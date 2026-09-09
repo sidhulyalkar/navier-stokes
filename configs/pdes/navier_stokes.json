@@ -1,0 +1,7 @@
+{
+  "name": "3D incompressible Navier-Stokes",
+  "fields": ["u", "p"],
+  "equations": ["dt u + (u.grad)u - nu Delta u + grad p = f", "div u = 0"],
+  "discovery_layers": ["scaling", "geometry", "balance", "stress", "correction", "proof"],
+  "target_variants": ["forced-blowup-reproduction", "forcing-minimization", "unforced-blowup-search"]
+}

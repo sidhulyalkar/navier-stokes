@@ -1,0 +1,18 @@
+{
+  "release": "v5.2.0",
+  "locked_at": "2026-09-09",
+  "paper": {
+    "title": "Finite Time Blowup for Navier-Stokes",
+    "url": "https://cdn.openai.com/pdf/32d9f210-8b73-45e0-91bc-82a30aef8a9a/navier-stokes.pdf",
+    "pages": 166,
+    "atlas_sections": ["4", "5", "6", "7", "8", "9", "10", "Appendix A", "Appendix B", "Appendix C"]
+  },
+  "lean": {
+    "repository": "https://github.com/openai/NavierStokesAndEuler",
+    "commit": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538",
+    "formalization_scope": "Full formalization of main results",
+    "formalization_sorry_count": 0,
+    "review_status": "self-assessed"
+  },
+  "policy": "Structural source anchors are reproducible facts about the published construction. Any new theorem-level or quantitative forcing claim requires a new evidence artifact and cannot inherit SOURCE status from this lock."
+}

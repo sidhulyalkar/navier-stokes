@@ -1,14 +1,25 @@
-# Navier–Stokes Research Lab
+# Navier–Stokes Research Lab v5.2.0
 
-A fail-closed, reproducible research program for studying finite-time singularity mechanisms in nonlinear PDEs, beginning with the 2026 OpenAI forced Navier–Stokes construction.
+Fail-closed research infrastructure for two coupled programs:
 
-## Research tracks
+1. **Forcing ablation**: determine which components of the published forced singular construction can be weakened, transferred into initial data, or replaced by intrinsic dynamics.
+2. **Automated blowup-mechanism discovery**: encode scaling, residual, stress, correction, and proof structure in a reusable search language for nonlinear PDEs.
 
-1. **Forcing ablation:** determine which parts of the published smooth forcing can be weakened, transferred into initial data, or replaced by intrinsic dynamics.
-2. **Blowup-mechanism discovery:** compile singularity constructions into searchable scaling, residual, stress-cone, correction, and proof-obligation objects that can be reused across Navier–Stokes, Euler, MHD, Boussinesq, Hall-MHD, and related systems.
+## v5.2 focus
+
+- GitHub-backed reproducibility and CI.
+- An evidence-aware constraint ledger for the similarity parameter `h`.
+- Explicit separation between cheap power-counting windows, manuscript assumptions, and concrete formalization constants.
+- Fail-closed interval comparison for the pulse-tail vs backward-propagator exponents needed by the initial-data-transfer route.
 
 ## Scientific contract
 
-This repository is deliberately fail-closed. Numerical survival, symbolic cancellation, or an agentic `PROMOTE` decision is **not** a theorem. Every release records explicit claim boundaries and proof obligations.
+`PROMOTE` means *survived the evaluator that emitted the label*. It does not mean proved. Unknown constants stay unknown. See `docs/CLAIMS.md` and `docs/RESEARCH_GOVERNANCE.md`.
 
-Current stable baseline: **v5.1.0** import in progress.
+## Run
+
+```bash
+python -m pip install -e . pytest
+pytest -q
+blowup-lab --out artifacts/v520
+```

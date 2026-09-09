@@ -1,0 +1,19 @@
+{
+  "claim": "No numerical gamma_tail or delta_backward is asserted in v5.2.",
+  "measurement_contract": [
+    "Extract a quantitative tail bound with explicit dependence on pulse frequency/scale.",
+    "Define the exact linearized/homogeneous pulse propagator used on each activation interval.",
+    "Bound the inverse/backward map from the global initial slice to the pulse activation slice.",
+    "Relate pulse index, activation scale, and frequency without asymptotic handwaving.",
+    "Only compare gamma_tail and delta_backward after both have certified intervals.",
+    "If exponents overlap, compare leading coefficients c and d with explicit error bars.",
+    "After single-pulse transfer succeeds, prove all-Sobolev summability and nonlinear cross-pulse compatibility."
+  ],
+  "model": "|a_n(0)| ~ exp(-c k_n^gamma_tail + d k_n^delta_backward)",
+  "verdict": {
+    "backward": {"evidence":"NEW_BOUND_REQUIRED","lower":null,"name":"delta_backward","source_ref":"backward propagator from t=0 to pulse activation time","upper":null},
+    "reason": "one or both exponent intervals are not quantitatively bounded",
+    "status": "OPEN",
+    "suppression": {"evidence":"SOURCE_EXTRACTION_REQUIRED","lower":null,"name":"gamma_tail","source_ref":"OpenAI Navier-Stokes Section 7 pulse Gaussian/tail bounds","upper":null}
+  }
+}

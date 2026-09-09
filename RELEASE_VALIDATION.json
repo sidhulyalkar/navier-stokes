@@ -1,0 +1,16 @@
+{
+  "artifact_generation": {"passed": true},
+  "scientific_claim_boundary": {
+    "actual_openai_force_reduced": false,
+    "actual_pulse_transfer_exponents_extracted": false,
+    "constraint_provenance_framework_implemented": true,
+    "unforced_navier_stokes_blowup_proved": false
+  },
+  "tests": {
+    "passed": true,
+    "returncode": 0,
+    "stdout": ".........................                                                [100%]\n25 passed in 0.05s"
+  },
+  "version": "5.2.0",
+  "note": "Full local SHA-256 manifest was generated during release validation; source, tests, docs, configs, and release artifacts are tracked in the repository."
+}

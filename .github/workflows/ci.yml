@@ -1,0 +1,26 @@
+name: research-ci
+
+on:
+  push:
+    branches: [main, "research/**", "release/**"]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e . pytest
+      - run: pytest -q
+      - run: blowup-lab --out artifacts/generated
+      - uses: actions/upload-artifact@v4
+        with:
+          name: research-artifacts-py${{ matrix.python-version }}
+          path: artifacts/generated
