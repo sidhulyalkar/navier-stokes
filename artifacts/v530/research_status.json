@@ -3,42 +3,47 @@
   "release_track": "v5.3.0-source-extraction",
   "updated_at": "2026-09-09",
   "canonical_repository": "sidhulyalkar/navier-stokes",
-  "scientific_status": "ACTIVE_SOURCE_EXTRACTION",
-  "evidence_ladder": [
-    "EXPLORATORY",
-    "SOURCE_EXTRACTED",
-    "REPRODUCED",
-    "VALIDATED_BOUND",
-    "FORMALIZED"
-  ],
+  "scientific_status": "ACTIVE_SOURCE_EXTRACTION_WITH_MODEL_CORRECTION",
+  "evidence_ladder": ["EXPLORATORY","SOURCE_EXTRACTED","REPRODUCED","VALIDATED_BOUND","FORMALIZED"],
   "tracks": [
     {
       "id": "initial_data_pulse_transfer",
       "status": "ACTIVE",
-      "current_gate": "derive slot-length/frequency relation and backward propagator bounds",
+      "current_gate": "prove actual tail-region geometry and derive backward propagator in dyadic stage n",
       "completed": [
-        "source-backed Gaussian slot-time envelope extracted"
+        "source-backed Gaussian slot-time envelope extracted",
+        "source-backed Q_n=2^-n, epsilon_n=2^-nh, carrier-viscosity, and ell_n~n^2 relations extracted",
+        "carrier/stage conversion derived: k_n~2^(nh/2)",
+        "v5.1 exp(-c*k^gamma) toy coordinate corrected to conditional exp(-C*n^2)=exp(-Theta((log k)^2)) source-natural scaling"
       ],
       "blocked": [
-        "certified gamma_tail interval",
-        "certified delta_back interval",
+        "uniform fixed-fraction cutoff/tail separation in actual pulse hierarchy",
+        "certified backward propagator growth in n-coordinate",
         "all-Sobolev/Gevrey summability",
-        "nonlinear compatibility",
+        "nonlinear cross-pulse compatibility",
         "exact unforced residual closure"
       ],
-      "claim": "No unforced construction is established."
+      "claim": "No unforced construction is established; the log-squared carrier tail is conditional on actual tail geometry."
     },
     {
       "id": "h_constraint_dependency",
       "status": "ACTIVE",
-      "current_gate": "enumerate direct and transitive consumers of small-h assumptions",
+      "current_gate": "extract exact target inequalities for numerical consumers and build transitive dependency DAG",
       "completed": [
         "cheap scaling window 0 < h < 1/6 reproduced",
-        "formalized concrete h <= 1/1000 source choice located"
+        "formalized concrete h <= 1/1000 source choice located",
+        "seed dependency graph implemented",
+        "source-visible consumers classified into NUMERIC versus DERIVED_WEAK categories"
+      ],
+      "priority_consumers": [
+        "MatchingConeBounds",
+        "NaturalEntrance",
+        "ActivationContinuation",
+        "TransitionRamp"
       ],
       "blocked": [
-        "complete dependency DAG",
-        "constraint classification",
+        "complete transitive declaration DAG",
+        "exact maximal h implied by each quantitative subtree",
         "local relaxation proofs",
         "certified expanded parameter window"
       ],
@@ -48,31 +53,28 @@
       "id": "forcing_decomposition",
       "status": "BLOCKED",
       "current_gate": "quantitative compilation of actual source fields",
-      "completed": [
-        "structural residual atlas"
-      ],
-      "blocked": [
-        "actual mechanism-level force norms",
-        "validated forcing continuation"
-      ],
+      "completed": ["structural residual atlas"],
+      "blocked": ["actual mechanism-level force norms","validated forcing continuation"],
       "claim": "No actual OpenAI force reduction is established."
     },
     {
       "id": "cross_pde_mechanism_compiler",
       "status": "PLANNED",
       "current_gate": "freeze quantitative Navier-Stokes reference grammar",
-      "targets": ["Euler", "Boussinesq", "MHD", "Hall-MHD"]
+      "targets": ["Euler","Boussinesq","MHD","Hall-MHD"]
     }
   ],
   "headline_findings": [
     "Elementary scaling permits a substantially broader h-window than the concrete formalized small-parameter choice.",
     "The source Lean formalization contains a literal Gaussian pulse-envelope bound in slot time.",
-    "Initial-data pulse transfer is now a concrete exponent/propagator comparison rather than a qualitative forcing-removal idea."
+    "The actual source scales give ell_n=Theta(n^2) while carrier k_n grows exponentially in n for fixed h, so the natural Gaussian tail comparison is in stage n, not a positive power of carrier frequency.",
+    "Several small-h consumers are quantitatively sensitive, while others use h<=1/1000 only to infer much weaker facts such as h<1/2."
   ],
   "hard_nonclaims": [
     "unforced Navier-Stokes blowup proved",
     "actual published force reduced",
     "full OpenAI construction independently verified",
-    "pulse-transfer exponents numerically or rigorously resolved"
+    "backward pulse-transfer cost resolved",
+    "1/1000 proven sharp or relaxable"
   ]
 }
