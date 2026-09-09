@@ -1,0 +1,33 @@
+{
+  "schema": "pulse-stage-scaling-v1",
+  "source_lock": {
+    "repository": "openai/NavierStokesAndEuler",
+    "commit": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+  },
+  "source_facts": {
+    "Q_n": "2^(-n)",
+    "epsilon_n": "Q_n^h = 2^(-n h)",
+    "carrier_viscosity": "1 <= epsilon_n * k_n^2 <= 4",
+    "slot_length": "2 r0 n^2 <= ell_n <= 2 r0 Tg n^2",
+    "gaussian_envelope": "envelope <= exp(-c * Delta_t^2 / (2 ell_n))"
+  },
+  "derived_relations": {
+    "carrier_vs_stage": "2^(n h/2) <= k_n <= 2*2^(n h/2)",
+    "stage_vs_carrier": "2 log2(k_n/2)/h <= n <= 2 log2(k_n)/h",
+    "slot_vs_carrier": "ell_n = Theta((log k_n)^2) for fixed h,r0>0"
+  },
+  "conditional_tail_result": {
+    "assumption": "the Gaussian estimate is evaluated at |Delta_t| >= a * ell_n for some stage-independent a>0",
+    "stage_form": "envelope <= exp(-C n^2)",
+    "carrier_form": "envelope <= exp(-Theta((log k_n)^2))",
+    "status": "DERIVED_CONDITIONAL"
+  },
+  "scientific_update": "The v5.1 toy parameterization exp(-c*k^gamma) is not the source-natural form for this slot Gaussian estimate. The source-backed scale conversion points instead to Gaussian decay in dyadic stage n, equivalent to log-squared decay in carrier frequency k under the stated fixed-fraction assumption.",
+  "open_obligations": [
+    "prove a uniform fixed-fraction separation for the actual cutoff/tail region where the estimate is used",
+    "derive the backward propagator in the same n-coordinate",
+    "compare its growth directly against exp(-C n^2)",
+    "control constants uniformly across labels, derivative orders, and correction stages"
+  ],
+  "claim_boundary": "No conclusion about initial-data transfer is made yet; the crucial backward bound and actual cutoff geometry remain open."
+}
