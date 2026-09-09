@@ -1,0 +1,28 @@
+{
+  "schema": "local-h-relaxation-v1",
+  "source_lock": {
+    "repository": "openai/NavierStokesAndEuler",
+    "commit": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+  },
+  "theorem": "NavierStokes.NaturalEntrance.base_source_lower",
+  "source_target": "29/10 < -W(h,j,eta) - h*(1 - 2*eta*U(j,eta))",
+  "assumptions_for_local_certificate": [
+    "0 < h < 1/2",
+    "0 < j <= 1/1000",
+    "|eta| <= 1"
+  ],
+  "conservative_derivation": [
+    "-W = 3 - 8*h*eta^2 + 2*D(h)*j*eta >= 3 - 8*h - j",
+    "|U(j,eta)| <= 4+j, hence 1 - 2*eta*U <= 9 + 2*j",
+    "therefore source >= 3 - j - h*(17 + 2*j)",
+    "requiring source > 2.9 yields h < (0.1-j)/(17+2*j)"
+  ],
+  "worst_case_j": 0.001,
+  "original_global_h_upper": 0.001,
+  "sufficient_local_h_upper_approx": 0.00582,
+  "approx_expansion_factor": 5.82,
+  "status": "DERIVED_SUFFICIENT_LOCAL_BOUND",
+  "interpretation": "The NaturalEntrance base-source margin alone does not force the global h<=1/1000 choice; this theorem has a source-derived sufficient window several times larger when j remains <=1/1000.",
+  "next_obligation": "Generalize/formalize base_source_lower with the relaxed explicit hypothesis, then move to matching-cone and activation bounds and intersect the resulting local windows.",
+  "claim_boundary": "This is not a global relaxation of the OpenAI construction. Other profile, stress-cone, activation, schedule, correction, and assembly estimates may impose a stricter h constraint."
+}
