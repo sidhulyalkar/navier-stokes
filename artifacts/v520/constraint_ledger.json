@@ -1,0 +1,22 @@
+{
+  "all_constraints_intersection": {
+    "active_lower_ids": ["H_POSITIVE"],
+    "active_upper_ids": ["H_FORMALIZATION_SMALL_PARAMETERS"],
+    "feasible": true,
+    "lower": "0",
+    "lower_strict": true,
+    "parameter": "h",
+    "upper": "1/1000",
+    "upper_strict": false
+  },
+  "constraints": [
+    {"evidence":"FORMALIZED","id":"H_POSITIVE","lean_declaration":"NaturalAxisData.SmallParameters.h_pos","lean_file":"NavierStokes/NaturalAxisData.lean","lower":"0","lower_strict":true,"notes":[],"parameter":"h","role":"selects anisotropic axial expansion","source_commit":"8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538","source_kind":"Lean","source_ref":"NaturalAxisData.SmallParameters.h_pos","upper":null,"upper_strict":false},
+    {"evidence":"EXPLORATORY_DERIVED","id":"H_POWER_COUNTING_ENERGY","lean_declaration":null,"lean_file":null,"lower":null,"lower_strict":false,"notes":["Cheap scaling condition only; not a proof-admissible range."],"parameter":"h","role":"finite/decaying core energy plus subleading axial diffusion","source_commit":null,"source_kind":"local derivation","source_ref":"v5.1 leading balance family","upper":"1/6","upper_strict":true},
+    {"evidence":"SOURCE","id":"H_MANUSCRIPT_SMALLNESS","lean_declaration":null,"lean_file":null,"lower":null,"lower_strict":false,"notes":["Tracked as a manuscript-level source constraint, not claimed optimal."],"parameter":"h","role":"published construction smallness regime","source_commit":null,"source_kind":"manuscript","source_ref":"Finite time blowup for Navier-Stokes, similarity-parameter smallness hypothesis","upper":"1/100","upper_strict":true},
+    {"evidence":"FORMALIZED","id":"H_FORMALIZATION_SMALL_PARAMETERS","lean_declaration":"NaturalAxisData.SmallParameters.h_le","lean_file":"NavierStokes/NaturalAxisData.lean","lower":null,"lower_strict":false,"notes":["The file comments that this is a concrete range permitted by the manuscript's smallness order.","Do not interpret 1/1000 as a demonstrated sharp threshold."],"parameter":"h","role":"concrete quantitative range used by the formalized natural-axis construction","source_commit":"8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538","source_kind":"Lean","source_ref":"NaturalAxisData.SmallParameters.h_le","upper":"1/1000","upper_strict":false},
+    {"evidence":"FORMALIZED_DERIVED","id":"H_GEOMETRY_HALF","lean_declaration":null,"lean_file":null,"lower":null,"lower_strict":false,"notes":["Weaker than the active small-parameter constraint."],"parameter":"h","role":"positivity/nondegeneracy of similarity geometry","source_commit":"8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538","source_kind":"Lean downstream","source_ref":"multiple geometry lemmas consume h_lt_half","upper":"1/2","upper_strict":true}
+  ],
+  "parameter": "h",
+  "scientific_interpretation": {"cheap_scaling_ceiling":"1/6","formalization_concrete_ceiling":"1/1000","manuscript_ceiling":"1/100","open_question":"Which proof obligations actually force each tightening, and how far can the constants be relaxed while preserving every downstream inequality?","sharpness_claimed":false},
+  "source_and_formal_intersection": {"active_lower_ids":["H_POSITIVE"],"active_upper_ids":["H_FORMALIZATION_SMALL_PARAMETERS"],"feasible":true,"lower":"0","lower_strict":true,"parameter":"h","upper":"1/1000","upper_strict":false}
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Incompressible MHD prototype",
+  "fields": ["u", "B", "p"],
+  "equations": ["dt u + (u.grad)u - (B.grad)B - nu Delta u + grad p = f", "dt B + (u.grad)B - (B.grad)u - eta Delta B = g", "div u = 0", "div B = 0"],
+  "discovery_layers": ["scaling", "geometry", "balance", "stress", "correction", "proof"]
+}

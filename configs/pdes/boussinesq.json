@@ -1,0 +1,6 @@
+{
+  "name": "Boussinesq prototype",
+  "fields": ["u", "p", "theta"],
+  "equations": ["dt u + (u.grad)u - nu Delta u + grad p = theta e_z + f", "dt theta + (u.grad)theta - kappa Delta theta = g", "div u = 0"],
+  "discovery_layers": ["scaling", "geometry", "balance", "stress", "correction", "proof"]
+}
