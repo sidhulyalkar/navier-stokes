@@ -1,0 +1,34 @@
+{
+  "schema": "pulse-tail-source-map-v1",
+  "status": "SOURCE_EXTRACTED_PARTIAL",
+  "source_lock": {
+    "repository": "openai/NavierStokesAndEuler",
+    "commit": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+  },
+  "primary_anchor": {
+    "file": "NavierStokes/GaussianEnvelope.lean",
+    "declarations": [
+      "GaussianEnvelope.envelope",
+      "GaussianEnvelope.integral_quadratic_bounds",
+      "GaussianEnvelope.gaussian_envelope_bounds",
+      "GaussianEnvelope.referenceMinSlope",
+      "GaussianEnvelope.referenceMaxSlope",
+      "GaussianEnvelope.referenceSlope_bounds",
+      "GaussianEnvelope.referenceRate"
+    ]
+  },
+  "extracted_bound": {
+    "form": "exp(-C*(t-t*)^2/(2*ell)) <= envelope(t) <= exp(-c*(t-t*)^2/(2*ell))",
+    "interpretation": "The formalization proves a literal Gaussian-in-time envelope when the instantaneous-rate derivative is bounded between -C/ell and -c/ell around its zero.",
+    "source_evidence": "FORMALIZED"
+  },
+  "not_yet_extracted": [
+    "relation between slot length ell and pulse hierarchy frequency k_n",
+    "relation between pulse activation index and physical time-to-singularity",
+    "global backward propagator from t=0 to the pulse activation slice",
+    "certified gamma_tail interval in the k_n parameterization",
+    "certified delta_backward interval"
+  ],
+  "verdict": "OPEN",
+  "claim_boundary": "Gaussian tail existence and its slot-time form are source-backed. No frequency-space tail exponent for initial-data transfer is asserted yet."
+}
