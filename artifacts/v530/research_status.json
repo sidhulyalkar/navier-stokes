@@ -1,0 +1,78 @@
+{
+  "schema": "research-status-v1",
+  "release_track": "v5.3.0-source-extraction",
+  "updated_at": "2026-09-09",
+  "canonical_repository": "sidhulyalkar/navier-stokes",
+  "scientific_status": "ACTIVE_SOURCE_EXTRACTION",
+  "evidence_ladder": [
+    "EXPLORATORY",
+    "SOURCE_EXTRACTED",
+    "REPRODUCED",
+    "VALIDATED_BOUND",
+    "FORMALIZED"
+  ],
+  "tracks": [
+    {
+      "id": "initial_data_pulse_transfer",
+      "status": "ACTIVE",
+      "current_gate": "derive slot-length/frequency relation and backward propagator bounds",
+      "completed": [
+        "source-backed Gaussian slot-time envelope extracted"
+      ],
+      "blocked": [
+        "certified gamma_tail interval",
+        "certified delta_back interval",
+        "all-Sobolev/Gevrey summability",
+        "nonlinear compatibility",
+        "exact unforced residual closure"
+      ],
+      "claim": "No unforced construction is established."
+    },
+    {
+      "id": "h_constraint_dependency",
+      "status": "ACTIVE",
+      "current_gate": "enumerate direct and transitive consumers of small-h assumptions",
+      "completed": [
+        "cheap scaling window 0 < h < 1/6 reproduced",
+        "formalized concrete h <= 1/1000 source choice located"
+      ],
+      "blocked": [
+        "complete dependency DAG",
+        "constraint classification",
+        "local relaxation proofs",
+        "certified expanded parameter window"
+      ],
+      "claim": "The 1/1000 constant is not asserted to be sharp."
+    },
+    {
+      "id": "forcing_decomposition",
+      "status": "BLOCKED",
+      "current_gate": "quantitative compilation of actual source fields",
+      "completed": [
+        "structural residual atlas"
+      ],
+      "blocked": [
+        "actual mechanism-level force norms",
+        "validated forcing continuation"
+      ],
+      "claim": "No actual OpenAI force reduction is established."
+    },
+    {
+      "id": "cross_pde_mechanism_compiler",
+      "status": "PLANNED",
+      "current_gate": "freeze quantitative Navier-Stokes reference grammar",
+      "targets": ["Euler", "Boussinesq", "MHD", "Hall-MHD"]
+    }
+  ],
+  "headline_findings": [
+    "Elementary scaling permits a substantially broader h-window than the concrete formalized small-parameter choice.",
+    "The source Lean formalization contains a literal Gaussian pulse-envelope bound in slot time.",
+    "Initial-data pulse transfer is now a concrete exponent/propagator comparison rather than a qualitative forcing-removal idea."
+  ],
+  "hard_nonclaims": [
+    "unforced Navier-Stokes blowup proved",
+    "actual published force reduced",
+    "full OpenAI construction independently verified",
+    "pulse-transfer exponents numerically or rigorously resolved"
+  ]
+}
