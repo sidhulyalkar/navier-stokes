@@ -1,0 +1,32 @@
+{
+  "schema": "h-constraint-dependency-v1",
+  "source_lock": {
+    "repository": "openai/NavierStokesAndEuler",
+    "commit": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+  },
+  "root": {
+    "file": "NavierStokes/NaturalAxisData.lean",
+    "declaration": "NaturalAxisData.SmallParameters.h_le",
+    "statement": "h <= 1/1000",
+    "classification": "ROOT"
+  },
+  "source_visible_consumers": [
+    {"id":"D_bounds","file":"NavierStokes/NaturalAxisData.lean","classification":"NUMERIC","statement":"499/1000 <= D(h) < 1/2"},
+    {"id":"A_bounds","file":"NavierStokes/NaturalAxisData.lean","classification":"NUMERIC","statement":"1/2 < A(h) <= 501/1000"},
+    {"id":"L_lower","file":"NavierStokes/NaturalAxisData.lean","classification":"NUMERIC","statement":"499/500 <= L(h,eta)"},
+    {"id":"neg_W_lower","file":"NavierStokes/NaturalAxisData.lean","classification":"NUMERIC","statement":"2991/1000 <= -W(h,j,eta)"},
+    {"id":"natural_entrance_numeric","file":"NavierStokes/NaturalEntrance.lean","classification":"NUMERIC","statement":"uses h_le with factor 4501/500 in entrance estimate"},
+    {"id":"matching_cone_numeric","file":"NavierStokes/MatchingConeBounds.lean","classification":"NUMERIC","statement":"uses h_le with factor 4501/500 in matching-cone estimate"},
+    {"id":"activation_numeric","file":"NavierStokes/ActivationContinuation.lean","classification":"NUMERIC","statement":"uses h_le with factor 4501/500 in activation continuation"},
+    {"id":"transition_numeric","file":"NavierStokes/TransitionRamp.lean","classification":"NUMERIC","statement":"uses h_le and |eta|<=11/10 quantitatively"},
+    {"id":"natural_core_half","file":"NavierStokes/NaturalCore.lean","classification":"DERIVED_WEAK","statement":"uses h_le only to infer h < 1/2 in the source-visible hit"},
+    {"id":"constructed_base_half","file":"NavierStokes/ConstructedSlowBase.lean","classification":"DERIVED_WEAK","statement":"height_lt_half derives h < 1/2 from h_le"}
+  ],
+  "current_priority": [
+    "extract the exact target inequality in MatchingConeBounds and solve it symbolically for h",
+    "extract the exact target inequality in NaturalEntrance and ActivationContinuation",
+    "trace which downstream declarations consume those quantitative lemmas",
+    "separate true structural bottlenecks from inherited h<1/2 proof plumbing"
+  ],
+  "claim_boundary": "This is a seeded source-dependency graph, not yet a complete transitive Lean import/declaration graph and not a proof of a maximal admissible h."
+}
