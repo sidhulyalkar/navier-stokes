@@ -1,0 +1,47 @@
+{
+  "schema": "v550-research-decision-v1",
+  "source_lock": {
+    "repository": "openai/NavierStokesAndEuler",
+    "commit": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+  },
+  "source_backed": {
+    "primary_seed_nonzero_gaussian_entry_value": true,
+    "primary_inside_slot_zero_physical_forcing": true,
+    "slot_cutoff_derivative_region": "L/5 <= |v-L/2| <= L/3",
+    "gaussian_off_plateau_bound": true,
+    "gaussian_stage_tail_absorbs_every_fixed_Q_power": true
+  },
+  "structural_obstruction": {
+    "identity": "for x'=A(v)x and y=chi(v)x, y'-A(v)y=chi'(v)x",
+    "uniqueness": "a homogeneous linear solution that vanishes on an earlier interval cannot later become nonzero on the same connected solution interval",
+    "decision": "KILL exact-temporal-compactness + nonzero-homogeneous-pulse + zero-source"
+  },
+  "promoted_lineage": {
+    "name": "globally-present-gaussian-small-pulse-tails",
+    "status": "PROMOTE_FOR_ANALYSIS",
+    "next": [
+      "enumerate every slot/clock cutoff residual term",
+      "remove cutoffs for one pulse and recompute the exact residual",
+      "find first domain/geometry/interaction obstruction outside the active slot",
+      "test a finite multi-pulse hierarchy before any infinite summability claim"
+    ]
+  },
+  "exact_project_local_h_certificates": {
+    "NaturalEntrance.base_source_lower": "99/17002",
+    "MatchingConeBounds.shape_axis_lower": "949/268040",
+    "claim_boundary": "conservative sufficient local bounds only"
+  },
+  "upstream_watch": {
+    "observed_main_2026_09_10": "f9e8bc5b38b6e212696e8a30e3e91517af887bbd",
+    "parent": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538",
+    "new_broader_axis_range": "h <= 1/100, j <= 1/20",
+    "selected_small_parameters_still": "h <= 1/1000",
+    "source_lock_migrated": false
+  },
+  "hard_nonclaims": {
+    "global_no_cutoff_hierarchy_constructed": false,
+    "actual_openai_force_reduced": false,
+    "full_selected_h_window_relaxed": false,
+    "unforced_navier_stokes_blowup_proved": false
+  }
+}
