@@ -48,7 +48,7 @@ def gaussian_fixed_fraction_exponent_bounds(
 ) -> tuple[float, float]:
     """Decay-exponent bounds for a Gaussian envelope at fixed slot fraction.
 
-    GaussianEnvelope gives envelope <= exp(-c*Delta^2/(2 ell)).  When
+    GaussianEnvelope gives envelope <= exp(-c*Delta^2/(2 ell)). When
     |Delta| >= fraction*ell, the exponent is at least c*fraction^2*ell/2.
     GaussianTailFlat proves fraction=1/5 on support of slot-cutoff derivatives.
     """
@@ -84,9 +84,9 @@ def asymptotic_coordinate_report() -> dict:
             ),
         },
         "scientific_update": (
-            "The fixed-fraction tail condition is no longer an open assumption. The pinned source proves it for "
-            "slot-cutoff derivatives. The remaining quantitative task is to track the uniform positive rate/length "
-            "constants through the selected actual construction and then study what happens if the cutoff is removed."
+            "The fixed-fraction tail condition is now source-backed for slot-cutoff derivatives. "
+            "The remaining quantitative task is to track the uniform positive rate/length constants through the "
+            "selected actual construction and then study what happens if the cutoff is removed."
         ),
         "open_obligations": [
             "extract the selected construction's explicit uniform lower bounds for Gaussian rate and scaled slot length",
