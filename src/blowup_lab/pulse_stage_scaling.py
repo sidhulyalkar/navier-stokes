@@ -15,10 +15,7 @@ class StageScaling:
         return 2.0 ** (-self.n * self.h)
 
     def carrier_bounds(self) -> tuple[float, float]:
-        """Source-backed continuous bounds implied by 1 <= eps*k^2 <= 4.
-
-        The true carrier is an integer. These are real-number comparison bounds.
-        """
+        """Source-backed continuous bounds implied by 1 <= eps*k^2 <= 4."""
         eps = self.epsilon()
         return eps ** -0.5, 2.0 * eps ** -0.5
 
@@ -38,12 +35,7 @@ class StageScaling:
 
 
 def stage_from_carrier_bounds(h: float, k: float) -> tuple[float, float]:
-    """Bound dyadic stage n from the continuous carrier inequalities.
-
-    From 2^(nh/2) <= k <= 2*2^(nh/2), for h>0 and k>0:
-      2 log2(k/2)/h <= n <= 2 log2(k)/h.
-    The lower bound is clipped at zero for small k.
-    """
+    """Bound dyadic stage n from 2^(nh/2) <= k <= 2*2^(nh/2)."""
     if h <= 0 or k <= 0:
         raise ValueError("h and k must be positive")
     lo = max(0.0, 2.0 * math.log2(k / 2.0) / h)
@@ -54,15 +46,11 @@ def stage_from_carrier_bounds(h: float, k: float) -> tuple[float, float]:
 def gaussian_fixed_fraction_exponent_bounds(
     *, h: float, k: float, r0: float, tg: float, c: float, fraction: float
 ) -> tuple[float, float]:
-    """Conditional exponent bounds for a Gaussian envelope at fixed slot fraction.
+    """Decay-exponent bounds for a Gaussian envelope at fixed slot fraction.
 
-    GaussianEnvelope gives envelope <= exp(-c * Delta^2/(2 ell)). If
-    |Delta| = fraction * ell, the positive decay exponent is
-        c * fraction^2 * ell / 2.
-
-    Combining stage/carrier and ell~n^2 yields bounds in carrier coordinates.
-    This is conditional on the actual evaluation/cutoff location remaining a
-    fixed positive fraction of the slot length.
+    GaussianEnvelope gives envelope <= exp(-c*Delta^2/(2 ell)). When
+    |Delta| >= fraction*ell, the exponent is at least c*fraction^2*ell/2.
+    GaussianTailFlat proves fraction=1/5 on support of slot-cutoff derivatives.
     """
     if min(h, k, r0, tg, c, fraction) <= 0:
         raise ValueError("all parameters must be positive")
@@ -75,36 +63,39 @@ def gaussian_fixed_fraction_exponent_bounds(
 
 def asymptotic_coordinate_report() -> dict:
     return {
-        "schema": "pulse-stage-scaling-v1",
+        "schema": "pulse-stage-scaling-v2",
         "source_facts": [
             "SlotColoring.dyadicQ: Q_n = 2^(-n)",
             "ChartScales.epsilon: epsilon_n = Q_n^h = 2^(-n h)",
             "ChartScales.carrier_viscosity_bounds: 1 <= epsilon_n k_n^2 <= 4",
-            "ChartScales.slotLength_bounds: 2 r0 n^2 <= ell_n <= 2 r0 Tg n^2",
-            "GaussianEnvelope.gaussian_envelope_bounds: envelope <= exp(-c Delta_t^2/(2 ell_n))",
+            "ChartScales.slotLength_bounds: ell_n = Theta(n^2)",
+            "GaussianTailFlat.slotCutoff_deriv_support: L/5 <= |v-L/2| <= L/3 on cutoff-derivative support",
+            "GaussianTailFlat.reference_envelope_off_plateau: envelope <= exp(-(u*referenceMinSlope/50)*L)",
+            "GaussianTailFlat.gaussian_beats_Q_power: polynomial(S)*exp(-c*S) is bounded by every fixed real power of Q",
+            "ActualGaussianCoverage.length_uniform_lower: actual scaled slot length has a uniform multiple of S=n^2",
         ],
         "derived": {
             "carrier_vs_stage": "2^(n h/2) <= k_n <= 2*2^(n h/2)",
             "stage_vs_carrier": "n = Theta(log k_n) for fixed h>0",
-            "slot_vs_carrier": "ell_n = Theta((log k_n)^2) for fixed h,r0>0",
-            "conditional_fixed_fraction_tail": (
-                "If |Delta_t| >= a*ell_n for a fixed a>0 in the region where the Gaussian "
-                "bound applies, then envelope <= exp(-C*n^2) = exp(-Theta((log k_n)^2))."
+            "slot_vs_carrier": "ell_n = Theta((log k_n)^2)",
+            "cutoff_tail": (
+                "On the actual slot-cutoff derivative region the fixed-fraction separation is source-backed, "
+                "so any uniform positive Gaussian rate and slot-length coefficient yield exp(-C*n^2) decay."
             ),
         },
         "scientific_update": (
-            "The v5.1 toy model exp(-c*k^gamma) is not the source-natural carrier parametrization "
-            "for this Gaussian slot estimate. The source-natural stage tail is Gaussian in n, "
-            "which is log-squared in carrier frequency k."
+            "The fixed-fraction tail condition is now source-backed for slot-cutoff derivatives. "
+            "The remaining quantitative task is to track the uniform positive rate/length constants through the "
+            "selected actual construction and then study what happens if the cutoff is removed."
         ),
         "open_obligations": [
-            "prove the actual pulse cutoff/evaluation region lies a uniform positive fraction of a slot from the midpoint when this tail is used",
-            "identify the correct backward propagator norm in the same stage or carrier coordinate",
-            "compare backward growth against exp(-C*n^2), not against an assumed exp(-c*k^gamma)",
-            "control constants uniformly across pulse labels, derivatives, and correction stages",
+            "extract the selected construction's explicit uniform lower bounds for Gaussian rate and scaled slot length",
+            "enumerate all source/residual terms caused by slot and clock cutoffs",
+            "construct or obstruct a globally defined no-cutoff homogeneous pulse through neighboring slots",
+            "control cross-frequency interactions if all pre-activation tails are simultaneously present",
         ],
         "claim_boundary": (
-            "All algebraic scale conversions above follow from pinned source definitions/bounds. "
-            "The fixed-fraction tail conclusion is conditional and is not yet asserted for the full actual pulse hierarchy."
+            "The source proves Gaussian flatness for cutoff errors and dyadic super-polynomial absorption. "
+            "This does not prove that the cutoffs can be removed or that a global unforced pulse hierarchy exists."
         ),
     }

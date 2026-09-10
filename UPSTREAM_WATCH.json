@@ -1,0 +1,30 @@
+{
+  "checked_at": "2026-09-10",
+  "repository": "openai/NavierStokesAndEuler",
+  "reproducibility_source_lock": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538",
+  "observed_main": "f9e8bc5b38b6e212696e8a30e3e91517af887bbd",
+  "observed_main_parent": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538",
+  "source_lock_changed": false,
+  "material_deltas": [
+    {
+      "file": "NavierStokes/NaturalAxisRange.lean",
+      "finding": "Current upstream separates the printed/manuscript axis range from the tighter selected SmallParameters range.",
+      "printed_range": {"h_upper": "1/100", "j_upper": "1/20"},
+      "selected_small_parameters_h_upper": "1/1000"
+    },
+    {
+      "file": "NavierStokes/AppendixJoiningResults.lean",
+      "declaration": "axis_L_lower_bound_window",
+      "finding": "Current upstream proves the enlarged-window denominator bound for h <= 1/100."
+    },
+    {
+      "file": "NavierStokes/PaperResults.lean",
+      "finding": "Current upstream adds a paper-results aggregation layer and associated proof additions."
+    }
+  ],
+  "research_impact": [
+    "Do not spend effort re-proving broad axis facts already generalized upstream to h <= 1/100.",
+    "Keep asking which later selected construction/cutoff/activation/correction requirements still force h <= 1/1000.",
+    "Do not silently migrate SOURCE_LOCK.json; first replay project tests and regenerate every source-derived artifact against the new commit."
+  ]
+}

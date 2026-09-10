@@ -1,16 +1,33 @@
 {
-  "artifact_generation": {"passed": true},
+  "version": "5.5.0",
+  "validation_state": "PASSED",
+  "validated_by": {
+    "system": "GitHub Actions",
+    "workflow": "research-ci",
+    "run_id": 34528029877,
+    "validated_head": "2393fc00282c2faec9b77beac74d5911a7c5e893",
+    "conclusion": "success"
+  },
+  "artifact_generation": {
+    "passed": true,
+    "note": "The v5.5 CLI artifact-generation step completed successfully in the recorded CI run."
+  },
   "scientific_claim_boundary": {
+    "within_slot_primary_homogeneous_zero_forcing_source_backed": true,
+    "slot_cutoff_tail_geometry_source_backed": true,
+    "global_no_cutoff_pulse_extension_constructed": false,
+    "all_pulses_encoded_in_single_initial_datum": false,
     "actual_openai_force_reduced": false,
-    "actual_pulse_transfer_exponents_extracted": false,
-    "constraint_provenance_framework_implemented": true,
     "unforced_navier_stokes_blowup_proved": false
   },
   "tests": {
     "passed": true,
-    "returncode": 0,
-    "stdout": ".........................                                                [100%]\n25 passed in 0.05s"
+    "matrix": ["python-3.10", "python-3.12"],
+    "note": "Exact test count is intentionally not copied from older releases; GitHub Actions conclusion is authoritative."
   },
-  "version": "5.2.0",
-  "note": "Full local SHA-256 manifest was generated during release validation; source, tests, docs, configs, and release artifacts are tracked in the repository."
+  "source_policy": {
+    "reproducibility_lock": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538",
+    "observed_upstream_main_2026_09_10": "f9e8bc5b38b6e212696e8a30e3e91517af887bbd",
+    "lock_migrated": false
+  }
 }
