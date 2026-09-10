@@ -138,6 +138,31 @@ def product_cutoff_atoms(*, source_zero: bool) -> list[ResidualAtom]:
     return atoms
 
 
+def clamped_tail_residual() -> ResidualAtom:
+    """Residual exposed by naively setting psi=1 while reusing the source clamp.
+
+    PrimaryPulseBounds.canonicalPrimaryPulse uses ParametricODE.extend for its
+    uncut components, so outside the native interval the reused tail is clamped
+    to an endpoint value. A constant tail has derivative zero. If the target is
+    the homogeneous ODE x'=A(v)x, its off-slot defect is therefore -A(v)x_end.
+    """
+    return ResidualAtom(
+        atom_id="uncut.clamped_endpoint_dynamics",
+        expression="-A(v) * x_endpoint",
+        mechanism="naive reuse of the continuously clamped finite-interval primary after deleting temporal cutoff",
+        support="off the native ODE interval wherever the clamped endpoint value is reused",
+        evidence=Evidence.ALGEBRAIC_DERIVED,
+        source_file="NavierStokes/PrimaryPulseBounds.lean",
+        source_declaration="PrimaryPulseBounds.canonicalPrimaryPulse",
+        asymptotic_status="no Gaussian-small conclusion follows from clamping alone",
+        disappears_if=("A(v) * x_endpoint == 0", "replace clamp by a genuine homogeneous continuation"),
+        warning=(
+            "This atom is the defect relative to the desired homogeneous ODE, not a claim that the source asserts "
+            "an off-slot ODE. The source deliberately uses clamping only for continuous extension."
+        ),
+    )
+
+
 def evaluate_scenario(scenario: CutoffScenario) -> dict:
     if scenario.cutoff_identically_one:
         atoms: list[ResidualAtom] = []
@@ -190,42 +215,56 @@ def cutoff_residual_atlas() -> dict:
         CutoffScenario("uncut_primary", source_zero=True, cutoff_identically_one=True),
     ]
     evaluated = [evaluate_scenario(s) for s in scenarios]
+    clamp_atom = clamped_tail_residual()
     return {
-        "schema": "cutoff-residual-atlas-v1",
+        "schema": "cutoff-residual-atlas-v2",
         "source_lock": {
             "repository": "openai/NavierStokesAndEuler",
             "commit": SOURCE_COMMIT,
         },
         "source_identity": source_identity(),
         "scenarios": evaluated,
+        "naive_uncut_clamped_reuse": {
+            "status": "KILL_AS_GLOBAL_HOMOGENEOUS_CANDIDATE",
+            "residual_atom": clamp_atom.to_dict(),
+            "reason": (
+                "Deleting psi removes excludedSlotError only where the uncut solve identity holds. Reusing the "
+                "source's clamped off-slot components instead produces a constant endpoint tail; relative to a "
+                "homogeneous continuation its defect is -A(v)x_endpoint unless that endpoint is an equilibrium."
+            ),
+            "replacement": "solve the homogeneous ODE on a genuinely enlarged finite interval",
+        },
         "hard_findings": {
             "general_excluded_slot_error_has_two_channels": True,
             "primary_source_zero_removes_uncovered_source_channel": True,
             "source_native_cutoff_is_product_of_clock_and_slot_localizers": True,
             "uncut_principal_localization_error_is_zero_if_global_solve_holds": True,
+            "naive_reuse_of_clamped_tail_is_global_homogeneous_solution": False,
+            "naive_clamped_tail_exposes_endpoint_dynamics_defect": True,
             "global_solve_for_uncut_hierarchy_established": False,
             "full_unforced_navier_stokes_residual_closed": False,
         },
         "next_experiment": {
-            "name": "one-pulse no-cutoff domain audit",
+            "name": "one-sided enlarged homogeneous primary",
             "question": (
-                "Starting from a source-backed primary coefficient, replace psi by 1 and trace the first theorem/domain "
-                "whose hypotheses fail outside the original active slot."
+                "Construct the same-seed homogeneous primary on [0,3L/2], using the source's wider (-L,2L) "
+                "coefficient/geometry domain, and recompute all residuals after removing temporal localization."
             ),
             "kill_conditions": [
-                "coefficient/phase/frame is not extendible through a neighboring slot with the required regularity",
-                "uncut pulse violates a hard geometry/support invariant needed by the next exact identity",
-                "a non-Gaussian cross interaction appears at an order that cannot be absorbed",
+                "the generalized coefficient-continuity or kinematics wrapper cannot be proved on [0,3L/2]",
+                "the enlarged solution fails to agree with the canonical primary on [0,L]",
+                "an exposed non-principal residual loses the smallness/cancellation required downstream",
             ],
             "promotion_conditions": [
-                "one uncut pulse remains well-defined on an enlarged connected domain",
-                "its exact principal localization error vanishes there",
+                "one enlarged homogeneous pulse is source-backed on [0,3L/2]",
+                "agreement with the canonical pulse on [0,L] follows by finite-interval uniqueness",
                 "all newly exposed non-principal residual channels are explicitly bounded or cancelled",
             ],
         },
         "claim_boundary": (
             "The atlas proves only algebraic/source identities and source-backed support bounds. psi=1 erases the "
-            "excludedSlotError term locally under the solve hypothesis; it does not prove the uncut coefficient extends "
-            "globally or that the complete Navier-Stokes residual vanishes."
+            "excludedSlotError term locally under the solve hypothesis; it does not make the source's clamped tail "
+            "homogeneous, prove a longer solution exists in the published construction, or close the complete "
+            "Navier-Stokes residual."
         ),
     }
