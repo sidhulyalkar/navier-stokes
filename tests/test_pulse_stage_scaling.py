@@ -35,7 +35,13 @@ def test_fixed_fraction_decay_is_log_squared_in_carrier_coordinate():
     assert math.isclose(ratio, expected, rel_tol=1e-12)
 
 
-def test_report_retracts_power_exponential_toy_coordinate():
+def test_report_promotes_fixed_fraction_cutoff_geometry_to_source_backed():
     report = asymptotic_coordinate_report()
-    assert "log-squared" in report["scientific_update"]
-    assert "conditional" in report["claim_boundary"].lower()
+    assert "source-backed" in report["scientific_update"]
+    assert any("L/5" in fact and "L/3" in fact for fact in report["source_facts"])
+    assert not any("prove the actual pulse cutoff" in item for item in report["open_obligations"])
+
+
+def test_report_still_refuses_no_cutoff_global_extension_claim():
+    report = asymptotic_coordinate_report()
+    assert "does not prove that the cutoffs can be removed" in report["claim_boundary"]
