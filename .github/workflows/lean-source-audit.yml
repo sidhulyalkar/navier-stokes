@@ -1,0 +1,58 @@
+name: lean-source-audit
+
+on:
+  push:
+    branches: ["research/**"]
+    paths:
+      - "formal/**"
+      - ".github/workflows/lean-source-audit.yml"
+  pull_request:
+    paths:
+      - "formal/**"
+      - ".github/workflows/lean-source-audit.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  v560-enlarged-interval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout research lab
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+
+      - name: Verify source lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git -C upstream rev-parse HEAD)"
+          expected="8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$actual" = "$expected"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+
+      - name: Install pinned Lean environment and mathlib cache
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: false
+          use-mathlib-cache: true
+
+      - name: Compile v5.6 enlarged-interval theorem
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd upstream
+          ~/.elan/bin/lake env lean ../formal/V560EnlargedInterval.lean
