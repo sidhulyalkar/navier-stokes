@@ -1,0 +1,28 @@
+{
+  "schema": "local-h-relaxation-v2",
+  "source_lock": {
+    "repository": "openai/NavierStokesAndEuler",
+    "commit": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+  },
+  "theorem": "NavierStokes.MatchingConeBounds.shape_axis_lower",
+  "original_global_upper": 0.001,
+  "assumptions": [
+    "0 < h < 1/2",
+    "0 < j <= 1/1000",
+    "|eta| <= 1",
+    "ell >= 11/20",
+    "theta in [0,1]"
+  ],
+  "conservative_lower_bound": "ell*(3-j) - 2*j - h*(8*ell + 9 + 2*j)",
+  "target": "8/5",
+  "worst_case_j": 0.001,
+  "worst_case_ell": 0.55,
+  "sufficient_local_h_upper_approx": 0.0035405,
+  "expansion_factor_over_global_approx": 3.5405,
+  "comparison": {
+    "natural_entrance_local_h_upper_approx": 0.00582,
+    "current_local_bottleneck": "MatchingConeBounds.shape_axis_lower"
+  },
+  "status": "DERIVED_SUFFICIENT_LOCAL_BOUND",
+  "claim_boundary": "This is a conservative local sufficient bound for shape_axis_lower only. It does not establish full stress-cone interiority or validity of the complete construction at the relaxed h."
+}
