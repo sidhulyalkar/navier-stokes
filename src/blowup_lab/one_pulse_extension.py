@@ -25,10 +25,9 @@ class ExtensionGate:
 def one_pulse_extension_audit() -> dict:
     """Audit the first no-cutoff counterfactual for one canonical primary pulse.
 
-    v5.6 distinguishes the source's continuous clamped representation from a
-    genuine enlarged homogeneous trajectory. The preferred first construction
-    is one-sided, [0, 3L/2], so it retains the canonical seed at t=0 and stays
-    strictly inside BasePhaseGeometry's wider source slot (-L, 2L).
+    The modal continuation and ambient reconstruction are intentionally split.
+    PrimaryODE.primary_hasDerivAt needs coefficient continuity, while FrameData
+    kinematics is needed later to reconstruct the projected ambient equation.
     """
     enlarged = enlarged_interval_report()
     gates = [
@@ -56,8 +55,8 @@ def one_pulse_extension_audit() -> dict:
             status="PASS",
             evidence="SOURCE_EXACT",
             source_file="NavierStokes/PrimaryODE.lean",
-            source_declaration="PrimaryODE.solution_hasDerivAt + FrameData.forcing_zero",
-            consequence="Within the native interval, the primary follows the homogeneous coefficient ODE.",
+            source_declaration="PrimaryODE.primary_hasDerivAt",
+            consequence="Within the native interval, the modal primary follows the homogeneous coefficient ODE.",
         ),
         ExtensionGate(
             gate_id="naive_clamped_tail_homogeneous",
@@ -84,43 +83,79 @@ def one_pulse_extension_audit() -> dict:
             ),
         ),
         ExtensionGate(
-            gate_id="one_sided_kinematics_wrapper",
-            question="Can the source kinematics proof be generalized from [0,L] to [0,3L/2]?",
+            gate_id="one_sided_coefficient_continuity",
+            question="Can source coefficient jets be restricted to carrier x [0,3L/2]?",
             status="READY_TO_FORMALIZE",
             evidence="SOURCE_PROOF_GENERALIZATION",
             source_file="NavierStokes/BasePhaseGeometry.lean",
-            source_declaration="FamilyData.kinematics / normal_nonzero / coefficient_jets",
+            source_declaration="FamilyData.coefficient_jets",
             consequence=(
-                "The published proof uses [0,L] mainly through inclusion into (-L,2L). The candidate [0,3L/2] has "
-                "the same inclusion with an L/2 buffer, so the wrapper has a direct proof path but is not yet Lean-checked here."
+                "This is sufficient to instantiate and differentiate the longer modal primary. Kinematics is not "
+                "needed yet."
             ),
         ),
         ExtensionGate(
-            gate_id="one_sided_homogeneous_solution",
-            question="Can a same-seed homogeneous solution be constructed on [0,3L/2]?",
-            status="READY_AFTER_WRAPPER",
-            evidence="SOURCE_LIBRARY_THEOREM",
-            source_file="NavierStokes/TangentODE.lean",
-            source_declaration="TangentODE.exists_linear_solution",
-            consequence="Finite-interval existence has no smallness restriction on interval length once coefficient continuity is available.",
+            gate_id="one_sided_modal_primary",
+            question="Can PrimaryODE.primary be instantiated with the same t=0 seed on [0,3L/2]?",
+            status="READY_AFTER_CONTINUITY",
+            evidence="SOURCE_GENERIC_CONSTRUCTION",
+            source_file="NavierStokes/PrimaryODE.lean",
+            source_declaration="PrimaryODE.primary / PrimaryODE.primary_hasDerivAt",
+            consequence=(
+                "The generic primary construction accepts any ordered finite interval. Once coefficient continuity "
+                "is available, primary_hasDerivAt certifies homogeneous modal dynamics on the enlarged interval."
+            ),
         ),
         ExtensionGate(
             gate_id="agreement_with_native_primary",
-            question="Will the enlarged solution agree with the canonical primary on [0,L]?",
-            status="READY_AFTER_CONSTRUCTION",
+            question="Does the enlarged modal primary equal the native primary on [0,L]?",
+            status="READY_AFTER_MODAL_CONSTRUCTION",
             evidence="SOURCE_LIBRARY_THEOREM",
             source_file="NavierStokes/TangentODE.lean",
             source_declaration="TangentODE.linear_solution_unique",
-            consequence="Same seed plus the same ODE on [0,L] gives the intended uniqueness bridge.",
+            consequence="Both have the same t=0 seed and solve the same homogeneous modal ODE on [0,L].",
+        ),
+        ExtensionGate(
+            gate_id="one_sided_kinematics_wrapper",
+            question="Can FrameData.Kinematics be generalized from [0,L] to [0,3L/2]?",
+            status="READY_TO_FORMALIZE",
+            evidence="SOURCE_PROOF_GENERALIZATION",
+            source_file="NavierStokes/BasePhaseGeometry.lean",
+            source_declaration="FamilyData.kinematics / normal_nonzero",
+            consequence=(
+                "This is required for ambient projected reconstruction, but no longer blocks construction of the "
+                "modal homogeneous extension itself."
+            ),
+        ),
+        ExtensionGate(
+            gate_id="ambient_projected_equation",
+            question="Does the enlarged modal primary reconstruct to the projected ambient equation on [0,3L/2]?",
+            status="READY_AFTER_KINEMATICS",
+            evidence="SOURCE_GENERIC_CONSTRUCTION",
+            source_file="NavierStokes/PrimaryODE.lean",
+            source_declaration="PrimaryODE.ambientSolution_hasDerivAt",
+            consequence="A generalized kinematics wrapper upgrades the modal continuation into an ambient projected trajectory.",
         ),
         ExtensionGate(
             gate_id="uncut_principal_error_on_enlarged_interval",
             question="If psi=1 and the principal solve identity holds on the enlarged interval, does excludedSlotError vanish there?",
-            status="READY_AFTER_CONSTRUCTION",
+            status="READY_AFTER_AMBIENT_RECONSTRUCTION",
             evidence="ALGEBRAIC_PLUS_SOURCE_IDENTITY",
             source_file="NavierStokes/LinearWaveBounds.lean",
             source_declaration="LinearWaveBounds.excludedSlotError / principal_cutoff_of_solve",
             consequence="The principal localization error then vanishes on the enlarged interval, not just on the native slot.",
+        ),
+        ExtensionGate(
+            gate_id="constructed_good_after_psi_one",
+            question="What remains in constructedGood after the localization channel is erased?",
+            status="OPEN",
+            evidence="SOURCE_IDENTITY_KNOWN_VALUE_NOT_RECOMPUTED",
+            source_file="NavierStokes/PrimaryResidualClass.lean",
+            source_declaration="PrimaryResidualClass.Inputs.linear_identity",
+            consequence=(
+                "The exact residual identity leaves mode(constructedGood). Its curl-principal and corrected-remainder "
+                "pieces must be recomputed for the uncut enlarged pulse."
+            ),
         ),
         ExtensionGate(
             gate_id="uncut_full_pde_residual_after_extension",
@@ -129,13 +164,21 @@ def one_pulse_extension_audit() -> dict:
             evidence="NOT_YET_EVALUATED",
             source_file="",
             source_declaration="",
-            consequence="This is now the first genuinely new scientific gate after the interval wrappers and enlarged ODE are built.",
+            consequence="Only after constructedGood and later nonlinear channels are resolved can two-pulse work begin.",
         ),
     ]
 
-    unresolved = [g for g in gates if g.status in {"READY_TO_FORMALIZE", "READY_AFTER_WRAPPER", "READY_AFTER_CONSTRUCTION", "OPEN"}]
+    active_statuses = {
+        "READY_TO_FORMALIZE",
+        "READY_AFTER_CONTINUITY",
+        "READY_AFTER_MODAL_CONSTRUCTION",
+        "READY_AFTER_KINEMATICS",
+        "READY_AFTER_AMBIENT_RECONSTRUCTION",
+        "OPEN",
+    }
+    unresolved = [g for g in gates if g.status in active_statuses]
     return {
-        "schema": "one-pulse-extension-audit-v2",
+        "schema": "one-pulse-extension-audit-v3",
         "source_lock": {
             "repository": "openai/NavierStokesAndEuler",
             "commit": SOURCE_COMMIT,
@@ -145,29 +188,34 @@ def one_pulse_extension_audit() -> dict:
         "first_active_gate": unresolved[0].to_dict(),
         "enlarged_interval": enlarged,
         "scientific_result": (
-            "The source's clamped tail cannot serve as the desired homogeneous continuation, but the source-visible "
-            "geometry does not kill a one-sided extension. BasePhaseGeometry already works on (-L,2L), so [0,3L/2] "
-            "is the cheapest theorem-sized candidate. Formalize the wider kinematics/continuity wrappers, construct the "
-            "same-seed solution there, prove native-slot agreement by uniqueness, then recompute the full residual."
+            "The clamped-tail lineage is killed, but the source geometry supports a sharper continuation test. "
+            "Coefficient continuity alone is enough to build a same-seed modal primary on [0,3L/2]; kinematics is "
+            "a later ambient-reconstruction gate. This reduces the first formal task to a compact restriction of the "
+            "already source-proved coefficient jets."
         ),
         "next_candidate": {
             "name": "one-sided enlarged homogeneous primary",
             "interval": "[0, 3L/2]",
             "construction": [
-                "derive coefficient continuity on carrier x [0,3L/2] from source coefficient_jets on (-L,2L)",
-                "generalize FrameData.Kinematics to [0,3L/2] using source normal_nonzero on (-L,2L)",
-                "solve the homogeneous linear ODE on [0,3L/2] from the unchanged primarySeed at t=0",
-                "prove agreement with the canonical primary on [0,L] using TangentODE.linear_solution_unique",
-                "replace temporal slot cutoff by one on the enlarged interval",
-                "recompute every non-principal residual and support condition before testing a second pulse",
+                "Lean-check coefficient continuity on carrier x [0,3L/2] from coefficient_jets on (-L,2L)",
+                "instantiate PrimaryODE.primary on [0,3L/2] with the unchanged t=0 primarySeed",
+                "certify homogeneous modal dynamics with PrimaryODE.primary_hasDerivAt",
+                "prove equality with the native primary on [0,L] via TangentODE.linear_solution_unique",
+                "Lean-check FrameData.Kinematics on [0,3L/2]",
+                "reconstruct the ambient projected equation",
+                "set temporal cutoff to one and recompute constructedGood",
+                "only then inspect nonlinear and two-pulse channels",
             ],
             "kill_if": [
-                "the wider coefficient/kinematics wrappers fail despite compact containment in (-L,2L)",
-                "the enlarged solution cannot match the canonical primary on [0,L]",
-                "new residual or interaction terms lose the all-order smallness/cancellation needed downstream",
+                "the coefficient-continuity restriction fails despite compact containment in (-L,2L)",
+                "the same-seed enlarged modal primary cannot be certified on [0,3L/2]",
+                "native-slot uniqueness fails because the two candidates do not actually solve the same modal ODE",
+                "ambient kinematics or a later residual channel fails structurally beyond L",
             ],
         },
         "hard_nonclaims": {
+            "enlarged_coefficient_continuity_lean_checked": False,
+            "enlarged_modal_primary_lean_checked": False,
             "generalized_kinematics_lean_checked": False,
             "enlarged_homogeneous_extension_constructed": False,
             "cutoff_can_be_removed_from_full_construction": False,
