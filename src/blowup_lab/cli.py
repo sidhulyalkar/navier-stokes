@@ -18,6 +18,7 @@ from .initial_data_transfer import default_transfer_campaign
 from .local_relaxations import relaxation_report
 from .localization_obstruction import localization_obstruction_report
 from .one_pulse_extension import one_pulse_extension_audit
+from .primary_residual_layers import primary_linear_residual_layers
 from .proof import obligations_dict
 from .pulse_localization_audit import pulse_localization_audit
 from .pulse_stage_scaling import asymptotic_coordinate_report
@@ -56,6 +57,7 @@ def run(outdir: Path) -> dict:
     cutoff_atlas = cutoff_residual_atlas()
     enlarged = enlarged_interval_report()
     one_pulse = one_pulse_extension_audit()
+    primary_layers = primary_linear_residual_layers()
 
     dump(outdir / "residual_atlas.json", atlas)
     dump(outdir / "ablation_campaign.json", {"routes": routes})
@@ -74,6 +76,7 @@ def run(outdir: Path) -> dict:
     dump(outdir / "cutoff_residual_atlas.json", cutoff_atlas)
     dump(outdir / "enlarged_interval.json", enlarged)
     dump(outdir / "one_pulse_extension.json", one_pulse)
+    dump(outdir / "primary_residual_layers.json", primary_layers)
 
     with (outdir / "ablation_matrix.csv").open("w", newline="") as f:
         w = csv.writer(f)
@@ -93,6 +96,7 @@ def run(outdir: Path) -> dict:
         ("cutoff_residual_atlas", cutoff_atlas, ("localization_obstruction",)),
         ("enlarged_interval_source_coverage", enlarged, ("cutoff_residual_atlas",)),
         ("one_pulse_extension", one_pulse, ("enlarged_interval_source_coverage",)),
+        ("primary_residual_layers", primary_layers, ("one_pulse_extension",)),
         ("exact_h_relaxations", exact_h, ("reference_scaling",)),
     ])
 
@@ -110,6 +114,8 @@ def run(outdir: Path) -> dict:
             "naive_clamped_tail_is_homogeneous_continuation": False,
             "source_analysis_slot_wider_than_native_ode_interval": True,
             "one_sided_interval_0_to_3L_over_2_strictly_inside_source_slot": True,
+            "constructed_good_remains_explicit_after_psi_one": True,
+            "constructed_good_proved_nonzero": False,
             "generalized_enlarged_interval_kinematics_lean_checked": False,
             "enlarged_homogeneous_primary_constructed": False,
             "actual_openai_force_norm_reduced": False,
@@ -130,15 +136,21 @@ def run(outdir: Path) -> dict:
             "killed_lineages": one_pulse["killed_lineages"],
             "next_candidate": one_pulse["next_candidate"],
         },
+        "post_localization_residual": {
+            "exact_identity": primary_layers["exact_identity"],
+            "psi_one_counterfactual": primary_layers["psi_one_counterfactual"],
+            "next_question": primary_layers["next_question"],
+        },
         "h_relaxations": exact_h,
         "upstream_policy": {
             "source_lock": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538",
             "lock_migrated": False,
         },
         "next_blocker": (
-            "Lean-check the coefficient-continuity and FrameData.Kinematics wrappers on [0,3L/2], instantiate the "
-            "same-seed homogeneous solution there, prove agreement with the canonical primary on [0,L] by "
-            "TangentODE.linear_solution_unique, then recompute every non-principal wave residual channel."
+            "Lean-check coefficient continuity and FrameData.Kinematics on [0,3L/2], instantiate the same-seed "
+            "homogeneous solution there, prove agreement with the canonical primary on [0,L] by "
+            "TangentODE.linear_solution_unique, then recompute constructedGood with psi=1 and classify its "
+            "curl-principal and corrected-remainder pieces before touching two-pulse interactions."
         ),
         "certificate_dag": cert,
     }
