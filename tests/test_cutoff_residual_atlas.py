@@ -1,5 +1,6 @@
 from blowup_lab.cutoff_residual_atlas import (
     CutoffScenario,
+    clamped_tail_residual,
     cutoff_residual_atlas,
     evaluate_scenario,
 )
@@ -37,6 +38,16 @@ def test_primary_product_cutoff_removes_source_exposure_channel():
     report = evaluate_scenario(CutoffScenario("product_primary", source_zero=True, product_cutoff=True))
     ids = {atom["atom_id"] for atom in report["atoms"]}
     assert ids == {"cutoff.clock_derivative", "cutoff.slot_derivative"}
+
+
+def test_naive_clamped_reuse_exposes_endpoint_dynamics_defect():
+    atom = clamped_tail_residual()
+    assert atom.atom_id == "uncut.clamped_endpoint_dynamics"
+    assert atom.expression == "-A(v) * x_endpoint"
+    atlas = cutoff_residual_atlas()
+    assert atlas["naive_uncut_clamped_reuse"]["status"] == "KILL_AS_GLOBAL_HOMOGENEOUS_CANDIDATE"
+    assert atlas["hard_findings"]["naive_reuse_of_clamped_tail_is_global_homogeneous_solution"] is False
+    assert atlas["hard_findings"]["naive_clamped_tail_exposes_endpoint_dynamics_defect"] is True
 
 
 def test_atlas_refuses_global_unforced_claim():
