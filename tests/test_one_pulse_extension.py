@@ -1,27 +1,32 @@
 from blowup_lab.one_pulse_extension import one_pulse_extension_audit
 
 
-def test_extension_is_defined_but_dynamics_are_not_globally_certified():
+def test_clamped_tail_is_killed_but_wider_source_slot_exists():
     report = one_pulse_extension_audit()
     gates = {gate["gate_id"]: gate for gate in report["gates"]}
     assert gates["function_defined_on_R"]["status"] == "PASS"
     assert gates["homogeneous_ode_on_native_interval"]["status"] == "PASS"
-    assert gates["homogeneous_ode_outside_native_interval"]["status"] == "OPEN"
+    assert gates["naive_clamped_tail_homogeneous"]["status"] == "KILL"
+    assert gates["wider_source_slot_available"]["status"] == "PASS"
 
 
-def test_first_blocker_is_dynamics_scope_not_function_definition():
+def test_first_active_gate_is_generalized_one_sided_kinematics():
     report = one_pulse_extension_audit()
-    assert report["first_blocker"]["gate_id"] == "homogeneous_ode_outside_native_interval"
+    assert report["first_active_gate"]["gate_id"] == "one_sided_kinematics_wrapper"
+    assert report["first_active_gate"]["status"] == "READY_TO_FORMALIZE"
 
 
-def test_uncut_principal_localization_error_is_only_local_progress():
+def test_one_sided_candidate_keeps_same_seed_and_has_uniqueness_bridge():
     report = one_pulse_extension_audit()
     gates = {gate["gate_id"]: gate for gate in report["gates"]}
-    assert gates["uncut_principal_error_on_native_interval"]["status"] == "PASS"
-    assert gates["uncut_full_pde_residual_global"]["status"] == "FAIL_NOT_ESTABLISHED"
+    assert report["next_candidate"]["interval"] == "[0, 3L/2]"
+    assert gates["one_sided_homogeneous_solution"]["status"] == "READY_AFTER_WRAPPER"
+    assert gates["agreement_with_native_primary"]["source_declaration"] == "TangentODE.linear_solution_unique"
+    assert gates["uncut_full_pde_residual_after_extension"]["status"] == "OPEN"
 
 
 def test_unforced_claim_remains_false():
     report = one_pulse_extension_audit()
-    assert report["hard_nonclaims"]["global_homogeneous_extension_exists"] is False
+    assert report["hard_nonclaims"]["generalized_kinematics_lean_checked"] is False
+    assert report["hard_nonclaims"]["enlarged_homogeneous_extension_constructed"] is False
     assert report["hard_nonclaims"]["unforced_blowup_proved"] is False
