@@ -8,56 +8,64 @@ This repository is not a claim of an unforced Navier–Stokes blowup proof. It i
 
 ### 1. What survives if the forcing is weakened or removed?
 
-We treat the published construction as a reference specimen and ask which ingredients can be replaced by intrinsic dynamics or encoded into smooth initial data.
+The current source audit has sharpened this question substantially.
 
-Current highest-value route:
+The canonical primary pulse inside one slot is already constructed as a **homogeneous zero-forcing two-mode ODE solution**. Its nonzero entry seed is the small Gaussian envelope value `P(a)`. The physical construction then multiplies that homogeneous pulse by temporal/spacetime cutoffs.
+
+So the frontier is no longer “can forcing create the growing pulse?” It is:
 
 ```text
-late pulse seeding by force
+source-backed tiny entry seed
         ↓
-source-backed Gaussian pulse tails
+homogeneous primary evolution inside a slot
         ↓
-pull desired pulse states back to t = 0
+current construction: multiply by slot / clock cutoffs
         ↓
-compare tail suppression vs backward amplification
+cutoff derivatives create localized residual/source terms
         ↓
-all-Sobolev / Gevrey summability
+new target: remove the cutoffs and keep globally present tiny tails
         ↓
-nonlinear compatibility
+control all cross-slot / cross-frequency interactions
+        ↓
+prove one smooth global initial datum contains the hierarchy
         ↓
 exact unforced residual closure
 ```
 
+There is an elementary structural obstruction to keeping both exact temporal compactness and zero forcing. For `x' = A(v)x` and `y = chi(v)x`,
+
+```text
+y' - A(v)y = chi'(v)x.
+```
+
+Moreover, uniqueness of the homogeneous linear ODE means a nonzero homogeneous pulse cannot vanish on an earlier time interval and then spontaneously appear. A successful unforced replacement therefore has to abandon exact temporal compactness or abandon this mechanism class.
+
 ### 2. Can blowup mechanisms themselves become searchable objects?
 
-The lab encodes a candidate as interacting layers:
+The lab encodes candidates as interacting layers:
 
 ```text
 scaling → geometry → PDE balance → stress realization
-        → corrections → residual closure → proof obligations
+        → pulse dynamics → localization → corrections
+        → residual closure → proof obligations
 ```
 
 The long-range goal is a mechanism compiler that can transfer ideas across Navier–Stokes, Euler, MHD, Hall-MHD, Boussinesq, and related nonlinear PDEs.
 
 ## Current research frontier
 
-### Pulse-transfer lineage
+### Pulse localization lineage
 
-The OpenAI Lean source already formalizes a Gaussian envelope of the form
+Pinned Lean source establishes all of the following:
 
-```text
-exp(-C (t-t*)² / (2ℓ)) ≤ envelope(t) ≤ exp(-c (t-t*)² / (2ℓ)).
-```
+- the reference pulse has Gaussian growth/decay around the slot midpoint;
+- the canonical primary is initialized by `primarySeed = (P(a), 0)`;
+- the canonical primary solves the slot ODE with zero forcing;
+- derivatives of the Gaussian slot cutoff live in the explicit region `L/5 <= |v-L/2| <= L/3`;
+- the envelope is exponentially small there;
+- Gaussian decay in the stage scale `S=n^2` beats every fixed real power of the dyadic scale `Q=2^-n`.
 
-The unresolved step is to convert the slot scale `ℓ` into the pulse hierarchy/frequency variable and rigorously bound the cost of propagating a desired activation state backward to the true initial slice.
-
-The decisive asymptotic comparison is
-
-```text
-|a_n(0)| ≲ exp(-c k_n^γ_tail + d k_n^δ_back).
-```
-
-No numerical values for `γ_tail` or `δ_back` are claimed until source-backed bounds exist.
+The next hard problem is global extension: can the homogeneous pulses remain present outside their assigned slots, with Gaussian-small tails, without destroying support geometry, nonlinear interaction bounds, summability, or exact residual closure?
 
 ### Similarity-parameter lineage
 
@@ -67,9 +75,18 @@ Elementary power counting gives the broad window
 0 < h < 1/6.
 ```
 
-The manuscript works in a much smaller regime and the released Lean implementation uses a concrete `h ≤ 1/1000` small-parameter choice. The project is tracing theorem-by-theorem where that margin is actually consumed.
+Two conservative source-derived local certificates from the pinned construction are now exact rationals:
 
-This can produce a useful result even if the final theorem cannot be extended: a precise map of which mechanism is responsible for each quantitative restriction.
+```text
+NaturalEntrance.base_source_lower:        h < 99/17002  ≈ 0.00582284
+MatchingConeBounds.shape_axis_lower:      h < 949/268040 ≈ 0.00354052
+```
+
+These are sufficient local bounds only, not sharp or global thresholds.
+
+An upstream check on 2026-09-10 found that OpenAI's current Lean tree now explicitly separates a broader printed/manuscript axis range (`h <= 1/100`, `j <= 1/20`) from the tighter selected `SmallParameters` range (`h <= 1/1000`). We therefore keep the original source lock for reproducibility and track upstream changes separately in `UPSTREAM_WATCH.json`.
+
+The useful question is now: **which selected downstream construction requirements still consume the extra factor of ten?**
 
 ## Evidence ladder
 
@@ -85,27 +102,27 @@ VALIDATED_BOUND
 FORMALIZED
 ```
 
-`PROMOTE`, `HOLD`, and `KILL` are **research-allocation labels**, not theorem statuses.
+`PROMOTE`, `HOLD`, and `KILL` are research-allocation labels, not theorem statuses.
 
 See [`docs/CLAIMS.md`](docs/CLAIMS.md) and [`docs/RESEARCH_GOVERNANCE.md`](docs/RESEARCH_GOVERNANCE.md).
 
 ## Project map
 
-- [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md) — the fastest technical tour of the project.
-- [`docs/RESEARCH_MAP.md`](docs/RESEARCH_MAP.md) — mechanism graph, active lineages, and decision gates.
-- [`docs/RESEARCH_PROGRAM.md`](docs/RESEARCH_PROGRAM.md) — long-range research architecture.
-- [`docs/FINDINGS_V5_2.md`](docs/FINDINGS_V5_2.md) — latest stable findings.
-- [`docs/V5_3_PLAN.md`](docs/V5_3_PLAN.md) — current source-extraction plan.
-- [`artifacts/`](artifacts/) — compact machine-readable evidence and experiment outputs.
+- [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md): concise technical tour.
+- [`docs/RESEARCH_MAP.md`](docs/RESEARCH_MAP.md): mechanism graph and active decision gates.
+- [`docs/FINDINGS_V5_5.md`](docs/FINDINGS_V5_5.md): current audit and research pivot.
+- [`docs/V5_5_PLAN.md`](docs/V5_5_PLAN.md): active release plan.
+- [`UPSTREAM_WATCH.json`](UPSTREAM_WATCH.json): upstream changes observed without mutating the reproducibility lock.
+- [`artifacts/`](artifacts/): machine-readable evidence and experiment outputs.
 
 ## Repository workflow
 
 - `main`: stable, reproducible research checkpoints.
 - `research/vX.Y.Z-*`: active hypothesis lineages.
-- Pull requests: scientific release boundaries with explicit claims/non-claims.
-- Issues: independent research questions and falsification tracks.
+- pull requests: scientific release boundaries with explicit claims/non-claims.
+- issues: independent research questions and falsification tracks.
 
-Current active branch: `research/v5.3.0-source-extraction`.
+Current active branch: `research/v5.5.0-path-bottleneck-pulse-propagator`.
 
 ## Run locally
 
@@ -115,4 +132,4 @@ pytest -q
 blowup-lab --out artifacts/local
 ```
 
-The code is intentionally designed to fail closed: unknown constants remain unknown, missing proof mechanisms cannot be silently ignored, and attractive numerical behavior cannot override a fatal mathematical invariant failure.
+The code is designed to fail closed: unknown constants remain unknown, missing proof mechanisms cannot be silently ignored, attractive numerical behavior cannot override fatal mathematical invariants, and release metadata is checked for version drift.
