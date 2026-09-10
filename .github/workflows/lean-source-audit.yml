@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   v560-enlarged-interval:
@@ -51,8 +52,59 @@ jobs:
           use-mathlib-cache: true
 
       - name: Compile v5.6 enlarged-interval theorem
+        id: lean_compile
         shell: bash
         run: |
-          set -euo pipefail
+          set +e
           cd upstream
-          ~/.elan/bin/lake env lean ../formal/V560EnlargedInterval.lean
+          ~/.elan/bin/lake env lean ../formal/V560EnlargedInterval.lean > ../lean-audit-output.txt 2>&1
+          status=$?
+          cd ..
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat lean-audit-output.txt
+          exit 0
+
+      - name: Publish Lean diagnostic to PR 10
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS: ${{ steps.lean_compile.outputs.status }}
+        run: |
+          set -euo pipefail
+          marker='<!-- lean-source-audit -->'
+          if [ "$STATUS" = "0" ]; then
+            result='✅ PASS'
+          else
+            result='❌ FAIL'
+          fi
+          {
+            echo "$marker"
+            echo "### Source-locked Lean audit: $result"
+            echo
+            echo "Pinned source: \`openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538\`"
+            echo "Toolchain: \`leanprover/lean4:v4.34.0-rc2\`"
+            echo "Workflow commit: \`${GITHUB_SHA}\`"
+            echo
+            echo '<details><summary>Lean compiler output</summary>'
+            echo
+            echo '```text'
+            tail -n 180 lean-audit-output.txt
+            echo '```'
+            echo '</details>'
+          } > lean-pr-comment.md
+
+          existing="$(gh api "repos/${GITHUB_REPOSITORY}/issues/10/comments" --paginate \
+            --jq '.[] | select(.body | contains("<!-- lean-source-audit -->")) | .id' | head -n 1)"
+          if [ -n "$existing" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${existing}" \
+              --raw-field body="$(cat lean-pr-comment.md)" >/dev/null
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/10/comments" \
+              --raw-field body="$(cat lean-pr-comment.md)" >/dev/null
+          fi
+
+      - name: Enforce Lean result
+        if: steps.lean_compile.outputs.status != '0'
+        shell: bash
+        run: exit 1
