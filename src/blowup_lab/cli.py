@@ -12,6 +12,7 @@ from .constraint_ledger import ledger_report
 from .cutoff_residual_atlas import cutoff_residual_atlas
 from .discovery import campaign_dict, local_campaign
 from .enlarged_interval import enlarged_interval_report
+from .enlarged_primary_control import enlarged_control_report
 from .exact_relaxations import exact_relaxation_report
 from .h_dependency import graph_report
 from .initial_data_transfer import default_transfer_campaign
@@ -58,6 +59,7 @@ def run(outdir: Path) -> dict:
     enlarged = enlarged_interval_report()
     one_pulse = one_pulse_extension_audit()
     primary_layers = primary_linear_residual_layers()
+    enlarged_control = enlarged_control_report()
 
     dump(outdir / "residual_atlas.json", atlas)
     dump(outdir / "ablation_campaign.json", {"routes": routes})
@@ -77,6 +79,7 @@ def run(outdir: Path) -> dict:
     dump(outdir / "enlarged_interval.json", enlarged)
     dump(outdir / "one_pulse_extension.json", one_pulse)
     dump(outdir / "primary_residual_layers.json", primary_layers)
+    dump(outdir / "enlarged_primary_control.json", enlarged_control)
 
     with (outdir / "ablation_matrix.csv").open("w", newline="") as f:
         w = csv.writer(f)
@@ -96,7 +99,8 @@ def run(outdir: Path) -> dict:
         ("cutoff_residual_atlas", cutoff_atlas, ("localization_obstruction",)),
         ("enlarged_interval_source_coverage", enlarged, ("cutoff_residual_atlas",)),
         ("one_pulse_extension", one_pulse, ("enlarged_interval_source_coverage",)),
-        ("primary_residual_layers", primary_layers, ("one_pulse_extension",)),
+        ("enlarged_primary_control", enlarged_control, ("one_pulse_extension",)),
+        ("primary_residual_layers", primary_layers, ("enlarged_primary_control",)),
         ("exact_h_relaxations", exact_h, ("reference_scaling",)),
     ])
 
@@ -114,6 +118,10 @@ def run(outdir: Path) -> dict:
             "naive_clamped_tail_is_homogeneous_continuation": False,
             "source_analysis_slot_wider_than_native_ode_interval": True,
             "one_sided_interval_0_to_3L_over_2_strictly_inside_source_slot": True,
+            "slot_level_modal_error_and_viscosity_bounds_cover_rho_below_2": True,
+            "generic_primary_bounds_separates_evolution_interval_from_length_budget": True,
+            "extended_reference_envelope_primary_bound_lean_checked": False,
+            "extended_simple_gaussian_sandwich_lean_checked": False,
             "constructed_good_remains_explicit_after_psi_one": True,
             "constructed_good_proved_nonzero": False,
             "enlarged_coefficient_continuity_lean_checked": False,
@@ -138,6 +146,11 @@ def run(outdir: Path) -> dict:
             "killed_lineages": one_pulse["killed_lineages"],
             "next_candidate": one_pulse["next_candidate"],
         },
+        "enlarged_primary_control": {
+            "parameters": enlarged_control["parameters"],
+            "derived": enlarged_control["derived"],
+            "scientific_update": enlarged_control["scientific_update"],
+        },
         "post_localization_residual": {
             "exact_identity": primary_layers["exact_identity"],
             "psi_one_counterfactual": primary_layers["psi_one_counterfactual"],
@@ -151,8 +164,8 @@ def run(outdir: Path) -> dict:
         "next_blocker": (
             "Lean-check coefficient continuity on carrier x [0,3L/2]. Then instantiate PrimaryODE.primary on that "
             "interval with the unchanged t=0 seed, certify homogeneous modal dynamics, and prove equality with the "
-            "native primary on [0,L] via TangentODE.linear_solution_unique. Only after that should the enlarged "
-            "kinematics/ambient wrapper and constructedGood residual be attacked."
+            "native primary on [0,L]. In parallel, replay PrimaryODE.primary_bounds directly from the wider slot-level "
+            "modal-error/viscosity identities and prove a scalar Gaussian sandwich beyond the native [0,L] interval."
         ),
         "certificate_dag": cert,
     }
