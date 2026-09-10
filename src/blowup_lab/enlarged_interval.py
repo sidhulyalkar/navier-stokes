@@ -52,12 +52,51 @@ class Obligation:
 
 
 def candidate_interval() -> NormalizedInterval:
-    """First one-sided no-cutoff experiment: [0, 3L/2].
-
-    This keeps the original t=0 seed and leaves an L/2 buffer to the right
-    boundary of the source analysis slot (-L, 2L).
-    """
+    """First one-sided no-cutoff experiment: [0, 3L/2]."""
     return NormalizedInterval(0.0, 1.5)
+
+
+def one_sided_factor_interval(rho: float) -> NormalizedInterval:
+    """Return the normalized one-sided interval [0,rho L]."""
+    if rho < 0:
+        raise ValueError("rho must be nonnegative")
+    return NormalizedInterval(0.0, float(rho))
+
+
+def extension_factor_frontier(factors: tuple[float, ...] = (1.0, 1.25, 1.5, 1.75, 1.9, 1.99, 2.0)) -> dict:
+    """Audit the source-geometry frontier for one-sided extension factors.
+
+    At the phase/frame-domain level, any compact [0,rho L] with rho<2 is
+    contained in the open source slot (-L,2L). rho=2 is deliberately rejected
+    because the source slot is open at 2L.
+    """
+    rows = []
+    for rho in factors:
+        I = one_sided_factor_interval(rho)
+        rows.append(
+            {
+                "rho": rho,
+                "interval": f"[0,{rho}L]",
+                "inside_source_slot": I.inside_source_slot(),
+                "contains_native": I.contains_native(),
+                "right_buffer_in_L_units": 2.0 - rho,
+                "source_geometry_status": "ADMISSIBLE_COMPACT_SUBINTERVAL" if I.inside_source_slot() else "OUTSIDE_OR_TOUCHES_OPEN_BOUNDARY",
+            }
+        )
+    return {
+        "schema": "one-sided-extension-factor-frontier-v1",
+        "source_fact": "BasePhaseGeometry.FamilyData.slot = (-L,2L)",
+        "derived_family": "For L>0 and 0<=rho<2, [0,rho L] is contained in (-L,2L).",
+        "native_interval_factor": 1.0,
+        "first_probe_factor": 1.5,
+        "source_geometric_supremum_factor": 2.0,
+        "supremum_attained": False,
+        "rows": rows,
+        "claim_boundary": (
+            "This frontier concerns only containment in the source analysis slot. It does not prove coefficient "
+            "continuity, modal dynamics, kinematics, residual control, or an unforced construction at every rho."
+        ),
+    }
 
 
 def enlarged_interval_report(interval: NormalizedInterval | None = None) -> dict:
@@ -107,6 +146,30 @@ def enlarged_interval_report(interval: NormalizedInterval | None = None) -> dict
             ),
         ),
         Obligation(
+            obligation_id="modal_primary_on_enlarged_interval",
+            statement="The same-seed modal primary can be certified on [0,3L/2] once coefficient continuity is available.",
+            status="READY_ON_CONTINUITY_GATE",
+            evidence="SOURCE_GENERIC_CONSTRUCTION",
+            source_file="NavierStokes/PrimaryODE.lean",
+            source_declaration="PrimaryODE.primary / PrimaryODE.primary_hasDerivAt",
+            rationale=(
+                "The generic primary accepts any ordered finite interval; primary_hasDerivAt requires coefficient "
+                "continuity but not FrameData.Kinematics."
+            ),
+        ),
+        Obligation(
+            obligation_id="agreement_with_native_primary",
+            statement="The enlarged modal primary equals the canonical primary on [0,L].",
+            status="READY_ON_MODAL_CONSTRUCTION_GATE",
+            evidence="SOURCE_LIBRARY_THEOREM",
+            source_file="NavierStokes/TangentODE.lean",
+            source_declaration="TangentODE.linear_solution_unique",
+            rationale=(
+                "Both candidates start from the same t=0 seed and satisfy the same continuous-coefficient homogeneous "
+                "modal ODE on [0,L]."
+            ),
+        ),
+        Obligation(
             obligation_id="normal_nonzero_on_enlarged_interval",
             statement="The phase normal stays nonzero on [0,3L/2].",
             status="DERIVED_READY_TO_FORMALIZE" if I.inside_source_slot() else "FAIL",
@@ -124,32 +187,7 @@ def enlarged_interval_report(interval: NormalizedInterval | None = None) -> dict
             source_declaration="BasePhaseGeometry.FamilyData.kinematics",
             rationale=(
                 "The source proof uses interval_subset_slot only to feed normal_nonzero; its other derivative and "
-                "eigenvector-nonzero steps are pointwise. Replacing that inclusion by [0,3L/2] subset (-L,2L) "
-                "should yield the generalized theorem without changing the frame formulas."
-            ),
-        ),
-        Obligation(
-            obligation_id="finite_interval_homogeneous_solution",
-            statement="A homogeneous linear solution exists on [0,3L/2] from the same t=0 seed.",
-            status="READY_ON_CONTINUITY_GATE",
-            evidence="SOURCE_LIBRARY_THEOREM",
-            source_file="NavierStokes/TangentODE.lean",
-            source_declaration="TangentODE.exists_linear_solution",
-            rationale=(
-                "The source proves existence on any finite closed interval for a continuous linear coefficient, with "
-                "no smallness restriction on interval length."
-            ),
-        ),
-        Obligation(
-            obligation_id="agreement_with_native_primary",
-            statement="The enlarged solution equals the canonical primary on [0,L].",
-            status="READY_ON_CONSTRUCTION_GATE",
-            evidence="SOURCE_LIBRARY_THEOREM",
-            source_file="NavierStokes/TangentODE.lean",
-            source_declaration="TangentODE.linear_solution_unique",
-            rationale=(
-                "Both solutions have the same t=0 seed and satisfy the same continuous-coefficient homogeneous ODE "
-                "on [0,L], so finite-interval uniqueness is the intended bridge."
+                "eigenvector-nonzero steps are pointwise. This is an ambient-reconstruction gate, not the first modal gate."
             ),
         ),
         Obligation(
@@ -159,7 +197,7 @@ def enlarged_interval_report(interval: NormalizedInterval | None = None) -> dict
             evidence="NOT_YET_EVALUATED",
             source_file="",
             source_declaration="",
-            rationale="This is the first gate after the enlarged primary itself is constructed and matched.",
+            rationale="This is a later gate after the enlarged modal primary is constructed and ambient reconstruction is checked.",
         ),
     ]
 
@@ -167,24 +205,24 @@ def enlarged_interval_report(interval: NormalizedInterval | None = None) -> dict
     formalization = [o for o in obligations if "READY" in o.status]
 
     return {
-        "schema": "enlarged-primary-interval-v1",
+        "schema": "enlarged-primary-interval-v2",
         "source_lock": {
             "repository": "openai/NavierStokesAndEuler",
             "commit": SOURCE_COMMIT,
         },
         "candidate": I.to_dict(),
+        "extension_factor_frontier": extension_factor_frontier(),
         "obligations": [o.to_dict() for o in obligations],
         "formalization_queue": [o.obligation_id for o in formalization],
         "first_unresolved_after_source_reuse": blocking[0].to_dict() if blocking else None,
         "scientific_update": (
-            "The source-visible geometry does not presently kill a one-sided extension to [0,3L/2]. "
-            "The stronger coefficient-jet and normal-nonzero results already live on (-L,2L). The immediate task "
-            "is to formalize the generalized compact-interval wrappers, construct the longer homogeneous solution, "
-            "and then recompute the complete wave residual."
+            "The source geometry supports every compact one-sided factor rho<2 at the domain level; rho=3/2 is the "
+            "first conservative probe. Coefficient continuity is the first formal gate for modal continuation. "
+            "Kinematics is deferred until ambient reconstruction."
         ),
         "claim_boundary": (
-            "This report identifies source coverage and a proof-generalization path. It does not claim that the "
-            "generalized kinematics wrapper has been Lean-checked, that the enlarged primary has been constructed "
-            "inside the published development, or that any full Navier-Stokes forcing has been removed."
+            "This report identifies source coverage and a proof-generalization path. It does not claim that enlarged "
+            "coefficient continuity, the longer modal primary, generalized kinematics, or any full Navier-Stokes "
+            "forcing removal has been Lean-checked unless the separate formal audit says so."
         ),
     }
