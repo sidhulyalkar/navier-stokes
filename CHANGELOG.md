@@ -1,5 +1,16 @@
 # Changelog
 
+## v5.6.0
+
+- Compile `LinearWaveBounds.excludedSlotError` into a machine-readable cutoff residual atlas.
+- Separate the exact cutoff-derivative channel `Dfast(psi)*amplitude` from uncovered-source channel `(1-psi)*source`.
+- Specialize the primary residual class to `source=0`, eliminating the uncovered-source channel.
+- Split the actual product cutoff into clock-derivative and Gaussian-slot derivative commutators.
+- Add the exact `psi=1` principal-wave counterfactual: the localization error vanishes wherever the uncut solve identity remains valid.
+- Identify the first one-pulse no-cutoff obstruction: `PrimaryODE.solution` is globally represented by a differentiable extension, but its ODE identity is source-proved only on the native finite interval.
+- Promote a new enlarged-interval homogeneous primary candidate and defer multi-pulse summability until that single-pulse gate is passed.
+- Advance CLI/artifact generation and release metadata to v5.6.0 with fresh CI required.
+
 ## v5.5.0
 
 - Audit the pulse construction at the source level and separate **homogeneous pulse amplification** from **cutoff localization**.
