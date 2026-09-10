@@ -11,6 +11,7 @@ from .certificates import build_certificate_dag
 from .constraint_ledger import ledger_report
 from .cutoff_residual_atlas import cutoff_residual_atlas
 from .discovery import campaign_dict, local_campaign
+from .enlarged_interval import enlarged_interval_report
 from .exact_relaxations import exact_relaxation_report
 from .h_dependency import graph_report
 from .initial_data_transfer import default_transfer_campaign
@@ -53,6 +54,7 @@ def run(outdir: Path) -> dict:
     pulse_localization = pulse_localization_audit()
     localization_obstruction = localization_obstruction_report()
     cutoff_atlas = cutoff_residual_atlas()
+    enlarged = enlarged_interval_report()
     one_pulse = one_pulse_extension_audit()
 
     dump(outdir / "residual_atlas.json", atlas)
@@ -70,6 +72,7 @@ def run(outdir: Path) -> dict:
     dump(outdir / "pulse_localization_audit.json", pulse_localization)
     dump(outdir / "localization_obstruction.json", localization_obstruction)
     dump(outdir / "cutoff_residual_atlas.json", cutoff_atlas)
+    dump(outdir / "enlarged_interval.json", enlarged)
     dump(outdir / "one_pulse_extension.json", one_pulse)
 
     with (outdir / "ablation_matrix.csv").open("w", newline="") as f:
@@ -88,13 +91,14 @@ def run(outdir: Path) -> dict:
         ("pulse_localization_audit", pulse_localization, ("source_residual_atlas",)),
         ("localization_obstruction", localization_obstruction, ("pulse_localization_audit",)),
         ("cutoff_residual_atlas", cutoff_atlas, ("localization_obstruction",)),
-        ("one_pulse_extension", one_pulse, ("cutoff_residual_atlas",)),
+        ("enlarged_interval_source_coverage", enlarged, ("cutoff_residual_atlas",)),
+        ("one_pulse_extension", one_pulse, ("enlarged_interval_source_coverage",)),
         ("exact_h_relaxations", exact_h, ("reference_scaling",)),
     ])
 
     report = {
         "version": VERSION,
-        "scientific_status": "CUTOFF_RESIDUAL_ATLAS_AND_ONE_PULSE_DOMAIN_OBSTRUCTION",
+        "scientific_status": "ONE_SIDED_ENLARGED_PRIMARY_READY_TO_FORMALIZE",
         "claims": {
             "published_proof_architecture_encoded": True,
             "leading_scaling_balances_reproduced": True,
@@ -103,17 +107,27 @@ def run(outdir: Path) -> dict:
             "primary_source_zero_eliminates_uncovered_source_channel": True,
             "slot_cutoff_tail_geometry_source_backed": True,
             "uncut_principal_localization_error_zero_under_solve_hypothesis": True,
-            "existing_differentiable_extension_is_source_backed_global_homogeneous_solution": False,
-            "global_no_cutoff_pulse_extension_constructed": False,
+            "naive_clamped_tail_is_homogeneous_continuation": False,
+            "source_analysis_slot_wider_than_native_ode_interval": True,
+            "one_sided_interval_0_to_3L_over_2_strictly_inside_source_slot": True,
+            "generalized_enlarged_interval_kinematics_lean_checked": False,
+            "enlarged_homogeneous_primary_constructed": False,
             "actual_openai_force_norm_reduced": False,
             "unforced_navier_stokes_blowup_proved": False,
         },
         "cutoff_atlas": {
             "scenario_count": len(cutoff_atlas["scenarios"]),
             "hard_findings": cutoff_atlas["hard_findings"],
+            "naive_uncut_clamped_reuse": cutoff_atlas["naive_uncut_clamped_reuse"],
+        },
+        "enlarged_interval": {
+            "candidate": enlarged["candidate"],
+            "formalization_queue": enlarged["formalization_queue"],
+            "first_unresolved_after_source_reuse": enlarged["first_unresolved_after_source_reuse"],
         },
         "one_pulse_extension": {
-            "first_blocker": one_pulse["first_blocker"],
+            "first_active_gate": one_pulse["first_active_gate"],
+            "killed_lineages": one_pulse["killed_lineages"],
             "next_candidate": one_pulse["next_candidate"],
         },
         "h_relaxations": exact_h,
@@ -122,8 +136,9 @@ def run(outdir: Path) -> dict:
             "lock_migrated": False,
         },
         "next_blocker": (
-            "Prove or kill an enlarged-interval homogeneous primary by extending the actual frame/coefficient "
-            "hypotheses beyond Icc(0,L), then recompute the non-principal residual and two-pulse interaction terms."
+            "Lean-check the coefficient-continuity and FrameData.Kinematics wrappers on [0,3L/2], instantiate the "
+            "same-seed homogeneous solution there, prove agreement with the canonical primary on [0,L] by "
+            "TangentODE.linear_solution_unique, then recompute every non-principal wave residual channel."
         ),
         "certificate_dag": cert,
     }
