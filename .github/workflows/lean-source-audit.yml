@@ -51,6 +51,13 @@ jobs:
           use-github-cache: false
           use-mathlib-cache: true
 
+      - name: Build pinned NavierStokes library
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd upstream
+          ~/.elan/bin/lake build NavierStokes
+
       - name: Compile v5.6 enlarged-interval theorem
         id: lean_compile
         shell: bash
