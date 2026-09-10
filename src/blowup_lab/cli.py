@@ -102,7 +102,7 @@ def run(outdir: Path) -> dict:
 
     report = {
         "version": VERSION,
-        "scientific_status": "ONE_SIDED_ENLARGED_PRIMARY_READY_TO_FORMALIZE",
+        "scientific_status": "ONE_SIDED_MODAL_PRIMARY_FORMAL_GATE",
         "claims": {
             "published_proof_architecture_encoded": True,
             "leading_scaling_balances_reproduced": True,
@@ -116,6 +116,8 @@ def run(outdir: Path) -> dict:
             "one_sided_interval_0_to_3L_over_2_strictly_inside_source_slot": True,
             "constructed_good_remains_explicit_after_psi_one": True,
             "constructed_good_proved_nonzero": False,
+            "enlarged_coefficient_continuity_lean_checked": False,
+            "enlarged_modal_primary_lean_checked": False,
             "generalized_enlarged_interval_kinematics_lean_checked": False,
             "enlarged_homogeneous_primary_constructed": False,
             "actual_openai_force_norm_reduced": False,
@@ -147,10 +149,10 @@ def run(outdir: Path) -> dict:
             "lock_migrated": False,
         },
         "next_blocker": (
-            "Lean-check coefficient continuity and FrameData.Kinematics on [0,3L/2], instantiate the same-seed "
-            "homogeneous solution there, prove agreement with the canonical primary on [0,L] by "
-            "TangentODE.linear_solution_unique, then recompute constructedGood with psi=1 and classify its "
-            "curl-principal and corrected-remainder pieces before touching two-pulse interactions."
+            "Lean-check coefficient continuity on carrier x [0,3L/2]. Then instantiate PrimaryODE.primary on that "
+            "interval with the unchanged t=0 seed, certify homogeneous modal dynamics, and prove equality with the "
+            "native primary on [0,L] via TangentODE.linear_solution_unique. Only after that should the enlarged "
+            "kinematics/ambient wrapper and constructedGood residual be attacked."
         ),
         "certificate_dag": cert,
     }
