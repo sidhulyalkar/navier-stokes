@@ -9,12 +9,14 @@ from .ablation import default_routes, route_dict
 from .atlas import ResidualAtlas
 from .certificates import build_certificate_dag
 from .constraint_ledger import ledger_report
+from .cutoff_residual_atlas import cutoff_residual_atlas
 from .discovery import campaign_dict, local_campaign
 from .exact_relaxations import exact_relaxation_report
 from .h_dependency import graph_report
 from .initial_data_transfer import default_transfer_campaign
 from .local_relaxations import relaxation_report
 from .localization_obstruction import localization_obstruction_report
+from .one_pulse_extension import one_pulse_extension_audit
 from .proof import obligations_dict
 from .pulse_localization_audit import pulse_localization_audit
 from .pulse_stage_scaling import asymptotic_coordinate_report
@@ -22,7 +24,7 @@ from .pulse_transfer_bounds import source_extraction_plan
 from .scaling import SimilarityScaling, leading_balance_family
 
 
-VERSION = "5.5.0"
+VERSION = "5.6.0"
 
 
 def dump(path: Path, obj: dict) -> None:
@@ -50,6 +52,8 @@ def run(outdir: Path) -> dict:
     exact_h = exact_relaxation_report()
     pulse_localization = pulse_localization_audit()
     localization_obstruction = localization_obstruction_report()
+    cutoff_atlas = cutoff_residual_atlas()
+    one_pulse = one_pulse_extension_audit()
 
     dump(outdir / "residual_atlas.json", atlas)
     dump(outdir / "ablation_campaign.json", {"routes": routes})
@@ -65,6 +69,8 @@ def run(outdir: Path) -> dict:
     dump(outdir / "exact_h_relaxations.json", exact_h)
     dump(outdir / "pulse_localization_audit.json", pulse_localization)
     dump(outdir / "localization_obstruction.json", localization_obstruction)
+    dump(outdir / "cutoff_residual_atlas.json", cutoff_atlas)
+    dump(outdir / "one_pulse_extension.json", one_pulse)
 
     with (outdir / "ablation_matrix.csv").open("w", newline="") as f:
         w = csv.writer(f)
@@ -81,48 +87,53 @@ def run(outdir: Path) -> dict:
         ("source_residual_atlas", atlas, ()),
         ("pulse_localization_audit", pulse_localization, ("source_residual_atlas",)),
         ("localization_obstruction", localization_obstruction, ("pulse_localization_audit",)),
+        ("cutoff_residual_atlas", cutoff_atlas, ("localization_obstruction",)),
+        ("one_pulse_extension", one_pulse, ("cutoff_residual_atlas",)),
         ("exact_h_relaxations", exact_h, ("reference_scaling",)),
     ])
 
     report = {
         "version": VERSION,
-        "scientific_status": "LOCALIZATION_OBSTRUCTION_AND_UPSTREAM_AWARE_BOTTLENECK_AUDIT",
+        "scientific_status": "CUTOFF_RESIDUAL_ATLAS_AND_ONE_PULSE_DOMAIN_OBSTRUCTION",
         "claims": {
             "published_proof_architecture_encoded": True,
             "leading_scaling_balances_reproduced": True,
             "within_slot_primary_homogeneous_zero_forcing_source_backed": True,
+            "excluded_slot_error_two_channel_identity_source_backed": True,
+            "primary_source_zero_eliminates_uncovered_source_channel": True,
             "slot_cutoff_tail_geometry_source_backed": True,
-            "gaussian_tail_beats_every_fixed_Q_power_source_backed": True,
-            "exact_temporal_compactness_compatible_with_nonzero_homogeneous_linear_pulse": False,
+            "uncut_principal_localization_error_zero_under_solve_hypothesis": True,
+            "existing_differentiable_extension_is_source_backed_global_homogeneous_solution": False,
             "global_no_cutoff_pulse_extension_constructed": False,
             "actual_openai_force_norm_reduced": False,
             "unforced_navier_stokes_blowup_proved": False,
         },
-        "atlas": {"atoms": len(atlas["atoms"]), "hash": atlas["atlas_hash"]},
-        "ablation": {
-            "routes": len(routes),
-            "promote": sum(r["status"] == "PROMOTE" for r in routes),
-            "hold": sum(r["status"] == "HOLD" for r in routes),
-            "kill": sum(r["status"] == "KILL" for r in routes),
+        "cutoff_atlas": {
+            "scenario_count": len(cutoff_atlas["scenarios"]),
+            "hard_findings": cutoff_atlas["hard_findings"],
         },
-        "scaling_search": {k: discovery[k] for k in ("candidate_count", "promoted", "held", "killed")},
+        "one_pulse_extension": {
+            "first_blocker": one_pulse["first_blocker"],
+            "next_candidate": one_pulse["next_candidate"],
+        },
         "h_relaxations": exact_h,
-        "pulse_localization": pulse_localization["hard_findings"],
-        "localization_obstruction": localization_obstruction["decision"],
-        "research_pivot": pulse_localization["research_pivot"],
+        "upstream_policy": {
+            "source_lock": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538",
+            "lock_migrated": False,
+        },
         "next_blocker": (
-            "Map every cutoff-generated residual/source term and test a globally present Gaussian-small tail hierarchy; "
-            "in parallel trace the selected-construction dependency that keeps h at 1/1000 despite broader manuscript-range axis results."
+            "Prove or kill an enlarged-interval homogeneous primary by extending the actual frame/coefficient "
+            "hypotheses beyond Icc(0,L), then recompute the non-principal residual and two-pulse interaction terms."
         ),
         "certificate_dag": cert,
     }
-    dump(outdir / "v550_report.json", report)
+    dump(outdir / "v560_report.json", report)
     return report
 
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--out", type=Path, default=Path("artifacts/v550"))
+    p.add_argument("--out", type=Path, default=Path("artifacts/v560"))
     args = p.parse_args()
     report = run(args.out)
     print(json.dumps(report, indent=2, sort_keys=True))
