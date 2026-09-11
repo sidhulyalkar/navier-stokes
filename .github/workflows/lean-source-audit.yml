@@ -55,12 +55,16 @@ jobs:
           use-github-cache: false
           use-mathlib-cache: true
 
-      - name: Build pinned NavierStokes library
+      - name: Build pinned BasePhaseGeometry dependency closure
         shell: bash
         run: |
           set -euo pipefail
           cd upstream
-          ~/.elan/bin/lake build NavierStokes
+          # BasePhaseGeometry imports PrimaryPulseBounds -> PrimaryODE. Building
+          # this exact module target compiles the transitive dependency closure
+          # needed by V560EnlargedInterval without rebuilding the ~9k-module
+          # NavierStokes library on every research commit.
+          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry
 
       - name: Compile v5.6 enlarged-interval theorem
         id: lean_compile
