@@ -33,7 +33,7 @@ noncomputable def patchProfile (θ : ℝ) : ℝ := SmoothCutoffs.cutoff (patchAr
 noncomputable def delayedProfile (θ : ℝ) : ℝ :=
   GaussianTailFlat.profile θ + patchProfile θ * (1 - GaussianTailFlat.profile θ)
 
-theorem patchProfile_contDiff : ContDiff ℝ ∞ patchProfile := by
+theorem patchProfile_contDiff : ContDiff ℝ (⊤ : ℕ∞) patchProfile := by
   unfold patchProfile patchArgument
   exact SmoothCutoffs.cutoff_contDiff.comp
     ((contDiff_const.mul contDiff_id).sub contDiff_const).div_const 11
@@ -144,8 +144,8 @@ theorem delayedProfile_one {θ : ℝ}
 /-- The left support endpoint is unchanged. -/
 theorem delayedProfile_zero_left {θ : ℝ} (hθ : θ ≤ (1 / 6 : ℝ)) :
     delayedProfile θ = 0 := by
-  have hn := nativeProfile_zero_left hθ
-  have hp := patchProfile_zero_left (by linarith [hθ])
+  have hn : GaussianTailFlat.profile θ = 0 := nativeProfile_zero_left (θ := θ) hθ
+  have hp : patchProfile θ = 0 := patchProfile_zero_left (θ := θ) (by linarith [hθ])
   unfold delayedProfile
   rw [hn, hp]
   ring
@@ -153,8 +153,9 @@ theorem delayedProfile_zero_left {θ : ℝ} (hθ : θ ≤ (1 / 6 : ℝ)) :
 /-- The delayed profile shuts down by normalized time 3/2. -/
 theorem delayedProfile_zero_right {θ : ℝ} (hθ : (3 / 2 : ℝ) ≤ θ) :
     delayedProfile θ = 0 := by
-  have hn := nativeProfile_zero_right (by linarith [hθ])
-  have hp := patchProfile_zero_right hθ
+  have hn : GaussianTailFlat.profile θ = 0 :=
+    nativeProfile_zero_right (θ := θ) (by linarith [hθ])
+  have hp : patchProfile θ = 0 := patchProfile_zero_right (θ := θ) hθ
   unfold delayedProfile
   rw [hn, hp]
   ring
