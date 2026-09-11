@@ -158,7 +158,7 @@ theorem referenceEigenvalue_lower_three_halves {lam u ell v : ℝ}
   unfold ViscousPropagator.referenceEigenvalue
   apply div_le_div_of_nonneg_left hlam.le (PulseGrowth.radius_pos _)
   apply Real.sqrt_le_sqrt
-  exact add_le_add_left hsq 1
+  simpa only [add_comm] using (add_le_add_left hsq 1)
 
 end NavierStokes.V560Audit
 
