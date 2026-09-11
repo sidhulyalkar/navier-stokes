@@ -55,28 +55,39 @@ jobs:
           use-github-cache: false
           use-mathlib-cache: true
 
-      - name: Build pinned BasePhaseGeometry dependency closure
+      - name: Build pinned research dependency closures
         shell: bash
         run: |
           set -euo pipefail
           cd upstream
-          # BasePhaseGeometry imports PrimaryPulseBounds -> PrimaryODE. Building
-          # this exact module target compiles the transitive dependency closure
-          # needed by V560EnlargedInterval without rebuilding the ~9k-module
-          # NavierStokes library on every research commit.
-          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry
+          # BasePhaseGeometry covers the enlarged primary; WaveEnvelopeTransport
+          # covers the common-cover separation wrapper used by Stage D.
+          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport
 
-      - name: Compile v5.6 enlarged-interval theorem
-        id: lean_compile
+      - name: Compile Stage C enlarged-primary theorem
+        id: stage_c
         shell: bash
         run: |
           set +e
           cd upstream
-          ~/.elan/bin/lake env lean ../formal/V560EnlargedInterval.lean > ../lean-audit-output.txt 2>&1
+          ~/.elan/bin/lake env lean ../formal/V560EnlargedInterval.lean > ../lean-stage-c.txt 2>&1
           status=$?
           cd ..
           echo "status=$status" >> "$GITHUB_OUTPUT"
-          cat lean-audit-output.txt
+          cat lean-stage-c.txt
+          exit 0
+
+      - name: Compile Stage D delayed-cutoff geometry
+        id: stage_d
+        shell: bash
+        run: |
+          set +e
+          cd upstream
+          ~/.elan/bin/lake env lean ../formal/V560DelayedRightCutoff.lean > ../lean-stage-d.txt 2>&1
+          status=$?
+          cd ..
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat lean-stage-d.txt
           exit 0
 
       - name: Publish Lean diagnostic to PR 10
@@ -84,27 +95,37 @@ jobs:
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          STATUS: ${{ steps.lean_compile.outputs.status }}
+          STAGE_C: ${{ steps.stage_c.outputs.status }}
+          STAGE_D: ${{ steps.stage_d.outputs.status }}
         run: |
           set -euo pipefail
           marker='<!-- lean-source-audit -->'
-          if [ "$STATUS" = "0" ]; then
-            result='✅ PASS'
-          else
-            result='❌ FAIL'
-          fi
+          c_result='❌ FAIL'
+          d_result='❌ FAIL'
+          [ "$STAGE_C" = "0" ] && c_result='✅ PASS'
+          [ "$STAGE_D" = "0" ] && d_result='✅ PASS'
           {
             echo "$marker"
-            echo "### Source-locked Lean audit: $result"
+            echo "### Source-locked Lean audit"
+            echo
+            echo "- Stage C enlarged primary: $c_result"
+            echo "- Stage D delayed cutoff geometry: $d_result"
             echo
             echo "Pinned source: \`openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538\`"
             echo "Toolchain: \`leanprover/lean4:v4.34.0-rc2\`"
             echo "Workflow commit: \`${GITHUB_SHA}\`"
             echo
-            echo '<details><summary>Lean compiler output</summary>'
+            echo '<details><summary>Stage C compiler output</summary>'
             echo
             echo '```text'
-            tail -n 180 lean-audit-output.txt
+            tail -n 140 lean-stage-c.txt
+            echo '```'
+            echo '</details>'
+            echo
+            echo '<details><summary>Stage D compiler output</summary>'
+            echo
+            echo '```text'
+            tail -n 140 lean-stage-d.txt
             echo '```'
             echo '</details>'
           } > lean-pr-comment.md
@@ -120,6 +141,6 @@ jobs:
           fi
 
       - name: Enforce Lean result
-        if: steps.lean_compile.outputs.status != '0'
+        if: steps.stage_c.outputs.status != '0' || steps.stage_d.outputs.status != '0'
         shell: bash
         run: exit 1
