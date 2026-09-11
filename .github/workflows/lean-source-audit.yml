@@ -151,6 +151,15 @@ jobs:
           fi
 
       - name: Enforce Lean result
-        if: steps.stage_c.outputs.status != '0' || steps.stage_d.outputs.status != '0' || steps.stage_e.outputs.status != '0'
+        if: always()
         shell: bash
-        run: exit 1
+        env:
+          STAGE_C: ${{ steps.stage_c.outputs.status }}
+          STAGE_D: ${{ steps.stage_d.outputs.status }}
+          STAGE_E: ${{ steps.stage_e.outputs.status }}
+        run: |
+          set -euo pipefail
+          printf 'Stage statuses: C=%s D=%s E=%s\n' "$STAGE_C" "$STAGE_D" "$STAGE_E"
+          test "$STAGE_C" = "0"
+          test "$STAGE_D" = "0"
+          test "$STAGE_E" = "0"
