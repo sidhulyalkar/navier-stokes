@@ -34,9 +34,11 @@ noncomputable def delayedProfile (θ : ℝ) : ℝ :=
   GaussianTailFlat.profile θ + patchProfile θ * (1 - GaussianTailFlat.profile θ)
 
 theorem patchProfile_contDiff : ContDiff ℝ (⊤ : ℕ∞) patchProfile := by
-  unfold patchProfile patchArgument
-  exact SmoothCutoffs.cutoff_contDiff.comp
-    ((contDiff_const.mul contDiff_id).sub contDiff_const).div_const 11
+  have harg : ContDiff ℝ (⊤ : ℕ∞) patchArgument := by
+    unfold patchArgument
+    exact (((contDiff_const.mul contDiff_id).sub contDiff_const).div_const 11)
+  unfold patchProfile
+  exact SmoothCutoffs.cutoff_contDiff.comp harg
 
 /-- Exact patch plateau. -/
 theorem patchProfile_one {θ : ℝ} (hθ : θ ∈ Icc (27 / 40 : ℝ) (49 / 40 : ℝ)) :
