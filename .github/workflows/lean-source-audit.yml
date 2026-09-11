@@ -21,7 +21,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  v560-enlarged-interval:
+  source-locked-formal-audit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout research lab
@@ -60,7 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           cd upstream
-          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport
+          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport NavierStokes.LinearWaveBounds
 
       - name: Compile Stage C enlarged-primary theorem
         id: stage_c
@@ -101,35 +101,46 @@ jobs:
           cat lean-stage-e.txt
           exit 0
 
-      - name: Publish Lean diagnostic to PR 10
-        if: always()
+      - name: Compile Stage F improved linear remainder theorem
+        id: stage_f
+        shell: bash
+        run: |
+          set +e
+          cd upstream
+          ~/.elan/bin/lake env lean ../formal/V570ImprovedLinearRemainder.lean > ../lean-stage-f.txt 2>&1
+          status=$?
+          cd ..
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat lean-stage-f.txt
+          exit 0
+
+      - name: Publish Lean diagnostic to current PR
+        if: always() && github.event_name == 'pull_request'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           STAGE_C: ${{ steps.stage_c.outputs.status }}
           STAGE_D: ${{ steps.stage_d.outputs.status }}
           STAGE_E: ${{ steps.stage_e.outputs.status }}
+          STAGE_F: ${{ steps.stage_f.outputs.status }}
         run: |
           set -euo pipefail
           marker='<!-- lean-source-audit -->'
-          c_result='❌ FAIL'
-          d_result='❌ FAIL'
-          e_result='❌ FAIL'
-          [ "$STAGE_C" = "0" ] && c_result='✅ PASS'
-          [ "$STAGE_D" = "0" ] && d_result='✅ PASS'
-          [ "$STAGE_E" = "0" ] && e_result='✅ PASS'
+          result() { [ "$1" = "0" ] && printf '✅ PASS' || printf '❌ FAIL'; }
           {
             echo "$marker"
             echo "### Source-locked Lean audit"
             echo
-            echo "- Stage C enlarged primary: $c_result"
-            echo "- Stage D delayed cutoff geometry: $d_result"
-            echo "- Stage E enlarged frame kinematics: $e_result"
+            echo "- Stage C enlarged primary: $(result "$STAGE_C")"
+            echo "- Stage D delayed cutoff geometry: $(result "$STAGE_D")"
+            echo "- Stage E enlarged frame kinematics: $(result "$STAGE_E")"
+            echo "- Stage F improved linear remainder: $(result "$STAGE_F")"
             echo
             echo "Pinned source: \`openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538\`"
             echo "Toolchain: \`leanprover/lean4:v4.34.0-rc2\`"
             echo "Workflow commit: \`${GITHUB_SHA}\`"
-            for stage in c d e; do
+            for stage in c d e f; do
               echo
               echo "<details><summary>Stage ${stage^^} compiler output</summary>"
               echo
@@ -140,17 +151,28 @@ jobs:
             done
           } > lean-pr-comment.md
 
-          existing="$(gh api "repos/${GITHUB_REPOSITORY}/issues/10/comments" --paginate \
+          existing="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
             --jq '.[] | select(.body | contains("<!-- lean-source-audit -->")) | .id' | head -n 1)"
           if [ -n "$existing" ]; then
             gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${existing}" \
               --raw-field body="$(cat lean-pr-comment.md)" >/dev/null
           else
-            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/10/comments" \
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
               --raw-field body="$(cat lean-pr-comment.md)" >/dev/null
           fi
 
       - name: Enforce Lean result
-        if: steps.stage_c.outputs.status != '0' || steps.stage_d.outputs.status != '0' || steps.stage_e.outputs.status != '0'
+        if: always()
         shell: bash
-        run: exit 1
+        env:
+          STAGE_C: ${{ steps.stage_c.outputs.status }}
+          STAGE_D: ${{ steps.stage_d.outputs.status }}
+          STAGE_E: ${{ steps.stage_e.outputs.status }}
+          STAGE_F: ${{ steps.stage_f.outputs.status }}
+        run: |
+          set -euo pipefail
+          printf 'Stage statuses: C=%s D=%s E=%s F=%s\n' "$STAGE_C" "$STAGE_D" "$STAGE_E" "$STAGE_F"
+          test "$STAGE_C" = "0"
+          test "$STAGE_D" = "0"
+          test "$STAGE_E" = "0"
+          test "$STAGE_F" = "0"
