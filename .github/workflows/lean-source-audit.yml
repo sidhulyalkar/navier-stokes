@@ -60,7 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           cd upstream
-          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport NavierStokes.LinearWaveBounds
+          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport NavierStokes.LinearWaveBounds NavierStokes.ActualInitialization
 
       - name: Compile Stage C enlarged-primary theorem
         id: stage_c
@@ -114,6 +114,19 @@ jobs:
           cat lean-stage-f.txt
           exit 0
 
+      - name: Compile Stage G nonlinear initialization propagation
+        id: stage_g
+        shell: bash
+        run: |
+          set +e
+          cd upstream
+          ~/.elan/bin/lake env lean ../formal/V570InitialResidualPropagation.lean > ../lean-stage-g.txt 2>&1
+          status=$?
+          cd ..
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat lean-stage-g.txt
+          exit 0
+
       - name: Publish Lean diagnostic to current PR
         if: always() && github.event_name == 'pull_request'
         shell: bash
@@ -124,6 +137,7 @@ jobs:
           STAGE_D: ${{ steps.stage_d.outputs.status }}
           STAGE_E: ${{ steps.stage_e.outputs.status }}
           STAGE_F: ${{ steps.stage_f.outputs.status }}
+          STAGE_G: ${{ steps.stage_g.outputs.status }}
         run: |
           set -euo pipefail
           marker='<!-- lean-source-audit -->'
@@ -136,11 +150,12 @@ jobs:
             echo "- Stage D delayed cutoff geometry: $(result "$STAGE_D")"
             echo "- Stage E enlarged frame kinematics: $(result "$STAGE_E")"
             echo "- Stage F improved linear remainder: $(result "$STAGE_F")"
+            echo "- Stage G nonlinear initialization propagation: $(result "$STAGE_G")"
             echo
             echo "Pinned source: \`openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538\`"
             echo "Toolchain: \`leanprover/lean4:v4.34.0-rc2\`"
             echo "Workflow commit: \`${GITHUB_SHA}\`"
-            for stage in c d e f; do
+            for stage in c d e f g; do
               echo
               echo "<details><summary>Stage ${stage^^} compiler output</summary>"
               echo
@@ -169,10 +184,12 @@ jobs:
           STAGE_D: ${{ steps.stage_d.outputs.status }}
           STAGE_E: ${{ steps.stage_e.outputs.status }}
           STAGE_F: ${{ steps.stage_f.outputs.status }}
+          STAGE_G: ${{ steps.stage_g.outputs.status }}
         run: |
           set -euo pipefail
-          printf 'Stage statuses: C=%s D=%s E=%s F=%s\n' "$STAGE_C" "$STAGE_D" "$STAGE_E" "$STAGE_F"
+          printf 'Stage statuses: C=%s D=%s E=%s F=%s G=%s\n' "$STAGE_C" "$STAGE_D" "$STAGE_E" "$STAGE_F" "$STAGE_G"
           test "$STAGE_C" = "0"
           test "$STAGE_D" = "0"
           test "$STAGE_E" = "0"
           test "$STAGE_F" = "0"
+          test "$STAGE_G" = "0"
