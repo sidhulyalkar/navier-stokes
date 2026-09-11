@@ -146,10 +146,19 @@ theorem referenceEigenvalue_lower_three_halves {lam u ell v : ℝ}
     lam / Real.sqrt (1 + (2 * u) ^ 2) ≤
       ViscousPropagator.referenceEigenvalue lam u ell v := by
   have hs := slotMagnitude_mem_three_halves hu hell hv
+  have hs0 : 0 ≤ PulseGrowth.slotMagnitude u ell v := by
+    have hu2 : 0 ≤ u / 2 := div_nonneg hu (by norm_num)
+    exact hu2.trans hs.1
+  have h2u0 : 0 ≤ 2 * u := mul_nonneg (by norm_num) hu
+  have hprod : 0 ≤ (2 * u - PulseGrowth.slotMagnitude u ell v) *
+      (2 * u + PulseGrowth.slotMagnitude u ell v) :=
+    mul_nonneg (sub_nonneg.mpr hs.2) (add_nonneg h2u0 hs0)
+  have hsq : PulseGrowth.slotMagnitude u ell v ^ 2 ≤ (2 * u) ^ 2 := by
+    nlinarith [hprod]
   unfold ViscousPropagator.referenceEigenvalue
   apply div_le_div_of_nonneg_left hlam.le (PulseGrowth.radius_pos _)
   apply Real.sqrt_le_sqrt
-  nlinarith [hs.2]
+  exact add_le_add_left hsq 1
 
 end NavierStokes.V560Audit
 
@@ -276,10 +285,12 @@ theorem primaryThreeHalves_reference_comparable
       (ChartScales.slotLength_bounds r0 h hr.le hh (hlarge i).four_le).2
   have hrt : 0 ≤ r0 * ChartScales.Tg := mul_nonneg hr.le ChartScales.Tg_pos.le
   have hthree : 3 * r0 * ChartScales.Tg ≤ M := by nlinarith [hslot]
+  have hscaled : 3 * a.length i ≤ 3 * ((2 * r0 * ChartScales.Tg) * D.scale i) :=
+    mul_le_mul_of_nonneg_left hslotL (by norm_num)
   have hbudget : 3 * a.length i / 2 - 0 ≤ M * D.scale i := by
     calc
       3 * a.length i / 2 - 0 ≤ 3 * ((2 * r0 * ChartScales.Tg) * D.scale i) / 2 := by
-        gcongr
+        nlinarith [hscaled]
       _ = (3 * r0 * ChartScales.Tg) * D.scale i := by ring
       _ ≤ M * D.scale i := mul_le_mul_of_nonneg_right hthree hS.le
   have hPpos (v : ℝ) (_hv : v ∈ Icc 0 (3 * a.length i / 2)) :
