@@ -106,7 +106,7 @@ def run(outdir: Path) -> dict:
 
     report = {
         "version": VERSION,
-        "scientific_status": "ONE_SIDED_MODAL_PRIMARY_FORMAL_GATE",
+        "scientific_status": "ENLARGED_MODAL_PRIMARY_STAGE_B_FORMAL_AUDIT",
         "claims": {
             "published_proof_architecture_encoded": True,
             "leading_scaling_balances_reproduced": True,
@@ -118,18 +118,27 @@ def run(outdir: Path) -> dict:
             "naive_clamped_tail_is_homogeneous_continuation": False,
             "source_analysis_slot_wider_than_native_ode_interval": True,
             "one_sided_interval_0_to_3L_over_2_strictly_inside_source_slot": True,
+            "one_sided_interval_0_to_3L_over_2_lean_checked": True,
+            "enlarged_coefficient_continuity_lean_checked": True,
             "slot_level_modal_error_and_viscosity_bounds_cover_rho_below_2": True,
             "generic_primary_bounds_separates_evolution_interval_from_length_budget": True,
+            "exact_three_halves_spectral_gap_derived": True,
+            "exact_three_halves_gaussian_constants_derived": True,
+            "enlarged_modal_primary_lean_checked": False,
+            "native_overlap_uniqueness_lean_checked": False,
             "extended_reference_envelope_primary_bound_lean_checked": False,
             "extended_simple_gaussian_sandwich_lean_checked": False,
             "constructed_good_remains_explicit_after_psi_one": True,
             "constructed_good_proved_nonzero": False,
-            "enlarged_coefficient_continuity_lean_checked": False,
-            "enlarged_modal_primary_lean_checked": False,
             "generalized_enlarged_interval_kinematics_lean_checked": False,
-            "enlarged_homogeneous_primary_constructed": False,
+            "enlarged_ambient_primary_constructed": False,
             "actual_openai_force_norm_reduced": False,
             "unforced_navier_stokes_blowup_proved": False,
+        },
+        "formal_evidence": {
+            "stage_a_lab_commit": "cd41ae7ca50f5cb1968010328603f226a0638a4b",
+            "source_commit": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538",
+            "stage_b_status": "PENDING_SOURCE_LOCKED_LEAN_AUDIT",
         },
         "cutoff_atlas": {
             "scenario_count": len(cutoff_atlas["scenarios"]),
@@ -149,6 +158,7 @@ def run(outdir: Path) -> dict:
         "enlarged_primary_control": {
             "parameters": enlarged_control["parameters"],
             "derived": enlarged_control["derived"],
+            "formal_evidence": enlarged_control["formal_evidence"],
             "scientific_update": enlarged_control["scientific_update"],
         },
         "post_localization_residual": {
@@ -162,10 +172,10 @@ def run(outdir: Path) -> dict:
             "lock_migrated": False,
         },
         "next_blocker": (
-            "Lean-check coefficient continuity on carrier x [0,3L/2]. Then instantiate PrimaryODE.primary on that "
-            "interval with the unchanged t=0 seed, certify homogeneous modal dynamics, and prove equality with the "
-            "native primary on [0,L]. In parallel, replay PrimaryODE.primary_bounds directly from the wider slot-level "
-            "modal-error/viscosity identities and prove a scalar Gaussian sandwich beyond the native [0,L] interval."
+            "Finish the source-locked Stage-B Lean audit for the [0,3L/2] same-seed PrimaryODE.primary and native-slot "
+            "uniqueness bridge. If green, formalize the exact 3/2 spectral-gap and Gaussian-envelope lemmas, replay "
+            "PrimaryODE.primary_bounds under an explicit enlarged-gap cone condition, then extend FrameData.Kinematics "
+            "and evaluate constructedGood at psi=1 before any two-pulse experiment."
         ),
         "certificate_dag": cert,
     }
