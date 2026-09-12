@@ -18,15 +18,13 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
-  source-locked-formal-audit:
+  v560-regression:
+    name: v5.6 regression C-E
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout research lab
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v4
       - name: Checkout pinned OpenAI formalization
         uses: actions/checkout@v4
         with:
@@ -34,219 +32,136 @@ jobs:
           ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
           path: upstream
           fetch-depth: 1
-
       - name: Verify source lock
-        shell: bash
         run: |
           set -euo pipefail
-          actual="$(git -C upstream rev-parse HEAD)"
-          expected="8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
-          test "$actual" = "$expected"
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
           test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
-
-      - name: Install pinned Lean environment and mathlib cache
-        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
         with:
           lake-package-directory: upstream
           auto-config: false
           build: false
           test: false
           lint: false
-          use-github-cache: false
+          use-github-cache: true
           use-mathlib-cache: true
+      - name: Build v5.6 dependency closure
+        run: |
+          cd upstream
+          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport
+      - name: Compile Stage C
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V560EnlargedInterval.lean
+      - name: Compile Stage D
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V560DelayedRightCutoff.lean
+      - name: Compile Stage E
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V560EnlargedKinematics.lean
 
-      - name: Build pinned research dependency closures
-        shell: bash
+  v570-linear:
+    name: v5.7 linear/localized F-H
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+      - name: Verify source lock
         run: |
           set -euo pipefail
-          cd upstream
-          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport NavierStokes.LinearWaveBounds NavierStokes.LocalizedWaveBounds NavierStokes.ActualInitialization NavierStokes.ActualInitialMean
-
-      - name: Compile Stage C enlarged-primary theorem
-        shell: bash
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+      - name: Build linear dependency closure
         run: |
-          set +e
           cd upstream
-          ~/.elan/bin/lake env lean ../formal/V560EnlargedInterval.lean > ../lean-stage-c.txt 2>&1
-          status=$?
-          cd ..
-          printf '%s\n' "$status" > lean-stage-c.status
-          cat lean-stage-c.txt
-          exit 0
+          ~/.elan/bin/lake build NavierStokes.LinearWaveBounds NavierStokes.LocalizedWaveBounds
+      - name: Compile Stage F improved global remainder
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570ImprovedLinearRemainder.lean
+      - name: Compile Stage H improved localized retained-good
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570ImprovedLocalizedGood.lean
 
-      - name: Compile Stage D delayed-cutoff geometry
-        shell: bash
+  v570-initialization:
+    name: v5.7 initialization G-I
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+      - name: Verify source lock
         run: |
-          set +e
-          cd upstream
-          ~/.elan/bin/lake env lean ../formal/V560DelayedRightCutoff.lean > ../lean-stage-d.txt 2>&1
-          status=$?
-          cd ..
-          printf '%s\n' "$status" > lean-stage-d.status
-          cat lean-stage-d.txt
-          exit 0
-
-      - name: Compile Stage E enlarged-frame kinematics
-        shell: bash
+          set -euo pipefail
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+      - name: Build initialization dependency closure
         run: |
-          set +e
           cd upstream
-          ~/.elan/bin/lake env lean ../formal/V560EnlargedKinematics.lean > ../lean-stage-e.txt 2>&1
-          status=$?
-          cd ..
-          printf '%s\n' "$status" > lean-stage-e.status
-          cat lean-stage-e.txt
-          exit 0
-
-      - name: Compile Stage F improved linear remainder theorem
-        shell: bash
-        run: |
-          set +e
-          cd upstream
-          ~/.elan/bin/lake env lean ../formal/V570ImprovedLinearRemainder.lean > ../lean-stage-f.txt 2>&1
-          status=$?
-          cd ..
-          printf '%s\n' "$status" > lean-stage-f.status
-          cat lean-stage-f.txt
-          exit 0
-
-      - name: Compile Stage G nonlinear initialization propagation
-        shell: bash
-        run: |
-          set +e
-          cd upstream
-          ~/.elan/bin/lake env lean ../formal/V570InitialResidualPropagation.lean > ../lean-stage-g.txt 2>&1
-          status=$?
-          cd ..
-          printf '%s\n' "$status" > lean-stage-g.status
-          cat lean-stage-g.txt
-          exit 0
-
-      - name: Compile Stage H localized retained-good theorem
-        shell: bash
-        run: |
-          set +e
-          cd upstream
-          ~/.elan/bin/lake env lean ../formal/V570ImprovedLocalizedGood.lean > ../lean-stage-h.txt 2>&1
-          status=$?
-          cd ..
-          printf '%s\n' "$status" > lean-stage-h.status
-          cat lean-stage-h.txt
-          exit 0
-
+          ~/.elan/bin/lake build NavierStokes.ActualInitialization
+      - name: Compile Stage G nonlinear residual propagation
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialResidualPropagation.lean
       - name: Compile Stage I three-gate invariant promotion
-        shell: bash
-        run: |
-          set +e
-          cd upstream
-          ~/.elan/bin/lake env lean ../formal/V570InitialInvariantPromotion.lean > ../lean-stage-i.txt 2>&1
-          status=$?
-          cd ..
-          printf '%s\n' "$status" > lean-stage-i.status
-          cat lean-stage-i.txt
-          exit 0
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialInvariantPromotion.lean
 
-      - name: Compile Stage J actual initial mean at sigma 2/5
-        shell: bash
-        run: |
-          set +e
-          cd upstream
-          ~/.elan/bin/lake env lean ../formal/V570InitialMeanTwoFifths.lean > ../lean-stage-j.txt 2>&1
-          status=$?
-          cd ..
-          printf '%s\n' "$status" > lean-stage-j.status
-          cat lean-stage-j.txt
-          exit 0
-
-      - name: Compile Stage K actual initial debt at sigma 2/5
-        shell: bash
-        run: |
-          set +e
-          cd upstream
-          ~/.elan/bin/lake env lean ../formal/V570InitialDebtTwoFifths.lean > ../lean-stage-k.txt 2>&1
-          status=$?
-          cd ..
-          printf '%s\n' "$status" > lean-stage-k.status
-          cat lean-stage-k.txt
-          exit 0
-
-      - name: Publish Lean diagnostic to current PR
-        if: always() && github.event_name == 'pull_request'
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
+  v570-mean-debt:
+    name: v5.7 mean/debt J-K
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+      - name: Verify source lock
         run: |
           set -euo pipefail
-          marker='<!-- lean-source-audit -->'
-          result() {
-            local stage="$1"
-            local file="lean-stage-${stage}.status"
-            if [ -f "$file" ] && [ "$(cat "$file")" = "0" ]; then
-              printf '✅ PASS'
-            else
-              printf '❌ FAIL'
-            fi
-          }
-          {
-            echo "$marker"
-            echo "### Source-locked Lean audit"
-            echo
-            echo "- Stage C enlarged primary: $(result c)"
-            echo "- Stage D delayed cutoff geometry: $(result d)"
-            echo "- Stage E enlarged frame kinematics: $(result e)"
-            echo "- Stage F improved linear remainder: $(result f)"
-            echo "- Stage G nonlinear initialization propagation: $(result g)"
-            echo "- Stage H localized retained-good sharpening: $(result h)"
-            echo "- Stage I three-gate invariant promotion: $(result i)"
-            echo "- Stage J actual initial mean sigma 2/5: $(result j)"
-            echo "- Stage K actual initial debt sigma 2/5: $(result k)"
-            echo
-            echo "Pinned source: \`openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538\`"
-            echo "Toolchain: \`leanprover/lean4:v4.34.0-rc2\`"
-            echo "Workflow commit: \`${GITHUB_SHA}\`"
-            for stage in c d e f g h i j k; do
-              echo
-              echo "<details><summary>Stage ${stage^^} compiler output</summary>"
-              echo
-              echo '```text'
-              if [ -f "lean-stage-${stage}.txt" ]; then
-                tail -n 120 "lean-stage-${stage}.txt"
-              else
-                echo '<compiler stage did not produce a log>'
-              fi
-              echo '```'
-              echo '</details>'
-            done
-          } > lean-pr-comment.md
-
-          existing="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate \
-            --jq '.[] | select(.body | contains("<!-- lean-source-audit -->")) | .id' | head -n 1)"
-          if [ -n "$existing" ]; then
-            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${existing}" \
-              --raw-field body="$(cat lean-pr-comment.md)" >/dev/null
-          else
-            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
-              --raw-field body="$(cat lean-pr-comment.md)" >/dev/null
-          fi
-
-      - name: Enforce Lean result
-        if: always()
-        shell: bash
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+      - name: Build mean/debt dependency closure
         run: |
-          set -euo pipefail
-          failed=0
-          for stage in c d e f g h i j k; do
-            file="lean-stage-${stage}.status"
-            if [ ! -f "$file" ]; then
-              echo "Stage ${stage^^}: missing status file"
-              failed=1
-              continue
-            fi
-            status="$(cat "$file")"
-            echo "Stage ${stage^^}: exit status $status"
-            if [ "$status" != "0" ]; then
-              failed=1
-            fi
-          done
-          test "$failed" = "0"
+          cd upstream
+          ~/.elan/bin/lake build NavierStokes.ActualInitialMean
+      - name: Compile Stage J actual initial mean sigma 2/5
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialMeanTwoFifths.lean
+      - name: Compile Stage K actual initial debt sigma 2/5
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialDebtTwoFifths.lean
