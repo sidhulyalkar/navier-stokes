@@ -60,7 +60,7 @@ jobs:
         run: |
           set -euo pipefail
           cd upstream
-          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport NavierStokes.LinearWaveBounds NavierStokes.LocalizedWaveBounds NavierStokes.ActualInitialization
+          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport NavierStokes.LinearWaveBounds NavierStokes.LocalizedWaveBounds NavierStokes.ActualInitialization NavierStokes.ActualInitialMean
 
       - name: Compile Stage C enlarged-primary theorem
         shell: bash
@@ -146,6 +146,18 @@ jobs:
           cat lean-stage-i.txt
           exit 0
 
+      - name: Compile Stage J actual initial mean at sigma 2/5
+        shell: bash
+        run: |
+          set +e
+          cd upstream
+          ~/.elan/bin/lake env lean ../formal/V570InitialMeanTwoFifths.lean > ../lean-stage-j.txt 2>&1
+          status=$?
+          cd ..
+          printf '%s\n' "$status" > lean-stage-j.status
+          cat lean-stage-j.txt
+          exit 0
+
       - name: Publish Lean diagnostic to current PR
         if: always() && github.event_name == 'pull_request'
         shell: bash
@@ -175,11 +187,12 @@ jobs:
             echo "- Stage G nonlinear initialization propagation: $(result g)"
             echo "- Stage H localized retained-good sharpening: $(result h)"
             echo "- Stage I three-gate invariant promotion: $(result i)"
+            echo "- Stage J actual initial mean sigma 2/5: $(result j)"
             echo
             echo "Pinned source: \`openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538\`"
             echo "Toolchain: \`leanprover/lean4:v4.34.0-rc2\`"
             echo "Workflow commit: \`${GITHUB_SHA}\`"
-            for stage in c d e f g h i; do
+            for stage in c d e f g h i j; do
               echo
               echo "<details><summary>Stage ${stage^^} compiler output</summary>"
               echo
@@ -210,7 +223,7 @@ jobs:
         run: |
           set -euo pipefail
           failed=0
-          for stage in c d e f g h i; do
+          for stage in c d e f g h i j; do
             file="lean-stage-${stage}.status"
             if [ ! -f "$file" ]; then
               echo "Stage ${stage^^}: missing status file"
