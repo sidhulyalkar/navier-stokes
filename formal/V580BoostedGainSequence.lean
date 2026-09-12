@@ -12,12 +12,12 @@ This file packages that margin into a candidate common gain sequence
 
   boostedGain(h,kappa,j) = gain(h,j) + h * (3/5 - kappa)
 
-and checks the global gain properties required by `StageEstimates`.  It also
+and checks the global gain properties required by `StageEstimates`. It also
 proves that the finite residual has enough source-backed margin to support the
 same boosted gain at every prefix index, including `J = 0`.
 
 This does not yet prove the raw potential/direct/pressure stage bounds at the
-boosted gain.  Those are a separate physical-adapter obligation.
+boosted gain. Those are a separate physical-adapter obligation.
 -/
 
 noncomputable section
@@ -78,9 +78,10 @@ finite-residual wave exponent at every prefix, including prefix zero. -/
 theorem boostedGain_le_residualWave {h κ : ℝ} (hh : 0 ≤ h) (hκ0 : 0 ≤ κ)
     (J : ℕ) :
     boostedGain h κ J ≤ h * residualWave J := by
-  have hm : 0 ≤ h * (1 / 10 + κ) := mul_nonneg hh (by linarith)
-  rw [← sub_nonneg] at hm
-  rwa [residual_boosted_gap] at hm
+  have hgap : 0 ≤ h * residualWave J - boostedGain h κ J := by
+    rw [residual_boosted_gap]
+    exact mul_nonneg hh (by linarith)
+  exact sub_nonneg.mp hgap
 
 /-- Consequently the source's stronger residual rate may be weakened to the
 same boosted common gain, with the existing residual derivative loss. -/
