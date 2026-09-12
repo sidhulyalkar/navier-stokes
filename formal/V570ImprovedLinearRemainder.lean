@@ -105,7 +105,7 @@ theorem pressureGradient_mem_improved
   · simpa [LinearWaveResidual.strippedPressureGradient] using
       (MemClass.zero (α := α + 1 / 2 - κ) (E := ℂ) (h.amplitude 0).weight_nonneg)
   · have hh := (d.Dz_mem h.pressure).mono_exponent
-      (show α + 1 / 2 - κ ≤ (α + 1 / 2) + 1 by linarith)
+      (show α + 1 / 2 - κ ≤ (α + 1 / 2) + 1 by linarith [h.loss_nonneg])
     simp [LinearWaveResidual.strippedPressureGradient] at hh ⊢
     exact hh
 
