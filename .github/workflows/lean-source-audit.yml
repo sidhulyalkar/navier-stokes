@@ -118,3 +118,39 @@ jobs:
           test "$STAGE_I" = success
           test "$STAGE_J" = success
           test "$STAGE_K" = success
+
+  v570-actual-primary:
+    name: v5.7 actual-primary Stage L
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+      - name: Verify source lock before installing research module
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+      - name: Install qualified Stage H as a composable research module
+        run: cp formal/V570ImprovedLocalizedGood.lean upstream/NavierStokes/V570ImprovedLocalizedGood.lean
+      - name: Build Stage L dependency closure and research module
+        run: |
+          cd upstream
+          ~/.elan/bin/lake build NavierStokes.ActualInitialization NavierStokes.V570ImprovedLocalizedGood
+      - name: Compile Stage L actual-primary 9/10 bridge
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570ActualPrimaryNineTenths.lean
