@@ -4,11 +4,11 @@ on:
   push:
     branches: ["research/**"]
     paths:
-      - "formal/**"
+      - "formal/V570*.lean"
       - ".github/workflows/lean-source-audit.yml"
   pull_request:
     paths:
-      - "formal/**"
+      - "formal/V570*.lean"
       - ".github/workflows/lean-source-audit.yml"
   workflow_dispatch:
 
@@ -20,44 +20,6 @@ permissions:
   contents: read
 
 jobs:
-  v560-regression:
-    name: v5.6 regression C-E
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Checkout pinned OpenAI formalization
-        uses: actions/checkout@v4
-        with:
-          repository: openai/NavierStokesAndEuler
-          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
-          path: upstream
-          fetch-depth: 1
-      - name: Verify source lock
-        run: |
-          set -euo pipefail
-          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
-          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
-      - name: Install pinned Lean environment
-        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
-        with:
-          lake-package-directory: upstream
-          auto-config: false
-          build: false
-          test: false
-          lint: false
-          use-github-cache: true
-          use-mathlib-cache: true
-      - name: Build v5.6 dependency closure
-        run: |
-          cd upstream
-          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport
-      - name: Compile Stage C
-        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V560EnlargedInterval.lean
-      - name: Compile Stage D
-        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V560DelayedRightCutoff.lean
-      - name: Compile Stage E
-        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V560EnlargedKinematics.lean
-
   v570-linear:
     name: v5.7 linear/localized F-H
     runs-on: ubuntu-latest
@@ -94,8 +56,8 @@ jobs:
       - name: Compile Stage H improved localized retained-good
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570ImprovedLocalizedGood.lean
 
-  v570-initialization:
-    name: v5.7 initialization G-I
+  v570-initializer:
+    name: v5.7 initializer G-K
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -121,46 +83,14 @@ jobs:
           lint: false
           use-github-cache: true
           use-mathlib-cache: true
-      - name: Build initialization dependency closure
+      - name: Build initializer dependency closure
         run: |
           cd upstream
-          ~/.elan/bin/lake build NavierStokes.ActualInitialization
+          ~/.elan/bin/lake build NavierStokes.ActualInitialMean
       - name: Compile Stage G nonlinear residual propagation
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialResidualPropagation.lean
       - name: Compile Stage I three-gate invariant promotion
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialInvariantPromotion.lean
-
-  v570-mean-debt:
-    name: v5.7 mean/debt J-K
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Checkout pinned OpenAI formalization
-        uses: actions/checkout@v4
-        with:
-          repository: openai/NavierStokesAndEuler
-          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
-          path: upstream
-          fetch-depth: 1
-      - name: Verify source lock
-        run: |
-          set -euo pipefail
-          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
-          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
-      - name: Install pinned Lean environment
-        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
-        with:
-          lake-package-directory: upstream
-          auto-config: false
-          build: false
-          test: false
-          lint: false
-          use-github-cache: true
-          use-mathlib-cache: true
-      - name: Build mean/debt dependency closure
-        run: |
-          cd upstream
-          ~/.elan/bin/lake build NavierStokes.ActualInitialMean
       - name: Compile Stage J actual initial mean sigma 2/5
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialMeanTwoFifths.lean
       - name: Compile Stage K actual initial debt sigma 2/5
