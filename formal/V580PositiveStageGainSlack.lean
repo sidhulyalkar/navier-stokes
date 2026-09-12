@@ -38,7 +38,7 @@ theorem boostedGain_eq_waveNative (h κ : ℝ) {j : ℕ} (hj : 1 ≤ j) :
   exact (wave_physical_gap h κ hj).symm
 
 theorem boostedGain_le_wavePressure {h κ : ℝ} (hh : 0 ≤ h)
-    (hκ : κ ≤ 1 / 100000) {j : ℕ} (hj : 1 ≤ j) :
+    (_hκ : κ ≤ 1 / 100000) {j : ℕ} (hj : 1 ≤ j) :
     boostedGain h κ j ≤ h * wavePressureNative κ j := by
   rw [pressure_physical_gap h κ hj]
   unfold boostedGain
@@ -58,13 +58,11 @@ theorem boostedGain_le_mean {h κ : ℝ} (hh : 0 ≤ h)
 
 section StageInputs
 
-universe uDA uDP uIA uKA uIP uKP
-
 variable {h κ qbig : ℝ}
-  {DA : Type uDA} {DP : Type uDP}
+  {DA DP : Type}
   [NormedAddCommGroup DA] [NormedSpace ℝ DA]
   [NormedAddCommGroup DP] [NormedSpace ℝ DP]
-  {IA : Type uIA} {KA : Type uKA} {IP : Type uIP} {KP : Type uKP}
+  {IA KA IP KP : Type}
 
 variable
   {WA : ℕ → WaveData h DA IA KA (Fin 3)}
