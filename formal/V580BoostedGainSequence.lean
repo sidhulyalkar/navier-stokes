@@ -42,8 +42,7 @@ theorem boost_nonneg {h κ : ℝ} (hh : 0 ≤ h) (hκ : κ ≤ 1 / 100000) :
 /-- `StageEstimates` only requires a nonnegative gain at index zero. -/
 theorem boostedGain_zero_nonneg {h κ : ℝ} (hh : 0 ≤ h) (hκ : κ ≤ 1 / 100000) :
     0 ≤ boostedGain h κ 0 := by
-  rw [boostedGain, gain_zero]
-  exact boost_nonneg hh hκ
+  simpa [boostedGain, gain_zero] using boost_nonneg hh hκ
 
 /-- Positive stages retain strictly positive gain. -/
 theorem boostedGain_pos {h κ : ℝ} (hh : 0 < h) (hκ : κ ≤ 1 / 100000)
@@ -58,12 +57,14 @@ theorem boostedGain_monotone {h κ : ℝ} (hh : 0 ≤ h) :
     Monotone (boostedGain h κ) := by
   intro j k hjk
   unfold boostedGain
-  exact add_le_add_right ((gain_monotone hh) hjk) _
+  have hg := (gain_monotone hh) hjk
+  linarith
 
 /-- Adding one fixed margin preserves divergence of the gain sequence. -/
 theorem boostedGain_tendsto_atTop {h κ : ℝ} (hh : 0 < h) :
     Tendsto (boostedGain h κ) atTop atTop := by
-  simpa only [boostedGain] using gain_add_tendsto_atTop hh (boost h κ)
+  change Tendsto (fun j => gain h j + boost h κ) atTop atTop
+  exact gain_add_tendsto_atTop hh (boost h κ)
 
 /-- The source finite-residual exponent retains an exact positive margin after
 spending the common stage boost. -/
