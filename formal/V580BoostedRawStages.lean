@@ -85,13 +85,11 @@ private theorem mean_gain_boosted {h κ α : ℝ}
   have ha := mul_le_mul_of_nonneg_left hα hh
   linarith
 
-universe uDP uDS uIP uKP uIS uKS
-
 variable {h κ qbig : ℝ}
-  {DP : Type uDP} {DS : Type uDS}
+  {DP DS : Type}
   [NormedAddCommGroup DP] [NormedSpace ℝ DP]
   [NormedAddCommGroup DS] [NormedSpace ℝ DS]
-  {IP : Type uIP} {KP : Type uKP} {IS : Type uIS} {KS : Type uKS}
+  {IP KP IS KS : Type*}
 
 /-- The literal potential increment of cycle `k` supports the boosted common
 gain at physical stage `k+1`. -/
