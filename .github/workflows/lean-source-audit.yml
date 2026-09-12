@@ -87,11 +87,34 @@ jobs:
         run: |
           cd upstream
           ~/.elan/bin/lake build NavierStokes.ActualInitialization NavierStokes.ActualInitialMean
-      - name: Compile Stage G nonlinear residual propagation
+      - id: stage_g
+        name: Compile Stage G nonlinear residual propagation
+        continue-on-error: true
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialResidualPropagation.lean
-      - name: Compile Stage I three-gate invariant promotion
+      - id: stage_i
+        name: Compile Stage I three-gate invariant promotion
+        continue-on-error: true
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialInvariantPromotion.lean
-      - name: Compile Stage J actual initial mean sigma 2/5
+      - id: stage_j
+        name: Compile Stage J actual initial mean sigma 2/5
+        continue-on-error: true
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialMeanTwoFifths.lean
-      - name: Compile Stage K actual initial debt sigma 2/5
+      - id: stage_k
+        name: Compile Stage K actual initial debt sigma 2/5
+        continue-on-error: true
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialDebtTwoFifths.lean
+      - name: Enforce all initializer theorem gates
+        if: always()
+        env:
+          STAGE_G: ${{ steps.stage_g.outcome }}
+          STAGE_I: ${{ steps.stage_i.outcome }}
+          STAGE_J: ${{ steps.stage_j.outcome }}
+          STAGE_K: ${{ steps.stage_k.outcome }}
+        run: |
+          set -euo pipefail
+          printf 'Stage G: %s\nStage I: %s\nStage J: %s\nStage K: %s\n' \
+            "$STAGE_G" "$STAGE_I" "$STAGE_J" "$STAGE_K"
+          test "$STAGE_G" = success
+          test "$STAGE_I" = success
+          test "$STAGE_J" = success
+          test "$STAGE_K" = success
