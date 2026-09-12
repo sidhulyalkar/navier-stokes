@@ -5,27 +5,29 @@ from blowup_lab.residual_force_ledger import exact_residual_attribution_report
 
 
 def force_residual_bridge_report() -> dict:
-    """Join the global force DAG and normalized residual ledger without inventing a bridge.
+    """Join the global force DAG and normalized residual ledger at the right granularity.
 
-    The repository now has two source-backed descriptions at different levels:
+    The source now supports two different bridge statements that must not be
+    conflated:
 
-    * the global force ancestry from the final smooth force down to the incoming
-      mixed diagonal residual;
-    * the exact normalized cycle-residual decomposition into physical and
-      harmonic-reconstruction channels.
+    1. an **aggregate rate bridge** is explicit: finite physical residual
+       `JetRate` estimates are installed in `StageEstimates`, consumed by the
+       diagonal schedule theorem, and yield vanishing jets for the infinite
+       mixed residual;
+    2. the **termwise attribution bridge** is still open: the exact normalized
+       harmonic/mean/base bookkeeping decomposition has not been carried as
+       separate additive channels through physical-chart conversion, diagonal
+       summation, spatial localization and periodization.
 
-    What is *not* yet source-extracted as one explicit theorem-level map is the
-    attribution bridge identifying each normalized residual channel with a
-    corresponding additive contribution to the mixed diagonal residual after
-    physical-chart conversion and spatial localization.  This report makes that
-    remaining gap first-class instead of silently equating the two ledgers.
+    Keeping these separate prevents a stronger finite-prefix exponent from
+    being mislabeled as a smaller final force.
     """
 
     force = final_force_attribution()
     residual = exact_residual_attribution_report()
 
     return {
-        "schema": "force-residual-bridge-v1",
+        "schema": "force-residual-bridge-v2",
         "source_lock": force["source_lock"],
         "global_force_frontier": {
             "node": "incoming.mixed_diagonal_residual",
@@ -39,47 +41,73 @@ def force_residual_bridge_report() -> dict:
             "native_gain_ledger": residual["native_gain_ledger"],
             "hard_findings": residual["hard_findings"],
         },
-        "bridge": {
-            "from": "incoming.mixed_diagonal_residual",
-            "to": "normalized physical residual / harmonic reconstruction",
+        "aggregate_rate_bridge": {
+            "status": "SOURCE_EXACT",
+            "input": "finite uncut residual JetRate with exponent gain(J) - residualLoss(m)",
+            "path": [
+                "ActualCycleResidualBounds.finite_residual_rates",
+                "ActualStageEstimates.stageEstimates_of_representations.finite_residual",
+                "MixedCandidateAssembly.StageEstimates.exists_schedule",
+                "MixedDiagonalResidual.exists_physical_schedule_residual_zero",
+                "MixedDiagonalResidual.physical_vanishingJointJets",
+                "JointResidualLimits.VanishingJointJets",
+            ],
+            "output": "the infinite mixed diagonal residual has vanishing jets of every finite order at the endpoint",
+            "interpretation": (
+                "The finite-stage residual exponent is a genuine input to diagonal assembly. "
+                "However, the final endpoint conclusion is already all-orders flat, so increasing "
+                "the finite exponent does not by itself produce a strictly stronger endpoint-flatness class."
+            ),
+        },
+        "termwise_attribution_bridge": {
+            "from": "normalized physical residual / harmonic reconstruction",
+            "to": "incoming.mixed_diagonal_residual and final force channels",
             "status": "OPEN",
             "reason": (
-                "The source-backed ledgers live on opposite sides of physical-chart conversion, "
-                "diagonal summation, spatial localization, and periodization.  v5.7 has not yet "
-                "extracted one exact additive identity carrying every normalized atom through "
-                "those wrappers into the final mixed diagonal residual."
+                "No extracted identity yet carries each normalized harmonic, mean and base channel "
+                "separately through physical-chart conversion, diagonal summation, spatial cutoff, "
+                "periodization and time localization."
             ),
             "required_obligations": [
-                "identify the exact physical-chart image of each normalized residual channel",
+                "identify the physical-chart image of each normalized residual channel",
                 "track diagonal summation without merging independently bounded channels",
                 "separate spatial-cutoff derivative cost from the interior original residual",
                 "separate periodization-region cost from the interior cut residual",
-                "prove which channel controls the terminal 3/4 < t < 1 residual rate",
+                "bind any norm-sensitive final-force quantity to the separately tracked channels",
             ],
         },
         "sigma_relevance": {
             "native_bottleneck": "representation.harmonic_sum",
             "candidate_delta_for_sigma_plus_one_fifth": "h/5",
-            "terminal_force_relevance": "CONDITIONAL",
-            "conditions": [
-                "the same literal state is formally requalified at sigma + 1/5",
-                "the stronger harmonic residual rate survives physical-chart conversion",
-                "the stronger rate survives diagonal summation and spatial localization",
-                "the terminal incoming residual is actually improved rather than merely reindexed",
+            "aggregate_diagonal_relevance": "SOURCE_BACKED",
+            "immediate_effect_if_requalified": "stronger finite-prefix residual JetRate",
+            "endpoint_flatness_effect": "NO_STRICT_IMPROVEMENT_FROM_EXPONENT_ALONE",
+            "possible_nonredundant_effects_to_test": [
+                "less aggressive admissible diagonal schedule",
+                "smaller finite-prefix depth for a fixed residual target",
+                "better quantitative constants or rates away from the endpoint",
+                "a norm-sensitive reduction after localization, if separately proved",
+            ],
+            "not_implied": [
+                "two correction cycles are deleted",
+                "the infinite mixed residual is in a stronger-than-all-orders endpoint class",
+                "the final forcing norm is smaller",
+                "an unforced Navier-Stokes singularity exists",
             ],
         },
         "hard_findings": {
             "global_force_ancestry_extracted": True,
             "normalized_residual_decomposition_extracted": True,
-            "exact_bridge_from_normalized_atoms_to_final_diagonal_force_extracted": False,
+            "aggregate_rate_bridge_to_mixed_diagonal_flatness_extracted": True,
+            "exact_termwise_bridge_to_final_force_extracted": False,
             "sigma_shift_proven_to_reduce_terminal_force": False,
             "actual_force_norm_reduced": False,
             "unforced_navier_stokes_blowup_proved": False,
         },
         "next_frontier": (
-            "Extract the smallest exact bridge from ActualCycleResidualBounds / physical residual "
-            "conversion into MixedDiagonalResidual.  Do not optimize Gaussian, alias, activation, "
-            "or Borel-extension terms before that bridge identifies what survives into the "
-            "terminal forcing channel."
+            "Quantify whether a stronger finite residual rate changes the selected diagonal schedule "
+            "or a norm-sensitive force quantity.  In parallel, carry the harmonic bottleneck as a "
+            "separate channel through physical-chart conversion and localization.  Endpoint flatness "
+            "alone is no longer a useful success metric because the source already proves all-orders flatness."
         ),
     }
