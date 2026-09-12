@@ -1,0 +1,165 @@
+name: lean-source-audit
+
+on:
+  push:
+    branches: ["research/**"]
+    paths:
+      - "formal/**"
+      - ".github/workflows/lean-source-audit.yml"
+  pull_request:
+    paths:
+      - "formal/**"
+      - ".github/workflows/lean-source-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  v560-enlarged-interval:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout research lab
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+
+      - name: Verify source lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(git -C upstream rev-parse HEAD)"
+          expected="8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$actual" = "$expected"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+
+      - name: Install pinned Lean environment and mathlib cache
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9 # v1.5.0
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: false
+          use-mathlib-cache: true
+
+      - name: Build pinned research dependency closures
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd upstream
+          ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport
+
+      - name: Compile Stage C enlarged-primary theorem
+        id: stage_c
+        shell: bash
+        run: |
+          set +e
+          cd upstream
+          ~/.elan/bin/lake env lean ../formal/V560EnlargedInterval.lean > ../lean-stage-c.txt 2>&1
+          status=$?
+          cd ..
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat lean-stage-c.txt
+          exit 0
+
+      - name: Compile Stage D delayed-cutoff geometry
+        id: stage_d
+        shell: bash
+        run: |
+          set +e
+          cd upstream
+          ~/.elan/bin/lake env lean ../formal/V560DelayedRightCutoff.lean > ../lean-stage-d.txt 2>&1
+          status=$?
+          cd ..
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat lean-stage-d.txt
+          exit 0
+
+      - name: Compile Stage E enlarged-frame kinematics
+        id: stage_e
+        shell: bash
+        run: |
+          set +e
+          cd upstream
+          ~/.elan/bin/lake env lean ../formal/V560EnlargedKinematics.lean > ../lean-stage-e.txt 2>&1
+          status=$?
+          cd ..
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat lean-stage-e.txt
+          exit 0
+
+      - name: Publish Lean diagnostic to PR 10
+        if: always()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STAGE_C: ${{ steps.stage_c.outputs.status }}
+          STAGE_D: ${{ steps.stage_d.outputs.status }}
+          STAGE_E: ${{ steps.stage_e.outputs.status }}
+        run: |
+          set -euo pipefail
+          marker='<!-- lean-source-audit -->'
+          c_result='❌ FAIL'
+          d_result='❌ FAIL'
+          e_result='❌ FAIL'
+          [ "$STAGE_C" = "0" ] && c_result='✅ PASS'
+          [ "$STAGE_D" = "0" ] && d_result='✅ PASS'
+          [ "$STAGE_E" = "0" ] && e_result='✅ PASS'
+          {
+            echo "$marker"
+            echo "### Source-locked Lean audit"
+            echo
+            echo "- Stage C enlarged primary: $c_result"
+            echo "- Stage D delayed cutoff geometry: $d_result"
+            echo "- Stage E enlarged frame kinematics: $e_result"
+            echo
+            echo "Pinned source: \`openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538\`"
+            echo "Toolchain: \`leanprover/lean4:v4.34.0-rc2\`"
+            echo "Workflow commit: \`${GITHUB_SHA}\`"
+            for stage in c d e; do
+              echo
+              echo "<details><summary>Stage ${stage^^} compiler output</summary>"
+              echo
+              echo '```text'
+              tail -n 120 "lean-stage-${stage}.txt"
+              echo '```'
+              echo '</details>'
+            done
+          } > lean-pr-comment.md
+
+          existing="$(gh api "repos/${GITHUB_REPOSITORY}/issues/10/comments" --paginate \
+            --jq '.[] | select(.body | contains("<!-- lean-source-audit -->")) | .id' | head -n 1)"
+          if [ -n "$existing" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${existing}" \
+              --raw-field body="$(cat lean-pr-comment.md)" >/dev/null
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues/10/comments" \
+              --raw-field body="$(cat lean-pr-comment.md)" >/dev/null
+          fi
+
+      - name: Enforce Lean result
+        if: always()
+        shell: bash
+        env:
+          STAGE_C: ${{ steps.stage_c.outputs.status }}
+          STAGE_D: ${{ steps.stage_d.outputs.status }}
+          STAGE_E: ${{ steps.stage_e.outputs.status }}
+        run: |
+          set -euo pipefail
+          printf 'Stage statuses: C=%s D=%s E=%s\n' "$STAGE_C" "$STAGE_D" "$STAGE_E"
+          test "$STAGE_C" = "0"
+          test "$STAGE_D" = "0"
+          test "$STAGE_E" = "0"

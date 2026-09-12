@@ -9,12 +9,17 @@ from .ablation import default_routes, route_dict
 from .atlas import ResidualAtlas
 from .certificates import build_certificate_dag
 from .constraint_ledger import ledger_report
+from .cutoff_residual_atlas import cutoff_residual_atlas
 from .discovery import campaign_dict, local_campaign
+from .enlarged_interval import enlarged_interval_report
+from .enlarged_primary_control import enlarged_control_report
 from .exact_relaxations import exact_relaxation_report
 from .h_dependency import graph_report
 from .initial_data_transfer import default_transfer_campaign
 from .local_relaxations import relaxation_report
 from .localization_obstruction import localization_obstruction_report
+from .one_pulse_extension import one_pulse_extension_audit
+from .primary_residual_layers import primary_linear_residual_layers
 from .proof import obligations_dict
 from .pulse_localization_audit import pulse_localization_audit
 from .pulse_stage_scaling import asymptotic_coordinate_report
@@ -22,7 +27,7 @@ from .pulse_transfer_bounds import source_extraction_plan
 from .scaling import SimilarityScaling, leading_balance_family
 
 
-VERSION = "5.5.0"
+VERSION = "5.6.0"
 
 
 def dump(path: Path, obj: dict) -> None:
@@ -50,6 +55,11 @@ def run(outdir: Path) -> dict:
     exact_h = exact_relaxation_report()
     pulse_localization = pulse_localization_audit()
     localization_obstruction = localization_obstruction_report()
+    cutoff_atlas = cutoff_residual_atlas()
+    enlarged = enlarged_interval_report()
+    one_pulse = one_pulse_extension_audit()
+    primary_layers = primary_linear_residual_layers()
+    enlarged_control = enlarged_control_report()
 
     dump(outdir / "residual_atlas.json", atlas)
     dump(outdir / "ablation_campaign.json", {"routes": routes})
@@ -65,6 +75,11 @@ def run(outdir: Path) -> dict:
     dump(outdir / "exact_h_relaxations.json", exact_h)
     dump(outdir / "pulse_localization_audit.json", pulse_localization)
     dump(outdir / "localization_obstruction.json", localization_obstruction)
+    dump(outdir / "cutoff_residual_atlas.json", cutoff_atlas)
+    dump(outdir / "enlarged_interval.json", enlarged)
+    dump(outdir / "one_pulse_extension.json", one_pulse)
+    dump(outdir / "primary_residual_layers.json", primary_layers)
+    dump(outdir / "enlarged_primary_control.json", enlarged_control)
 
     with (outdir / "ablation_matrix.csv").open("w", newline="") as f:
         w = csv.writer(f)
@@ -81,48 +96,96 @@ def run(outdir: Path) -> dict:
         ("source_residual_atlas", atlas, ()),
         ("pulse_localization_audit", pulse_localization, ("source_residual_atlas",)),
         ("localization_obstruction", localization_obstruction, ("pulse_localization_audit",)),
+        ("cutoff_residual_atlas", cutoff_atlas, ("localization_obstruction",)),
+        ("enlarged_interval_source_coverage", enlarged, ("cutoff_residual_atlas",)),
+        ("one_pulse_extension", one_pulse, ("enlarged_interval_source_coverage",)),
+        ("enlarged_primary_control", enlarged_control, ("one_pulse_extension",)),
+        ("primary_residual_layers", primary_layers, ("enlarged_primary_control",)),
         ("exact_h_relaxations", exact_h, ("reference_scaling",)),
     ])
 
     report = {
         "version": VERSION,
-        "scientific_status": "LOCALIZATION_OBSTRUCTION_AND_UPSTREAM_AWARE_BOTTLENECK_AUDIT",
+        "scientific_status": "ENLARGED_MODAL_PRIMARY_STAGE_B_FORMAL_AUDIT",
         "claims": {
             "published_proof_architecture_encoded": True,
             "leading_scaling_balances_reproduced": True,
             "within_slot_primary_homogeneous_zero_forcing_source_backed": True,
+            "excluded_slot_error_two_channel_identity_source_backed": True,
+            "primary_source_zero_eliminates_uncovered_source_channel": True,
             "slot_cutoff_tail_geometry_source_backed": True,
-            "gaussian_tail_beats_every_fixed_Q_power_source_backed": True,
-            "exact_temporal_compactness_compatible_with_nonzero_homogeneous_linear_pulse": False,
-            "global_no_cutoff_pulse_extension_constructed": False,
+            "uncut_principal_localization_error_zero_under_solve_hypothesis": True,
+            "naive_clamped_tail_is_homogeneous_continuation": False,
+            "source_analysis_slot_wider_than_native_ode_interval": True,
+            "one_sided_interval_0_to_3L_over_2_strictly_inside_source_slot": True,
+            "one_sided_interval_0_to_3L_over_2_lean_checked": True,
+            "enlarged_coefficient_continuity_lean_checked": True,
+            "slot_level_modal_error_and_viscosity_bounds_cover_rho_below_2": True,
+            "generic_primary_bounds_separates_evolution_interval_from_length_budget": True,
+            "exact_three_halves_spectral_gap_derived": True,
+            "exact_three_halves_gaussian_constants_derived": True,
+            "enlarged_modal_primary_lean_checked": False,
+            "native_overlap_uniqueness_lean_checked": False,
+            "extended_reference_envelope_primary_bound_lean_checked": False,
+            "extended_simple_gaussian_sandwich_lean_checked": False,
+            "constructed_good_remains_explicit_after_psi_one": True,
+            "constructed_good_proved_nonzero": False,
+            "generalized_enlarged_interval_kinematics_lean_checked": False,
+            "enlarged_ambient_primary_constructed": False,
             "actual_openai_force_norm_reduced": False,
             "unforced_navier_stokes_blowup_proved": False,
         },
-        "atlas": {"atoms": len(atlas["atoms"]), "hash": atlas["atlas_hash"]},
-        "ablation": {
-            "routes": len(routes),
-            "promote": sum(r["status"] == "PROMOTE" for r in routes),
-            "hold": sum(r["status"] == "HOLD" for r in routes),
-            "kill": sum(r["status"] == "KILL" for r in routes),
+        "formal_evidence": {
+            "stage_a_lab_commit": "cd41ae7ca50f5cb1968010328603f226a0638a4b",
+            "source_commit": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538",
+            "stage_b_status": "PENDING_SOURCE_LOCKED_LEAN_AUDIT",
         },
-        "scaling_search": {k: discovery[k] for k in ("candidate_count", "promoted", "held", "killed")},
+        "cutoff_atlas": {
+            "scenario_count": len(cutoff_atlas["scenarios"]),
+            "hard_findings": cutoff_atlas["hard_findings"],
+            "naive_uncut_clamped_reuse": cutoff_atlas["naive_uncut_clamped_reuse"],
+        },
+        "enlarged_interval": {
+            "candidate": enlarged["candidate"],
+            "formalization_queue": enlarged["formalization_queue"],
+            "first_unresolved_after_source_reuse": enlarged["first_unresolved_after_source_reuse"],
+        },
+        "one_pulse_extension": {
+            "first_active_gate": one_pulse["first_active_gate"],
+            "killed_lineages": one_pulse["killed_lineages"],
+            "next_candidate": one_pulse["next_candidate"],
+        },
+        "enlarged_primary_control": {
+            "parameters": enlarged_control["parameters"],
+            "derived": enlarged_control["derived"],
+            "formal_evidence": enlarged_control["formal_evidence"],
+            "scientific_update": enlarged_control["scientific_update"],
+        },
+        "post_localization_residual": {
+            "exact_identity": primary_layers["exact_identity"],
+            "psi_one_counterfactual": primary_layers["psi_one_counterfactual"],
+            "next_question": primary_layers["next_question"],
+        },
         "h_relaxations": exact_h,
-        "pulse_localization": pulse_localization["hard_findings"],
-        "localization_obstruction": localization_obstruction["decision"],
-        "research_pivot": pulse_localization["research_pivot"],
+        "upstream_policy": {
+            "source_lock": "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538",
+            "lock_migrated": False,
+        },
         "next_blocker": (
-            "Map every cutoff-generated residual/source term and test a globally present Gaussian-small tail hierarchy; "
-            "in parallel trace the selected-construction dependency that keeps h at 1/1000 despite broader manuscript-range axis results."
+            "Finish the source-locked Stage-B Lean audit for the [0,3L/2] same-seed PrimaryODE.primary and native-slot "
+            "uniqueness bridge. If green, formalize the exact 3/2 spectral-gap and Gaussian-envelope lemmas, replay "
+            "PrimaryODE.primary_bounds under an explicit enlarged-gap cone condition, then extend FrameData.Kinematics "
+            "and evaluate constructedGood at psi=1 before any two-pulse experiment."
         ),
         "certificate_dag": cert,
     }
-    dump(outdir / "v550_report.json", report)
+    dump(outdir / "v560_report.json", report)
     return report
 
 
 def main() -> None:
     p = argparse.ArgumentParser()
-    p.add_argument("--out", type=Path, default=Path("artifacts/v550"))
+    p.add_argument("--out", type=Path, default=Path("artifacts/v560"))
     args = p.parse_args()
     report = run(args.out)
     print(json.dumps(report, indent=2, sort_keys=True))
