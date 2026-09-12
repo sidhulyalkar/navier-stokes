@@ -68,7 +68,8 @@ theorem schedule_smallness_mono_gain
   intro j hj m hm q hq hqa
   have haj : (1 : ℝ) ≤ (a j : ℝ) := by exact_mod_cast ha j
   have hrecip : (1 : ℝ) / (a j : ℝ) ≤ 1 := by
-    simpa only [one_div] using inv_le_one₀ (by positivity) haj
+    rw [one_div, inv_le_one₀]
+    exact haj
   have hq1 : q ≤ 1 := hqa.trans hrecip
   have hhalf : g j / 2 ≤ g' j / 2 := by
     exact div_le_div_of_nonneg_right (hgain j hj) (by norm_num)
