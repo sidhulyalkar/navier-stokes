@@ -25,7 +25,8 @@ open NavierStokes.ActualInitialization
 
 /-- The source's zero-mean nonlinear residual theorem admits the full `9/10`
 linear gain because, at the actual primary velocity exponent `1/2`, its
-quadratic ceiling is `2*(1/2) - kappa = 9/10`. -/
+quadratic ceiling is `2*(1/2) - kappa`, which is strictly larger than `9/10`
+for the pinned `ChartScales.kappa = 1/100000`. -/
 theorem zeroMean_residual_nine_tenths
     {B N0 : ℕ}
     (hprimary : UniformVelocity strip envelope (1/2) (primaryBlock (B := B) (N0 := N0)))
@@ -96,10 +97,14 @@ theorem initial_residual_uniform_of_primary_nine_tenths
     (fun _ _ _ => by simpa using (HarmonicResidual.band_zero 0 (D := Point)))
     hzero (by norm_num)
 
-/-- The two source ceilings that govern the propagation are exactly saturated
-at the actual parameters. -/
-theorem nonlinear_ceiling_nine_tenths :
-    (9/10 : ℝ) = (1/2) + (1/2) - ChartScales.kappa := by
+/-- The nonlinear propagation ceiling has strict slack at the pinned source
+parameter, while the mean-stage ceiling is exactly saturated at `9/10`. -/
+theorem nonlinear_ceiling_strictly_above_nine_tenths :
+    (9/10 : ℝ) < (1/2) + (1/2) - ChartScales.kappa := by
+  norm_num [ChartScales.kappa]
+
+theorem nonlinear_ceiling_slack :
+    ((1/2 : ℝ) + (1/2) - ChartScales.kappa) - (9/10) = 9999 / 100000 := by
   norm_num [ChartScales.kappa]
 
 theorem mean_stage_ceiling_nine_tenths :
