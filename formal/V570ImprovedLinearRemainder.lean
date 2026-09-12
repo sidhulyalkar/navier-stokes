@@ -148,7 +148,7 @@ theorem viscousRemainder_mem_improved
     (frequency_mul (real_mul_complex (unweighted_mul (h.normal 1) h.inverse_radius) (hJ i))
       h.frequency_scale) 2
   have hDrr' := hDrr.mono_exponent
-    (show α - 1 / 2 - κ ≤ (α - κ) - κ by linarith)
+    (show α - 1 / 2 - κ ≤ (α - κ) - κ by linarith [hκ])
   have hri' := hri.mono_exponent
     (show α - 1 / 2 - κ ≤ 0 + (α - κ) by linarith)
   have hDzz' := hDzz.mono_exponent
