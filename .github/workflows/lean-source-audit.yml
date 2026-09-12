@@ -86,7 +86,7 @@ jobs:
       - name: Build initializer dependency closure
         run: |
           cd upstream
-          ~/.elan/bin/lake build NavierStokes.ActualInitialMean
+          ~/.elan/bin/lake build NavierStokes.ActualInitialization NavierStokes.ActualInitialMean
       - name: Compile Stage G nonlinear residual propagation
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V570InitialResidualPropagation.lean
       - name: Compile Stage I three-gate invariant promotion
