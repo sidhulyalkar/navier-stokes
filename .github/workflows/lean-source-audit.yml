@@ -134,6 +134,18 @@ jobs:
           cat lean-stage-h.txt
           exit 0
 
+      - name: Compile Stage I three-gate invariant promotion
+        shell: bash
+        run: |
+          set +e
+          cd upstream
+          ~/.elan/bin/lake env lean ../formal/V570InitialInvariantPromotion.lean > ../lean-stage-i.txt 2>&1
+          status=$?
+          cd ..
+          printf '%s\n' "$status" > lean-stage-i.status
+          cat lean-stage-i.txt
+          exit 0
+
       - name: Publish Lean diagnostic to current PR
         if: always() && github.event_name == 'pull_request'
         shell: bash
@@ -162,11 +174,12 @@ jobs:
             echo "- Stage F improved linear remainder: $(result f)"
             echo "- Stage G nonlinear initialization propagation: $(result g)"
             echo "- Stage H localized retained-good sharpening: $(result h)"
+            echo "- Stage I three-gate invariant promotion: $(result i)"
             echo
             echo "Pinned source: \`openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538\`"
             echo "Toolchain: \`leanprover/lean4:v4.34.0-rc2\`"
             echo "Workflow commit: \`${GITHUB_SHA}\`"
-            for stage in c d e f g h; do
+            for stage in c d e f g h i; do
               echo
               echo "<details><summary>Stage ${stage^^} compiler output</summary>"
               echo
@@ -197,7 +210,7 @@ jobs:
         run: |
           set -euo pipefail
           failed=0
-          for stage in c d e f g h; do
+          for stage in c d e f g h i; do
             file="lean-stage-${stage}.status"
             if [ ! -f "$file" ]; then
               echo "Stage ${stage^^}: missing status file"
