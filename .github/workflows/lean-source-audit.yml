@@ -63,7 +63,6 @@ jobs:
           ~/.elan/bin/lake build NavierStokes.BasePhaseGeometry NavierStokes.WaveEnvelopeTransport NavierStokes.LinearWaveBounds NavierStokes.ActualInitialization
 
       - name: Compile Stage C enlarged-primary theorem
-        id: stage_c
         shell: bash
         run: |
           set +e
@@ -71,12 +70,11 @@ jobs:
           ~/.elan/bin/lake env lean ../formal/V560EnlargedInterval.lean > ../lean-stage-c.txt 2>&1
           status=$?
           cd ..
-          echo "status=$status" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$status" > lean-stage-c.status
           cat lean-stage-c.txt
           exit 0
 
       - name: Compile Stage D delayed-cutoff geometry
-        id: stage_d
         shell: bash
         run: |
           set +e
@@ -84,12 +82,11 @@ jobs:
           ~/.elan/bin/lake env lean ../formal/V560DelayedRightCutoff.lean > ../lean-stage-d.txt 2>&1
           status=$?
           cd ..
-          echo "status=$status" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$status" > lean-stage-d.status
           cat lean-stage-d.txt
           exit 0
 
       - name: Compile Stage E enlarged-frame kinematics
-        id: stage_e
         shell: bash
         run: |
           set +e
@@ -97,12 +94,11 @@ jobs:
           ~/.elan/bin/lake env lean ../formal/V560EnlargedKinematics.lean > ../lean-stage-e.txt 2>&1
           status=$?
           cd ..
-          echo "status=$status" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$status" > lean-stage-e.status
           cat lean-stage-e.txt
           exit 0
 
       - name: Compile Stage F improved linear remainder theorem
-        id: stage_f
         shell: bash
         run: |
           set +e
@@ -110,12 +106,11 @@ jobs:
           ~/.elan/bin/lake env lean ../formal/V570ImprovedLinearRemainder.lean > ../lean-stage-f.txt 2>&1
           status=$?
           cd ..
-          echo "status=$status" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$status" > lean-stage-f.status
           cat lean-stage-f.txt
           exit 0
 
       - name: Compile Stage G nonlinear initialization propagation
-        id: stage_g
         shell: bash
         run: |
           set +e
@@ -123,7 +118,7 @@ jobs:
           ~/.elan/bin/lake env lean ../formal/V570InitialResidualPropagation.lean > ../lean-stage-g.txt 2>&1
           status=$?
           cd ..
-          echo "status=$status" >> "$GITHUB_OUTPUT"
+          printf '%s\n' "$status" > lean-stage-g.status
           cat lean-stage-g.txt
           exit 0
 
@@ -133,24 +128,27 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          STAGE_C: ${{ steps.stage_c.outputs.status }}
-          STAGE_D: ${{ steps.stage_d.outputs.status }}
-          STAGE_E: ${{ steps.stage_e.outputs.status }}
-          STAGE_F: ${{ steps.stage_f.outputs.status }}
-          STAGE_G: ${{ steps.stage_g.outputs.status }}
         run: |
           set -euo pipefail
           marker='<!-- lean-source-audit -->'
-          result() { [ "$1" = "0" ] && printf '✅ PASS' || printf '❌ FAIL'; }
+          result() {
+            local stage="$1"
+            local file="lean-stage-${stage}.status"
+            if [ -f "$file" ] && [ "$(cat "$file")" = "0" ]; then
+              printf '✅ PASS'
+            else
+              printf '❌ FAIL'
+            fi
+          }
           {
             echo "$marker"
             echo "### Source-locked Lean audit"
             echo
-            echo "- Stage C enlarged primary: $(result "$STAGE_C")"
-            echo "- Stage D delayed cutoff geometry: $(result "$STAGE_D")"
-            echo "- Stage E enlarged frame kinematics: $(result "$STAGE_E")"
-            echo "- Stage F improved linear remainder: $(result "$STAGE_F")"
-            echo "- Stage G nonlinear initialization propagation: $(result "$STAGE_G")"
+            echo "- Stage C enlarged primary: $(result c)"
+            echo "- Stage D delayed cutoff geometry: $(result d)"
+            echo "- Stage E enlarged frame kinematics: $(result e)"
+            echo "- Stage F improved linear remainder: $(result f)"
+            echo "- Stage G nonlinear initialization propagation: $(result g)"
             echo
             echo "Pinned source: \`openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538\`"
             echo "Toolchain: \`leanprover/lean4:v4.34.0-rc2\`"
@@ -160,7 +158,11 @@ jobs:
               echo "<details><summary>Stage ${stage^^} compiler output</summary>"
               echo
               echo '```text'
-              tail -n 120 "lean-stage-${stage}.txt"
+              if [ -f "lean-stage-${stage}.txt" ]; then
+                tail -n 120 "lean-stage-${stage}.txt"
+              else
+                echo '<compiler stage did not produce a log>'
+              fi
               echo '```'
               echo '</details>'
             done
@@ -179,17 +181,20 @@ jobs:
       - name: Enforce Lean result
         if: always()
         shell: bash
-        env:
-          STAGE_C: ${{ steps.stage_c.outputs.status }}
-          STAGE_D: ${{ steps.stage_d.outputs.status }}
-          STAGE_E: ${{ steps.stage_e.outputs.status }}
-          STAGE_F: ${{ steps.stage_f.outputs.status }}
-          STAGE_G: ${{ steps.stage_g.outputs.status }}
         run: |
           set -euo pipefail
-          printf 'Stage statuses: C=%s D=%s E=%s F=%s G=%s\n' "$STAGE_C" "$STAGE_D" "$STAGE_E" "$STAGE_F" "$STAGE_G"
-          test "$STAGE_C" = "0"
-          test "$STAGE_D" = "0"
-          test "$STAGE_E" = "0"
-          test "$STAGE_F" = "0"
-          test "$STAGE_G" = "0"
+          failed=0
+          for stage in c d e f g; do
+            file="lean-stage-${stage}.status"
+            if [ ! -f "$file" ]; then
+              echo "Stage ${stage^^}: missing status file"
+              failed=1
+              continue
+            fi
+            status="$(cat "$file")"
+            echo "Stage ${stage^^}: exit status $status"
+            if [ "$status" != "0" ]; then
+              failed=1
+            fi
+          done
+          test "$failed" = "0"
