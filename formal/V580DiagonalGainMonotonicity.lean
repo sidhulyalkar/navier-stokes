@@ -41,7 +41,7 @@ theorem abs_logPowerWeight_mono_exponent
     (mul_nonneg (abs_nonneg C) (abs_nonneg ((1 + |Real.log q|) ^ p)))
 
 /-- Any scalar smallness certificate proved for exponent `r` is automatically
-valid for a larger exponent `r'` on `0 < q <= 1`. -/
+valid for a larger exponent `r'` on `0 < q ≤ 1`. -/
 theorem smallness_mono_exponent
     {C p r r' q ε : ℝ} (hq : 0 < q) (hq1 : q ≤ 1) (hrr : r ≤ r')
     (hsmall : |logPowerWeight C p r q| ≤ ε) :
@@ -67,8 +67,9 @@ theorem schedule_smallness_mono_gain
         |logPowerWeight (C j m) (p j m) (g' j / 2) q| ≤ (1 / 2 : ℝ) ^ j := by
   intro j hj m hm q hq hqa
   have haj : (1 : ℝ) ≤ (a j : ℝ) := by exact_mod_cast ha j
+  have hajpos : (0 : ℝ) < (a j : ℝ) := lt_of_lt_of_le zero_lt_one haj
   have hrecip : (1 : ℝ) / (a j : ℝ) ≤ 1 := by
-    rw [one_div, inv_le_one₀]
+    rw [one_div, inv_le_one₀ hajpos]
     exact haj
   have hq1 : q ≤ 1 := hqa.trans hrecip
   have hhalf : g j / 2 ≤ g' j / 2 := by
