@@ -96,7 +96,7 @@ theorem pressureGradient_mem_improved
   · simpa [LinearWaveResidual.strippedPressureGradient] using
       (LocalClass.zero (α := α + 1 / 2 - κ) (E := ℂ) (h.amplitude 0).weight_nonneg)
   · have hh := (Dz_mem d h.pressure).mono_exponent
-      (show α + 1 / 2 - κ ≤ (α + 1 / 2) + 1 by linarith)
+      (show α + 1 / 2 - κ ≤ (α + 1 / 2) + 1 by linarith [h.loss_nonneg])
     simp [LinearWaveResidual.strippedPressureGradient] at hh ⊢
     exact hh
 
@@ -137,7 +137,7 @@ theorem viscousRemainder_mem_improved
       (real_mul_complex (unweighted_mul (h.normal_component 1) h.inverse_radius) (hJ j))
       h.frequency_scale) 2
   have hDrr' := hDrr.mono_exponent
-    (show α - 1 / 2 - κ ≤ (α - κ) - κ by linarith)
+    (show α - 1 / 2 - κ ≤ (α - κ) - κ by linarith [hκ])
   have hri' := hri.mono_exponent
     (show α - 1 / 2 - κ ≤ 0 + (α - κ) by linarith)
   have hDzz' := hDzz.mono_exponent
