@@ -13,9 +13,9 @@ constant and the filter-large carrier on which the estimate is known.  Those
 hidden choices must be exposed before one can make honest quantitative
 comparisons between two gain certificates.
 
-This file adds only a lossless interface.  It does **not** define a standard
-force norm, does not choose a canonical/minimal constant, and does not claim a
-smaller force.
+This file adds only a lossless interface plus constant-preserving algebra.  It
+does **not** define a standard force norm, does not choose a canonical/minimal
+constant, and does not claim a smaller force.
 -/
 
 noncomputable section
@@ -134,6 +134,58 @@ def weaken {l : Filter D} {q : D → ℝ} {f : D → V} {m : ℕ} {r s : ℝ}
     (W : QuantitativeJetRate l q f m r)
     (hq : ∀ x ∈ W.carrier, 0 < q x ∧ q x ≤ 1) (hsr : s ≤ r) :
     (W.weaken hq hsr).constant = W.constant := rfl
+
+/-- Transfer a quantitative certificate across an equality on an open set.
+The carrier is intersected with that set and the constant is unchanged. -/
+def congrOn {l : Filter D} {q : D → ℝ} {f g : D → V} {m : ℕ} {r : ℝ}
+    (W : QuantitativeJetRate l q f m r) {U : Set D}
+    (hU : IsOpen U) (hlU : U ∈ l) (hfg : EqOn f g U) :
+    QuantitativeJetRate l q g m r where
+  carrier := W.carrier ∩ U
+  carrier_mem := inter_mem W.carrier_mem hlU
+  constant := W.constant
+  constant_nonneg := W.constant_nonneg
+  bound := by
+    intro x hx
+    rw [← ResidualStability.iteratedFDeriv_eqOn hU hfg m hx.2]
+    exact W.bound x hx.1
+
+@[simp] theorem congrOn_constant
+    {l : Filter D} {q : D → ℝ} {f g : D → V} {m : ℕ} {r : ℝ}
+    (W : QuantitativeJetRate l q f m r) {U : Set D}
+    (hU : IsOpen U) (hlU : U ∈ l) (hfg : EqOn f g U) :
+    (W.congrOn hU hlU hfg).constant = W.constant := rfl
+
+/-- Add two quantitative certificates without losing their constants to a new
+existential choice.  The common carrier is their intersection with the open
+smoothness domain, and the resulting constant is literally `C_f + C_g`. -/
+def add {l : Filter D} {q : D → ℝ} {f g : D → V} {m : ℕ} {r : ℝ}
+    (Wf : QuantitativeJetRate l q f m r)
+    (Wg : QuantitativeJetRate l q g m r) {U : Set D}
+    (hU : IsOpen U) (hlU : U ∈ l)
+    (hsf : ContDiffOn ℝ ∞ f U) (hsg : ContDiffOn ℝ ∞ g U) :
+    QuantitativeJetRate l q (fun x => f x + g x) m r where
+  carrier := (Wf.carrier ∩ Wg.carrier) ∩ U
+  carrier_mem := inter_mem (inter_mem Wf.carrier_mem Wg.carrier_mem) hlU
+  constant := Wf.constant + Wg.constant
+  constant_nonneg := add_nonneg Wf.constant_nonneg Wg.constant_nonneg
+  bound := by
+    intro x hx
+    calc
+      ‖iteratedFDeriv ℝ m (fun y => f y + g y) x‖ ≤
+          ‖iteratedFDeriv ℝ m f x‖ + ‖iteratedFDeriv ℝ m g x‖ :=
+        ResidualStability.norm_jet_add_le hU hsf hsg hx.2 m
+      _ ≤ Wf.constant * (q x) ^ r + Wg.constant * (q x) ^ r :=
+        add_le_add (Wf.bound x hx.1.1) (Wg.bound x hx.1.2)
+      _ = (Wf.constant + Wg.constant) * (q x) ^ r := by ring
+
+@[simp] theorem add_constant
+    {l : Filter D} {q : D → ℝ} {f g : D → V} {m : ℕ} {r : ℝ}
+    (Wf : QuantitativeJetRate l q f m r)
+    (Wg : QuantitativeJetRate l q g m r) {U : Set D}
+    (hU : IsOpen U) (hlU : U ∈ l)
+    (hsf : ContDiffOn ℝ ∞ f U) (hsg : ContDiffOn ℝ ∞ g U) :
+    (Wf.add Wg hU hlU hsf hsg).constant = Wf.constant + Wg.constant := rfl
 
 /-- Forgetting the explicit data recovers exactly a source `JetRate`. -/
 theorem jetRate {l : Filter D} {q : D → ℝ} {f : D → V} {m : ℕ} {r : ℝ}
