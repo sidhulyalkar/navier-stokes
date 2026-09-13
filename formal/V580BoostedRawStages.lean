@@ -102,7 +102,7 @@ theorem potential_bound_boosted (H : D.Metadata κ) (Q : D.ValidScale qbig)
       ‖iteratedFDeriv ℝ m (D.potential k) w‖ ≤ C * PhysicalWaveSum.physicalQ h w ^
         (boostedGain h κ (k + 1) - PhysicalStageBounds.potentialLoss h h 0 m) :=
   potentialIncrement_bound
-    (D.particular k) (D.signed k) (D.temporal k) (D.rank k)
+    (D.particularPotential k) (D.signedPotential k) (D.temporal k) (D.rank k)
     hh hh1 (Q.temporal k) (Q.rank k)
     (potential_gain_boosted hh.le (H.particularPotential k) (H.particularPotentialShift k))
     (potential_gain_boosted hh.le (H.signedPotential k) (H.signedPotentialShift k))
@@ -118,7 +118,7 @@ theorem direct_bound_boosted (H : D.Metadata κ) (Q : D.ValidScale qbig)
       ‖iteratedFDeriv ℝ m (D.direct k) w‖ ≤ C * PhysicalWaveSum.physicalQ h w ^
         (boostedGain h κ (k + 1) - PhysicalStageBounds.directLoss h 0 m) :=
   (D.angular k).angular_bound_with_gain hh hh1 (Q.angular k)
-    (mean_gain_boosted hh.le hκ (H.angular k)) m
+    (by simpa using mean_gain_boosted hh.le hκ (H.angular k)) m
 
 /-- Same literal pressure increment at the boosted common gain. -/
 theorem pressure_bound_boosted (H : D.Metadata κ) (Q : D.ValidScale qbig)
@@ -132,11 +132,11 @@ theorem pressure_bound_boosted (H : D.Metadata κ) (Q : D.ValidScale qbig)
   pressureIncrement_bound
     (D.particularPressure k) (D.signedPressure k) (D.pressure k)
     hh hh1 (Q.pressure k)
-    (pressure_gain_boosted hh.le k
+    (pressure_gain_boosted hh.le
       (H.particularPressure k) (H.particularPressureShift k))
-    (pressure_gain_boosted hh.le k
+    (pressure_gain_boosted hh.le
       (H.signedPressure k) (H.signedPressureShift k))
-    (mean_gain_boosted hh.le hκ k (H.pressure k)) m
+    (mean_gain_boosted hh.le hκ (H.pressure k)) m
 
 /-- Exact representation identities transfer the boosted positive-stage bounds
 to the same literal candidate stage families.  Index zero is deliberately
