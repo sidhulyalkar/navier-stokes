@@ -5,10 +5,12 @@ on:
     branches: ["research/v5.9.0-force-size-bridge"]
     paths:
       - "formal/V590QuantitativeJetRate.lean"
+      - "formal/V590EndpointActivationBridge.lean"
       - ".github/workflows/v590-quantitative-jet-rate-audit.yml"
   pull_request:
     paths:
       - "formal/V590QuantitativeJetRate.lean"
+      - "formal/V590EndpointActivationBridge.lean"
       - ".github/workflows/v590-quantitative-jet-rate-audit.yml"
   workflow_dispatch:
 
@@ -21,7 +23,7 @@ permissions:
 
 jobs:
   quantitative-jet-rate:
-    name: v5.9 quantitative JetRate witness
+    name: v5.9 quantitative JetRate + endpoint activation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -47,9 +49,11 @@ jobs:
           lint: false
           use-github-cache: true
           use-mathlib-cache: true
-      - name: Build JetRate dependency closure
+      - name: Build endpoint residual dependency closure
         run: |
           cd upstream
-          ~/.elan/bin/lake build NavierStokes.DiagonalResidual
+          ~/.elan/bin/lake build NavierStokes.DiagonalResidual NavierStokes.TimeLocalization NavierStokes.SpacetimeEndpoint
       - name: Compile v5.9 quantitative JetRate witness
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V590QuantitativeJetRate.lean
+      - name: Compile v5.9 source-endpoint activation bridge
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V590EndpointActivationBridge.lean
