@@ -102,7 +102,7 @@ theorem potential_bound_boosted {L : ℕ → ℝ}
       (V580GluedSignedMeanSlack.signedMeanPotential_bound_boosted R M hN W hq j m)
 
 /-- Pressure analogue of `potential_bound_boosted`. -/
-theorem pressure_bound_boosted {L : ℕ → ℝ}
+theorem pressure_bound_boosted {LP : ℕ → ℝ}
     (hq : qbig ≤ ChartScales.Q N)
     (hs : ∀ j, ContDiffOn ℝ ∞ (particularP j) (CutStageEstimates.physicalSublevel h qbig))
     (hb : ∀ j m, GluedStageEstimates.Bound qbig (particularP j) m
