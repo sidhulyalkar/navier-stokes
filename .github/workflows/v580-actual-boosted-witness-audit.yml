@@ -1,0 +1,74 @@
+name: v5.8-actual-boosted-witness-audit
+
+on:
+  push:
+    branches: ["research/v5.8.0-boosted-glued-stage-estimates"]
+    paths:
+      - "formal/V580GluedParticularSlack.lean"
+      - "formal/V580GluedSignedMeanSlack.lean"
+      - "formal/V580BoostedGluedStageEstimates.lean"
+      - "formal/V580ActualBoostedCandidate.lean"
+      - "formal/V580ActualBoostedWitness.lean"
+      - ".github/workflows/v580-actual-boosted-witness-audit.yml"
+  pull_request:
+    paths:
+      - "formal/V580GluedParticularSlack.lean"
+      - "formal/V580GluedSignedMeanSlack.lean"
+      - "formal/V580BoostedGluedStageEstimates.lean"
+      - "formal/V580ActualBoostedCandidate.lean"
+      - "formal/V580ActualBoostedWitness.lean"
+      - ".github/workflows/v580-actual-boosted-witness-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  actual-boosted-witness:
+    name: v5.8 actual boosted witness assembly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+      - name: Verify source lock
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+      - name: Build actual-candidate dependency closure
+        run: |
+          cd upstream
+          ~/.elan/bin/lake build NavierStokes.ActualCandidateAssembly
+      - name: Install v5.8 research modules
+        run: |
+          cp formal/V580GluedParticularSlack.lean upstream/NavierStokes/V580GluedParticularSlack.lean
+          cp formal/V580GluedSignedMeanSlack.lean upstream/NavierStokes/V580GluedSignedMeanSlack.lean
+          cp formal/V580BoostedGluedStageEstimates.lean upstream/NavierStokes/V580BoostedGluedStageEstimates.lean
+          cp formal/V580ActualBoostedCandidate.lean upstream/NavierStokes/V580ActualBoostedCandidate.lean
+          cd upstream
+          ~/.elan/bin/lake env lean NavierStokes/V580GluedParticularSlack.lean
+          ~/.elan/bin/lake env lean NavierStokes/V580GluedSignedMeanSlack.lean
+          ~/.elan/bin/lake env lean NavierStokes/V580BoostedGluedStageEstimates.lean
+          ~/.elan/bin/lake env lean NavierStokes/V580ActualBoostedCandidate.lean
+      - name: Compile boosted actual witness assembly
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V580ActualBoostedWitness.lean
