@@ -84,22 +84,29 @@ theorem stageAdmissible_mono_gain
   have hweight :
       |DiagonalScale.logPowerWeight (C j m) (p j m) (gStrong j / 2) q| ≤
         |DiagonalScale.logPowerWeight (C j m) (p j m) (gWeak j / 2) q| := by
-    rw [DiagonalScale.logPowerWeight, DiagonalScale.logPowerWeight]
-    rw [abs_mul, abs_mul,
-      abs_of_nonneg (Real.rpow_nonneg hq.le _),
-      abs_of_nonneg (Real.rpow_nonneg hq.le _)]
-    exact mul_le_mul_of_nonneg_left hpow (abs_nonneg _)
+    unfold DiagonalScale.logPowerWeight
+    calc
+      |C j m * (1 + |Real.log q|) ^ p j m * q ^ (gStrong j / 2)| =
+          |C j m * (1 + |Real.log q|) ^ p j m| * q ^ (gStrong j / 2) := by
+            rw [abs_mul, abs_of_nonneg (Real.rpow_nonneg hq.le _)]
+      _ ≤ |C j m * (1 + |Real.log q|) ^ p j m| * q ^ (gWeak j / 2) :=
+        mul_le_mul_of_nonneg_left hpow (abs_nonneg _)
+      _ = |C j m * (1 + |Real.log q|) ^ p j m * q ^ (gWeak j / 2)| := by
+        rw [abs_mul, abs_of_nonneg (Real.rpow_nonneg hq.le _)]
   exact hweight.trans (hweak hj m hm q hq hqb)
 
 /-- Least local integer scale satisfying the exact pinned numerical obligation. -/
-def leastLocalScale (C p : ℕ → ℕ → ℝ) (g : ℕ → ℝ)
-    (hg : ∀ j, 1 ≤ j → 0 < g j) (B j : ℕ) : ℕ :=
-  Nat.find (exists_stageAdmissible C p g hg B j)
+noncomputable def leastLocalScale (C p : ℕ → ℕ → ℝ) (g : ℕ → ℝ)
+    (hg : ∀ j, 1 ≤ j → 0 < g j) (B j : ℕ) : ℕ := by
+  classical
+  exact Nat.find (exists_stageAdmissible C p g hg B j)
 
 theorem leastLocalScale_spec (C p : ℕ → ℕ → ℝ) (g : ℕ → ℝ)
     (hg : ∀ j, 1 ≤ j → 0 < g j) (B j : ℕ) :
-    StageAdmissible C p g B j (leastLocalScale C p g hg B j) :=
-  Nat.find_spec (exists_stageAdmissible C p g hg B j)
+    StageAdmissible C p g B j (leastLocalScale C p g hg B j) := by
+  classical
+  unfold leastLocalScale
+  exact Nat.find_spec (exists_stageAdmissible C p g hg B j)
 
 /-- Pointwise gain improvement can only decrease the least admissible local
 scale. -/
@@ -111,9 +118,11 @@ theorem leastLocalScale_mono_gain
     (B j : ℕ) :
     leastLocalScale C p gStrong hStrong B j ≤
       leastLocalScale C p gWeak hWeak B j := by
+  classical
+  unfold leastLocalScale
   apply Nat.find_min'
   exact stageAdmissible_mono_gain C p (hgain j)
-    (leastLocalScale_spec C p gWeak hWeak B j)
+    (Nat.find_spec (exists_stageAdmissible C p gWeak hWeak B j))
 
 /-- The source doubling envelope is monotone in its local-scale input. -/
 theorem doublingEnvelope_mono {b c : ℕ → ℕ}
@@ -171,7 +180,7 @@ theorem canonicalSchedule_spec
 initial floor fixed, pointwise stronger gain yields a pointwise no-larger
 canonical cutoff schedule. -/
 theorem canonicalSchedule_mono_gain
-    (C p : ℕ → ℕ → ℝ) {gWeak gStrong : ℕ → ℝ}
+    (C p : ℕ → ℕ → ℝ) {gWeak gStrong : ℕ → ℕ → ℝ}
     (hWeak : ∀ j, 1 ≤ j → 0 < gWeak j)
     (hStrong : ∀ j, 1 ≤ j → 0 < gStrong j)
     (hgain : ∀ j, 1 ≤ j → gWeak j ≤ gStrong j)
