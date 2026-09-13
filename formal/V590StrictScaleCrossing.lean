@@ -42,7 +42,8 @@ theorem leastLocalScale_lt_iff_exists_admissible_below
     have hmin : leastLocalScale C p g hg B j ≤ b := by
       classical
       unfold leastLocalScale
-      exact Nat.find_min' hb
+      apply Nat.find_min'
+      exact hb
     exact lt_of_le_of_lt hmin hbt
 
 /-- Q1-strict characterization.  A stronger certificate genuinely changes the
