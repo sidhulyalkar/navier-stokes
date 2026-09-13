@@ -1,4 +1,5 @@
 import NavierStokes.DiagonalResidual
+import NavierStokes.TimeLocalization
 
 /-!
 # v5.9: explicit quantitative witnesses behind `JetRate`
@@ -22,7 +23,7 @@ noncomputable section
 
 namespace NavierStokes.V590QuantitativeJetRate
 
-open Set Filter Function
+open Set Filter Function ProblemStatement
 open scoped Topology BigOperators ContDiff
 
 variable {D V : Type*}
@@ -194,5 +195,53 @@ theorem jetRate {l : Filter D} {q : D → ℝ} {f : D → V} {m : ℕ} {r : ℝ}
   nonempty_quantitativeJetRate_iff_jetRate.mp ⟨W⟩
 
 end QuantitativeJetRate
+
+/-! ## Terminal activation bridge -/
+
+/-- The open plateau on which the pinned time switch is identically one. -/
+def terminalPlateau : Set SpaceTime := {z | (3 / 4 : ℝ) < z.1}
+
+theorem terminalPlateau_open : IsOpen terminalPlateau := by
+  change IsOpen (Prod.fst ⁻¹' Ioi (3 / 4 : ℝ))
+  exact isOpen_Ioi.preimage continuous_fst
+
+/-- Incoming presingular Navier--Stokes residual, as a spacetime field. -/
+def incomingResidual (u : VelocityField) (p : PressureField) : VelocityField :=
+  fun z => navierStokesResidual u p z.1 z.2
+
+/-- Residual after the source's time activation, before later force extension. -/
+def activatedResidual (u : VelocityField) (p : PressureField) : VelocityField :=
+  fun z => navierStokesResidual (TimeLocalization.activatedVelocity u)
+    (TimeLocalization.activatedPressure p) z.1 z.2
+
+/-- On the terminal plateau the activation changes no residual at all. -/
+theorem incomingResidual_eq_activatedResidual_on_terminal
+    (u : VelocityField) (p : PressureField) :
+    EqOn (incomingResidual u p) (activatedResidual u p) terminalPlateau := by
+  intro z hz
+  change (3 / 4 : ℝ) < z.1 at hz
+  exact (TimeLocalization.activated_residual_eq_late u p hz z.2).symm
+
+/-- Any explicit endpoint residual certificate transfers to the activated
+residual on the terminal plateau with the **same constant**.  Only the carrier
+is intersected with `t > 3/4`.
+
+This is the first quantitative force-pipeline bridge.  It is still not a
+standard force norm and says nothing about the earlier activation interval. -/
+def quantitativeActivatedResidualOfTerminal
+    {l : Filter SpaceTime} {q : SpaceTime → ℝ} {m : ℕ} {r : ℝ}
+    (u : VelocityField) (p : PressureField)
+    (W : QuantitativeJetRate l q (incomingResidual u p) m r)
+    (hlate : terminalPlateau ∈ l) :
+    QuantitativeJetRate l q (activatedResidual u p) m r :=
+  W.congrOn terminalPlateau_open hlate
+    (incomingResidual_eq_activatedResidual_on_terminal u p)
+
+@[simp] theorem quantitativeActivatedResidualOfTerminal_constant
+    {l : Filter SpaceTime} {q : SpaceTime → ℝ} {m : ℕ} {r : ℝ}
+    (u : VelocityField) (p : PressureField)
+    (W : QuantitativeJetRate l q (incomingResidual u p) m r)
+    (hlate : terminalPlateau ∈ l) :
+    (quantitativeActivatedResidualOfTerminal u p W hlate).constant = W.constant := rfl
 
 end NavierStokes.V590QuantitativeJetRate
