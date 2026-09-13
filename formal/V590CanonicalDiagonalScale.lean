@@ -92,6 +92,7 @@ theorem stageAdmissible_mono_gain
       _ ≤ |C j m * (1 + |Real.log q|) ^ p j m| * q ^ (gWeak j / 2) :=
         mul_le_mul_of_nonneg_left hpow (abs_nonneg _)
       _ = |C j m * (1 + |Real.log q|) ^ p j m * q ^ (gWeak j / 2)| := by
+        symm
         rw [abs_mul, abs_of_nonneg (Real.rpow_nonneg hq.le _)]
   exact hweight.trans (hweak hj m hm q hq hqb)
 
