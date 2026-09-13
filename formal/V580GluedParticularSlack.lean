@@ -49,6 +49,8 @@ section ActualRun
 variable {B N0 N : ℕ}
   (R : ActualStageEstimates.RunData B N0)
 
+include R
+
 /-- The exact glued current-particular potential field supports the common
 v5.8 boost. -/
 theorem current_potential_bound_boosted
