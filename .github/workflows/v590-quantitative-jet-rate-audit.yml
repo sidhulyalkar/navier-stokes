@@ -1,0 +1,69 @@
+name: v5.9-quantitative-jet-rate-audit
+
+on:
+  push:
+    branches: ["research/v5.9.0-integrated-force-size"]
+    paths:
+      - "formal/V590QuantitativeJetRate.lean"
+      - "formal/V590EndpointActivationBridge.lean"
+      - "formal/V590ExplicitDiagonalTail.lean"
+      - ".github/workflows/v590-quantitative-jet-rate-audit.yml"
+  pull_request:
+    paths:
+      - "formal/V590QuantitativeJetRate.lean"
+      - "formal/V590EndpointActivationBridge.lean"
+      - "formal/V590ExplicitDiagonalTail.lean"
+      - ".github/workflows/v590-quantitative-jet-rate-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quantitative-jet-rate:
+    name: v5.9 quantitative JetRate + endpoint bridge
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+      - name: Verify source lock
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+      - name: Build endpoint residual dependency closure
+        run: |
+          cd upstream
+          ~/.elan/bin/lake build NavierStokes.DiagonalResidual NavierStokes.TimeLocalization NavierStokes.SpacetimeEndpoint
+      - name: Install v5.9 quantitative JetRate module
+        run: |
+          cp formal/V590QuantitativeJetRate.lean upstream/NavierStokes/V590QuantitativeJetRate.lean
+          cd upstream
+          mkdir -p .lake/build/lib/lean/NavierStokes
+          ~/.elan/bin/lake env lean \
+            -o .lake/build/lib/lean/NavierStokes/V590QuantitativeJetRate.olean \
+            NavierStokes/V590QuantitativeJetRate.lean
+      - name: Compile v5.9 source-endpoint activation bridge
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V590EndpointActivationBridge.lean
+      - name: Compile v5.9 explicit diagonal-tail constant
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V590ExplicitDiagonalTail.lean
