@@ -55,8 +55,14 @@ jobs:
         run: |
           cd upstream
           ~/.elan/bin/lake build NavierStokes.DiagonalResidual NavierStokes.TimeLocalization NavierStokes.SpacetimeEndpoint
-      - name: Compile v5.9 quantitative JetRate witness
-        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V590QuantitativeJetRate.lean
+      - name: Install v5.9 quantitative JetRate module
+        run: |
+          cp formal/V590QuantitativeJetRate.lean upstream/NavierStokes/V590QuantitativeJetRate.lean
+          cd upstream
+          mkdir -p .lake/build/lib/lean/NavierStokes
+          ~/.elan/bin/lake env lean \
+            -o .lake/build/lib/lean/NavierStokes/V590QuantitativeJetRate.olean \
+            NavierStokes/V590QuantitativeJetRate.lean
       - name: Compile v5.9 source-endpoint activation bridge
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V590EndpointActivationBridge.lean
       - name: Compile v5.9 explicit diagonal-tail constant
