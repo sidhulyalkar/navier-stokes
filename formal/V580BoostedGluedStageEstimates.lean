@@ -1,4 +1,5 @@
 import NavierStokes.GluedStageEstimates
+import NavierStokes.ActualCycleResidualBounds
 import NavierStokes.V580GluedParticularSlack
 import NavierStokes.V580GluedSignedMeanSlack
 
@@ -98,21 +99,18 @@ theorem potential_bound_boosted {L : ℕ → ℝ}
       (sub_le_sub_left (le_max_left _ _) _) (hb j m)
   · exact weaken_bound outgoing.data.h_pos outgoing.data.h_lt_half
       (sub_le_sub_left (le_max_right _ _) _)
-      (by
-        simpa [boostedGain, boost,
-          V580GluedSignedMeanSlack.boostedGain, V580GluedSignedMeanSlack.boost]
-          using V580GluedSignedMeanSlack.signedMeanPotential_bound_boosted R M hN W hq j m)
+      (V580GluedSignedMeanSlack.signedMeanPotential_bound_boosted R M hN W hq j m)
 
 /-- Pressure analogue of `potential_bound_boosted`. -/
 theorem pressure_bound_boosted {L : ℕ → ℝ}
     (hq : qbig ≤ ChartScales.Q N)
     (hs : ∀ j, ContDiffOn ℝ ∞ (particularP j) (CutStageEstimates.physicalSublevel h qbig))
     (hb : ∀ j m, GluedStageEstimates.Bound qbig (particularP j) m
-      (boostedGain (j + 1) - L m))
+      (boostedGain (j + 1) - LP m))
     (j m : ℕ) :
     GluedStageEstimates.Bound qbig
       (GluedStageEstimates.pressure R M hN W particularP j) m
-      (boostedGain (j + 1) - GluedStageEstimates.pressureLoss L m) := by
+      (boostedGain (j + 1) - GluedStageEstimates.pressureLoss LP m) := by
   rw [GluedStageEstimates.pressure_eq]
   apply add_bounds outgoing.data.h_pos outgoing.data.h_lt_half (hs j)
     (GluedStageEstimates.signedMeanPressure_smooth R M hN W hq j)
@@ -120,10 +118,7 @@ theorem pressure_bound_boosted {L : ℕ → ℝ}
       (sub_le_sub_left (le_max_left _ _) _) (hb j m)
   · exact weaken_bound outgoing.data.h_pos outgoing.data.h_lt_half
       (sub_le_sub_left (le_max_right _ _) _)
-      (by
-        simpa [boostedGain, boost,
-          V580GluedSignedMeanSlack.boostedGain, V580GluedSignedMeanSlack.boost]
-          using V580GluedSignedMeanSlack.signedMeanPressure_bound_boosted R M hN W hq j m)
+      (V580GluedSignedMeanSlack.signedMeanPressure_bound_boosted R M hN W hq j m)
 
 variable
   (WA : PhysicalStageBounds.WaveData h DA0 IA0 KA0 (Fin 3))
@@ -160,10 +155,7 @@ theorem represented_raw_bounds_boosted {LA LP : ℕ → ℝ}
       (potential_bound_boosted R M hN W particularA hq hsA hbA j m))
   obtain ⟨CB, hCB, hb⟩ := raw_of_positive_bounds (fun j m =>
     bound_congr outgoing.data.h_pos outgoing.data.h_lt_half (e.direct_succ j)
-      (by
-        simpa [boostedGain, boost,
-          V580GluedSignedMeanSlack.boostedGain, V580GluedSignedMeanSlack.boost]
-          using V580GluedSignedMeanSlack.direct_bound_boosted R M hN W hq j m))
+      (V580GluedSignedMeanSlack.direct_bound_boosted R M hN hq j m))
   obtain ⟨CP, hCP, hp⟩ := raw_of_positive_bounds (fun j m =>
     bound_congr outgoing.data.h_pos outgoing.data.h_lt_half (e.pressure_succ j)
       (pressure_bound_boosted R M hN W particularP hq hsP hbP j m))
@@ -231,7 +223,7 @@ noncomputable def stageEstimates_of_component_bounds_boosted {LA LP : ℕ → �
     intro m
     simpa only [actualInitialTemporalInput, actualInitialRankInput,
       actualInitialAngularInput, MeanInput.ofMoving, min_self] using
-      GluedStageEstimates.represented_initial_rate certificate modulation upper B WA
+      ActualPhysicalStageBounds.represented_initial_rate certificate modulation upper B WA
         (actualInitialTemporalInput B N0 N hN) (actualInitialRankInput B N0 N hN)
         (actualInitialAngularInput B N0 N hN) hU hlU e.potential_zero e.direct_zero m
   · intro J m
