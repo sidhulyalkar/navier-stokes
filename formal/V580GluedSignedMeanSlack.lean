@@ -85,7 +85,7 @@ theorem signedMeanPotential_bound_boosted {qbig : ℝ}
     GluedStageEstimates.Bound qbig (GluedStageEstimates.signedMeanPotential R M hN W j) m
       (boostedGain (j + 1) - PhysicalStageBounds.potentialLoss h h 0 m) := by
   have hs0 := (W.potential j).vector_bound_with_gain
-    outgoing.data.h_pos outgoing.data.h_lt_half (potential_gain_boosted R M hN W j) m
+    outgoing.data.h_pos outgoing.data.h_lt_half (potential_gain_boosted W j) m
   have hs := weaken_bound (qbig := qbig)
     (s := boostedGain (j + 1) - PhysicalStageBounds.potentialLoss h h 0 m)
     outgoing.data.h_pos outgoing.data.h_lt_half
@@ -96,12 +96,12 @@ theorem signedMeanPotential_bound_boosted {qbig : ℝ}
     (s := boostedGain (j + 1) - PhysicalStageBounds.potentialLoss h h 0 m)
     outgoing.data.h_pos outgoing.data.h_lt_half (sub_le_sub_left (le_max_right _ _) _)
     ((ActualStageEstimates.temporalInput R M hN j).angular_bound_with_gain
-      outgoing.data.h_pos outgoing.data.h_lt_half hq (mean_gain_boosted R M hN W j) m)
+      outgoing.data.h_pos outgoing.data.h_lt_half hq (mean_gain_boosted j) m)
   have hr := weaken_bound
     (s := boostedGain (j + 1) - PhysicalStageBounds.potentialLoss h h 0 m)
     outgoing.data.h_pos outgoing.data.h_lt_half (sub_le_sub_left (le_max_right _ _) _)
     ((ActualStageEstimates.rankInput R M hN j).angular_bound_with_gain
-      outgoing.data.h_pos outgoing.data.h_lt_half hq (mean_gain_boosted R M hN W j) m)
+      outgoing.data.h_pos outgoing.data.h_lt_half hq (mean_gain_boosted j) m)
   have ss : ContDiffOn ℝ ∞ (W.potential j).vector
       (CutStageEstimates.physicalSublevel h qbig) :=
     ((W.potential j).vector_smooth outgoing.data.h_pos outgoing.data.h_lt_half).mono
@@ -121,7 +121,7 @@ theorem signedMeanPressure_bound_boosted {qbig : ℝ}
       (boostedGain (j + 1) -
         PhysicalStageBounds.pressureLoss h (2 * CoordinateAlgebra.A h) 0 m) := by
   have hs0 := (W.pressure j).pressure_bound_with_gain
-    outgoing.data.h_pos outgoing.data.h_lt_half (pressure_gain_boosted R M hN W j) m
+    outgoing.data.h_pos outgoing.data.h_lt_half (pressure_gain_boosted W j) m
   have hs := weaken_bound (qbig := qbig)
     (s := boostedGain (j + 1) -
       PhysicalStageBounds.pressureLoss h (2 * CoordinateAlgebra.A h) 0 m)
@@ -134,7 +134,7 @@ theorem signedMeanPressure_bound_boosted {qbig : ℝ}
       PhysicalStageBounds.pressureLoss h (2 * CoordinateAlgebra.A h) 0 m)
     outgoing.data.h_pos outgoing.data.h_lt_half (sub_le_sub_left (le_max_right _ _) _)
     ((ActualStageEstimates.pressureInput R M hN j).field_bound_with_gain
-      outgoing.data.h_pos outgoing.data.h_lt_half hq (mean_gain_boosted R M hN W j) m)
+      outgoing.data.h_pos outgoing.data.h_lt_half hq (mean_gain_boosted j) m)
   exact add_bounds outgoing.data.h_pos outgoing.data.h_lt_half
     (((W.pressure j).pressure_smooth outgoing.data.h_pos outgoing.data.h_lt_half).mono
       inter_subset_left)
@@ -147,6 +147,6 @@ theorem direct_bound_boosted {qbig : ℝ}
     GluedStageEstimates.Bound qbig (GluedStageEstimates.direct R M hN j) m
       (boostedGain (j + 1) - PhysicalStageBounds.directLoss h 0 m) :=
   (ActualStageEstimates.angularInput R M hN j).angular_bound_with_gain
-    outgoing.data.h_pos outgoing.data.h_lt_half hq (mean_gain_boosted R M hN W j) m
+    outgoing.data.h_pos outgoing.data.h_lt_half hq (mean_gain_boosted j) m
 
 end NavierStokes.V580GluedSignedMeanSlack
