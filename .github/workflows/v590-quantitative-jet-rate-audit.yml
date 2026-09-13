@@ -6,11 +6,13 @@ on:
     paths:
       - "formal/V590QuantitativeJetRate.lean"
       - "formal/V590EndpointActivationBridge.lean"
+      - "formal/V590ExplicitDiagonalTail.lean"
       - ".github/workflows/v590-quantitative-jet-rate-audit.yml"
   pull_request:
     paths:
       - "formal/V590QuantitativeJetRate.lean"
       - "formal/V590EndpointActivationBridge.lean"
+      - "formal/V590ExplicitDiagonalTail.lean"
       - ".github/workflows/v590-quantitative-jet-rate-audit.yml"
   workflow_dispatch:
 
@@ -23,7 +25,7 @@ permissions:
 
 jobs:
   quantitative-jet-rate:
-    name: v5.9 quantitative JetRate + endpoint activation
+    name: v5.9 quantitative JetRate + endpoint bridge
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -57,3 +59,5 @@ jobs:
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V590QuantitativeJetRate.lean
       - name: Compile v5.9 source-endpoint activation bridge
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V590EndpointActivationBridge.lean
+      - name: Compile v5.9 explicit diagonal-tail constant
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V590ExplicitDiagonalTail.lean
