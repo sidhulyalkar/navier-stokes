@@ -67,6 +67,7 @@ theorem exists_quantitative_diagonal_tail
   }, rfl⟩
   intro x hx
   rcases hx with ⟨⟨hxU, hqx⟩, hsmallx⟩
+  change q x < δ at hsmallx
   have hpref := hprefix x (hq.contDiffAt (hU.mem_nhds hxU)).continuousAt
     (by simpa only [abs_of_pos hqx.1] using hsmallx)
   have heq :
