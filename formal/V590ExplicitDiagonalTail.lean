@@ -52,8 +52,8 @@ theorem exists_quantitative_diagonal_tail
   obtain ⟨δ, hδ, hprefix⟩ :=
     DiagonalJetBounds.partialPotential_eventuallyEq_uncut a q A (J + 1)
   let S : Set D :=
-    U ∩ {x | 0 < q x ∧ q x ≤ 1} ∩ {x | |q x| < δ}
-  have hsmall : ∀ᶠ x in l, |q x| < δ :=
+    U ∩ {x | 0 < q x ∧ q x ≤ 1} ∩ {x | q x < δ}
+  have hsmall : ∀ᶠ x in l, q x < δ :=
     hqzero.eventually (gt_mem_nhds hδ)
   have hS : S ∈ l := by
     filter_upwards [hlU, hlq, hsmall] with x hx hqx hs
