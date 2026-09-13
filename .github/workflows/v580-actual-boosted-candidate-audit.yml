@@ -53,6 +53,11 @@ jobs:
           lint: false
           use-github-cache: true
           use-mathlib-cache: true
+      - name: Restore pinned upstream build closure
+        uses: actions/cache@v5
+        with:
+          path: upstream/.lake/build
+          key: v580-actual-candidate-${{ runner.os }}-${{ runner.arch }}-openai-8937a8f4-lean-v4.34.0-rc2
       - name: Build actual-candidate dependency closure
         run: |
           cd upstream
