@@ -59,11 +59,17 @@ jobs:
         run: |
           cp formal/V580GluedParticularSlack.lean upstream/NavierStokes/V580GluedParticularSlack.lean
           cd upstream
-          ~/.elan/bin/lake env lean NavierStokes/V580GluedParticularSlack.lean
+          mkdir -p .lake/build/lib/lean/NavierStokes
+          ~/.elan/bin/lake env lean \
+            -o .lake/build/lib/lean/NavierStokes/V580GluedParticularSlack.olean \
+            NavierStokes/V580GluedParticularSlack.lean
       - name: Install boosted glued signed-mean module
         run: |
           cp formal/V580GluedSignedMeanSlack.lean upstream/NavierStokes/V580GluedSignedMeanSlack.lean
           cd upstream
-          ~/.elan/bin/lake env lean NavierStokes/V580GluedSignedMeanSlack.lean
+          mkdir -p .lake/build/lib/lean/NavierStokes
+          ~/.elan/bin/lake env lean \
+            -o .lake/build/lib/lean/NavierStokes/V580GluedSignedMeanSlack.olean \
+            NavierStokes/V580GluedSignedMeanSlack.lean
       - name: Compile boosted glued StageEstimates
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V580BoostedGluedStageEstimates.lean
