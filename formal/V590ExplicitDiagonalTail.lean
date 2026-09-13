@@ -9,15 +9,13 @@ with the literal constant `(1/2)^J`, but the public `JetRate` proposition hides
 that constant existentially.
 
 The source also chooses the sufficiently-small carrier radius existentially in
-`Prop`.  Lean therefore does not permit us to eliminate that proof directly
-into a data-valued `QuantitativeJetRate` object.  The honest interface is an
+`Prop`. Lean therefore does not permit us to eliminate that proof directly
+into a data-valued `QuantitativeJetRate` object. The honest interface is an
 existential theorem asserting that a quantitative certificate exists whose
-constant is literally
-
-  C_J = (1/2)^J.
+constant is literally `C_J = (1/2)^J`.
 
 This retains the source constant without pretending that the source provides a
-canonical carrier or computable witness.  It is quantitative endpoint
+canonical carrier or computable witness. It is quantitative endpoint
 information, not yet a force norm, and it does not compare two assembled
 witnesses.
 -/
@@ -35,10 +33,7 @@ variable {D V : Type*}
   [NormedAddCommGroup V] [NormedSpace ℝ V]
 
 /-- The same fixed-prefix diagonal-potential tail as the pinned source theorem,
-with the exact source constant `(1/2)^J` retained propositionally.
-
-The carrier remains existential because the source's small-radius witness is
-itself existential in `Prop`; no canonical carrier is claimed. -/
+with the exact source constant `(1/2)^J` retained propositionally. -/
 theorem exists_quantitative_diagonal_tail
     {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
     {q : D → ℝ} {A : ℕ → D → V} {g L : ℕ → ℝ}
@@ -57,8 +52,8 @@ theorem exists_quantitative_diagonal_tail
   obtain ⟨δ, hδ, hprefix⟩ :=
     DiagonalJetBounds.partialPotential_eventuallyEq_uncut a q A (J + 1)
   let S : Set D :=
-    U ∩ {x | 0 < q x ∧ q x ≤ 1} ∩ {x | |q x| < δ}
-  have hsmall : ∀ᶠ x in l, |q x| < δ :=
+    U ∩ {x | 0 < q x ∧ q x ≤ 1} ∩ {x | q x < δ}
+  have hsmall : ∀ᶠ x in l, q x < δ :=
     hqzero.eventually (gt_mem_nhds hδ)
   have hS : S ∈ l := by
     filter_upwards [hlU, hlq, hsmall] with x hx hqx hs
@@ -85,11 +80,7 @@ theorem exists_quantitative_diagonal_tail
   exact DiagonalJetBounds.potential_tail_jet_bound ha hU hq hA hg hb hxU
     hqx.1 hqx.2 J m hm
 
-/-- Direct weighted-bound form: there is a filter-large carrier on which the
-fixed-prefix tail obeys the exact source constant `(1/2)^J`.
-
-This is useful for quantitative consumers that do not need to name the carrier
-chosen by the source proof. -/
+/-- Direct weighted-bound form retaining the literal source constant. -/
 theorem exists_explicit_diagonal_tail_bound
     {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
     {q : D → ℝ} {A : ℕ → D → V} {g L : ℕ → ℝ}
@@ -110,8 +101,7 @@ theorem exists_explicit_diagonal_tail_bound
   refine ⟨W.carrier, W.carrier_mem, ?_⟩
   simpa [hW] using W.bound
 
-/-- Forgetting the explicit witness recovers the pinned public theorem's
-`JetRate` conclusion. -/
+/-- Forgetting explicit data recovers the source-level `JetRate`. -/
 theorem quantitative_diagonal_tail_jetRate
     {a : ℕ → ℝ} (ha : Tendsto a atTop atTop)
     {q : D → ℝ} {A : ℕ → D → V} {g L : ℕ → ℝ}
