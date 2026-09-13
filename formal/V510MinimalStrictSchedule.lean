@@ -1,4 +1,5 @@
 import NavierStokes.V590CanonicalDiagonalScale
+import NavierStokes.SolenoidalDiagonal
 
 /-!
 # v5.10: minimal strict diagonal schedule
