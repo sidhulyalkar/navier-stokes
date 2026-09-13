@@ -49,9 +49,9 @@ private theorem boostedGain_pos {j : ℕ} (hj : 1 ≤ j) : 0 < boostedGain j := 
 
 private theorem boostedGain_mono : Monotone boostedGain := by
   intro j k hjk
+  have hg := (ActualIterationLedger.gain_monotone outgoing.data.h_pos.le) hjk
   unfold boostedGain
-  exact add_le_add_right
-    ((ActualIterationLedger.gain_monotone outgoing.data.h_pos.le) hjk) boost
+  linarith
 
 private theorem boostedGain_top : Tendsto boostedGain atTop atTop := by
   change Tendsto (fun j => ActualIterationLedger.gain h j + boost) atTop atTop
@@ -78,11 +78,12 @@ variable {B N0 N : ℕ}
   (hN : 4 ≤ N) (W : GluedStageEstimates.SignedInputs D I K)
   (particularA : ℕ → VelocityField) (particularP : ℕ → PressureField)
 
-variable {qbig : ℝ} (hq : qbig ≤ ChartScales.Q N)
+variable {qbig : ℝ}
 
 /-- Combine a boosted particular-potential estimate with the independently
 boosted signed/mean estimate. -/
 theorem potential_bound_boosted {L : ℕ → ℝ}
+    (hq : qbig ≤ ChartScales.Q N)
     (hs : ∀ j, ContDiffOn ℝ ∞ (particularA j) (CutStageEstimates.physicalSublevel h qbig))
     (hb : ∀ j m, GluedStageEstimates.Bound qbig (particularA j) m
       (boostedGain (j + 1) - L m))
@@ -104,6 +105,7 @@ theorem potential_bound_boosted {L : ℕ → ℝ}
 
 /-- Pressure analogue of `potential_bound_boosted`. -/
 theorem pressure_bound_boosted {L : ℕ → ℝ}
+    (hq : qbig ≤ ChartScales.Q N)
     (hs : ∀ j, ContDiffOn ℝ ∞ (particularP j) (CutStageEstimates.physicalSublevel h qbig))
     (hb : ∀ j m, GluedStageEstimates.Bound qbig (particularP j) m
       (boostedGain (j + 1) - L m))
@@ -129,12 +131,13 @@ variable
   (A Bdirect : ℕ → VelocityField) (P : ℕ → PressureField)
 
 variable {A Bdirect P}
-  (e : GluedStageEstimates.Representations R M hN W particularA particularP
-    WA WP A Bdirect P (qbig := qbig))
 
 /-- Transfer all boosted positive-stage component estimates to the exact raw
 candidate sequences. -/
 theorem represented_raw_bounds_boosted {LA LP : ℕ → ℝ}
+    (hq : qbig ≤ ChartScales.Q N)
+    (e : GluedStageEstimates.Representations R M hN W particularA particularP
+      WA WP A Bdirect P (qbig := qbig))
     (hsA : ∀ j, ContDiffOn ℝ ∞ (particularA j) (CutStageEstimates.physicalSublevel h qbig))
     (hsP : ∀ j, ContDiffOn ℝ ∞ (particularP j) (CutStageEstimates.physicalSublevel h qbig))
     (hbA : ∀ j m, GluedStageEstimates.Bound qbig (particularA j) m
@@ -169,6 +172,9 @@ theorem represented_raw_bounds_boosted {LA LP : ℕ → ℝ}
 /-- The complete glued finite-stage record with unchanged fields and losses and
 with only the common gain promoted. -/
 noncomputable def stageEstimates_of_component_bounds_boosted {LA LP : ℕ → ℝ}
+    (hq : qbig ≤ ChartScales.Q N)
+    (e : GluedStageEstimates.Representations R M hN W particularA particularP
+      WA WP A Bdirect P (qbig := qbig))
     (hsA : ∀ j, ContDiffOn ℝ ∞ (particularA j) (CutStageEstimates.physicalSublevel h qbig))
     (hsP : ∀ j, ContDiffOn ℝ ∞ (particularP j) (CutStageEstimates.physicalSublevel h qbig))
     (hbA : ∀ j m, GluedStageEstimates.Bound qbig (particularA j) m
@@ -181,8 +187,8 @@ noncomputable def stageEstimates_of_component_bounds_boosted {LA LP : ℕ → �
       (MixedDiagonalResidual.uncutVelocity A Bdirect J)
       (DiagonalJetBounds.uncutPrefix P (J + 1))) :
     MixedCandidateAssembly.StageEstimates h qbig A Bdirect P := by
-  let hr := represented_raw_bounds_boosted R M hN W particularA particularP hq WA WP e
-    hsA hsP hbA hbP
+  let hr := represented_raw_bounds_boosted R M hN W particularA particularP
+    WA WP hq e hsA hsP hbA hbP
   let CA := hr.choose
   let CB := hr.choose_spec.choose
   let CP := hr.choose_spec.choose_spec.choose
@@ -267,9 +273,9 @@ noncomputable def actualStageEstimates_boosted
     MixedCandidateAssembly.StageEstimates h qbig A Bdirect P := by
   let E := stageEstimates_of_component_bounds_boosted R M hN W
     (GluedStageEstimates.currentPotential B N0 N)
-    (GluedStageEstimates.currentPressure B N0 N) hq
+    (GluedStageEstimates.currentPressure B N0 N)
     (InitialPhysicalData.potentialWaveData B N0)
-    (InitialPhysicalData.pressureWaveData B N0) e
+    (InitialPhysicalData.pressureWaveData B N0) hq e
     (fun j => (GluedStageEstimates.current_fields_smooth R C hGeom hq j).1)
     (fun j => (GluedStageEstimates.current_fields_smooth R C hGeom hq j).2)
     (fun j m => by
