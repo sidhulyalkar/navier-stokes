@@ -180,7 +180,7 @@ theorem canonicalSchedule_spec
 initial floor fixed, pointwise stronger gain yields a pointwise no-larger
 canonical cutoff schedule. -/
 theorem canonicalSchedule_mono_gain
-    (C p : ℕ → ℕ → ℝ) {gWeak gStrong : ℕ → ℕ → ℝ}
+    (C p : ℕ → ℕ → ℝ) {gWeak gStrong : ℕ → ℝ}
     (hWeak : ∀ j, 1 ≤ j → 0 < gWeak j)
     (hStrong : ∀ j, 1 ≤ j → 0 < gStrong j)
     (hgain : ∀ j, 1 ≤ j → gWeak j ≤ gStrong j)
