@@ -26,76 +26,75 @@ noncomputable section
 
 namespace NavierStokes.V580BoostedRawStages
 
-open Set
+open Set ProblemStatement
 open NavierStokes.ActualPhysicalStageBounds
 open NavierStokes.ActualIterationLedger
 
 noncomputable def boost (h κ : ℝ) : ℝ := h * (3 / 5 - κ)
 
 noncomputable def boostedGain (h κ : ℝ) (j : ℕ) : ℝ :=
-  gain h j + boost h κ
+  ActualIterationLedger.gain h j + boost h κ
 
-private theorem boosted_eq_waveNative {h κ : ℝ} (j : ℕ) (hj : 1 ≤ j) :
-    boostedGain h κ j = h * waveNative κ j := by
+@[simp] theorem boostedGain_zero (h κ : ℝ) :
+    boostedGain h κ 0 = boost h κ := by
+  simp [boostedGain]
+
+@[simp] theorem boostedGain_succ (h κ : ℝ) (j : ℕ) :
+    boostedGain h κ (j + 1) = ActualIterationLedger.gain h (j + 1) + boost h κ := rfl
+
+/-- The potential channel exactly supplies the common boost. -/
+theorem potential_gain_boosted
+    {h κ : ℝ} (hh : 0 ≤ h) {k : ℕ} {native shift : ℝ}
+    (hnative : ActualIterationLedger.waveNative κ (k + 1) ≤ native)
+    (hshift : -h ≤ shift) :
+    boostedGain h κ (k + 1) ≤ h * native + shift + h := by
   unfold boostedGain boost
-  exact (wave_physical_gap h κ hj).symm
+  have hbase := ActualIterationLedger.wave_physical_gap h κ (show 1 ≤ k + 1 by omega)
+  have hnative_mul : h * ActualIterationLedger.waveNative κ (k + 1) ≤ h * native :=
+    mul_le_mul_of_nonneg_left hnative hh
+  rw [hbase] at hnative_mul
+  linarith
 
-private theorem boosted_le_wavePressure {h κ : ℝ} (hh : 0 ≤ h)
-    {j : ℕ} (hj : 1 ≤ j) :
-    boostedGain h κ j ≤ h * wavePressureNative κ j := by
-  rw [pressure_physical_gap h κ hj]
+/-- Direct mean-generated angular fields have much more margin than the common
+potential-channel boost. -/
+theorem mean_gain_boosted
+    {h κ : ℝ} (hh : 0 ≤ h) (hκ : κ ≤ 1 / 100000) {k : ℕ} {native : ℝ}
+    (hnative : ActualIterationLedger.meanNative κ (k + 1) ≤ native) :
+    boostedGain h κ (k + 1) ≤ h * native := by
   unfold boostedGain boost
-  have hm : h * (3 / 5 - κ) ≤ h * (11 / 10 - κ) :=
-    mul_le_mul_of_nonneg_left (by linarith) hh
+  have hbase := ActualIterationLedger.mean_physical_gap h κ (show 1 ≤ k + 1 by omega)
+  have hnative_mul : h * ActualIterationLedger.meanNative κ (k + 1) ≤ h * native :=
+    mul_le_mul_of_nonneg_left hnative hh
+  rw [hbase] at hnative_mul
+  have hmargin : 3 / 5 - κ ≤ 11 / 10 - 2 * κ := by linarith
+  have := mul_le_mul_of_nonneg_left hmargin hh
   linarith
 
-private theorem boosted_le_mean {h κ : ℝ} (hh : 0 ≤ h)
-    (hκ : κ ≤ 1 / 100000) {j : ℕ} (hj : 1 ≤ j) :
-    boostedGain h κ j ≤ h * meanNative κ j := by
-  rw [mean_physical_gap h κ hj]
+/-- The wave-pressure channel also has more than the common potential margin. -/
+theorem pressure_gain_boosted
+    {h κ : ℝ} (hh : 0 ≤ h) {k : ℕ} {native shift : ℝ}
+    (hnative : ActualIterationLedger.wavePressureNative κ (k + 1) ≤ native)
+    (hshift : -(2 * CoordinateAlgebra.A h) ≤ shift) :
+    boostedGain h κ (k + 1) ≤ h * native + shift + 2 * CoordinateAlgebra.A h := by
   unfold boostedGain boost
-  have hm : h * (3 / 5 - κ) ≤ h * (11 / 10 - 2 * κ) := by
-    apply mul_le_mul_of_nonneg_left _ hh
-    linarith
+  have hbase := ActualIterationLedger.pressure_physical_gap h κ (show 1 ≤ k + 1 by omega)
+  have hnative_mul : h * ActualIterationLedger.wavePressureNative κ (k + 1) ≤ h * native :=
+    mul_le_mul_of_nonneg_left hnative hh
+  rw [hbase] at hnative_mul
+  have hmargin : (3 / 5 : ℝ) - κ ≤ 11 / 10 - κ := by norm_num
+  have := mul_le_mul_of_nonneg_left hmargin hh
   linarith
 
-private theorem potential_gain_boosted {h κ α s : ℝ}
-    (hh : 0 ≤ h) (k : ℕ)
-    (hα : waveNative κ (k + 1) ≤ α) (hs : -h ≤ s) :
-    boostedGain h κ (k + 1) ≤ h * α + s + h := by
-  have hg := boosted_eq_waveNative (h := h) (κ := κ) (k + 1) (Nat.succ_pos k)
-  have ha := mul_le_mul_of_nonneg_left hα hh
-  rw [hg]
-  linarith
-
-private theorem pressure_gain_boosted {h κ α s : ℝ}
-    (hh : 0 ≤ h) (k : ℕ)
-    (hα : wavePressureNative κ (k + 1) ≤ α)
-    (hs : -(2 * CoordinateAlgebra.A h) ≤ s) :
-    boostedGain h κ (k + 1) ≤ h * α + s + 2 * CoordinateAlgebra.A h := by
-  have hg := boosted_le_wavePressure (h := h) (κ := κ) hh (Nat.succ_pos k)
-  have ha := mul_le_mul_of_nonneg_left hα hh
-  linarith
-
-private theorem mean_gain_boosted {h κ α : ℝ}
-    (hh : 0 ≤ h) (hκ : κ ≤ 1 / 100000) (k : ℕ)
-    (hα : meanNative κ (k + 1) ≤ α) :
-    boostedGain h κ (k + 1) ≤ h * α + 0 := by
-  have hg := boosted_le_mean (h := h) (κ := κ) hh hκ (Nat.succ_pos k)
-  have ha := mul_le_mul_of_nonneg_left hα hh
-  linarith
+section CycleInputs
 
 variable {h κ qbig : ℝ}
-  {DP DS : Type}
-  [NormedAddCommGroup DP] [NormedSpace ℝ DP]
-  [NormedAddCommGroup DS] [NormedSpace ℝ DS]
-  {IP KP IS KS : Type*}
+  {DP DS : Type} [NormedAddCommGroup DP] [NormedSpace ℝ DP]
+  [NormedAddCommGroup DS] [NormedSpace ℝ DS] {IP KP IS KS : Type*}
+  (D : CycleInputs h DP IP KP DS IS KS)
 
-/-- The literal potential increment of cycle `k` supports the boosted common
-gain at physical stage `k+1`. -/
-theorem potential_bound_boosted
-    (D : CycleInputs h DP IP KP DS IS KS)
-    (H : D.Metadata κ) (Q : D.ValidScale qbig)
+/-- Same literal potential increment, sharpened only by spending the visible
+metadata slack. -/
+theorem potential_bound_boosted (H : D.Metadata κ) (Q : D.ValidScale qbig)
     (hh : 0 < h) (hh1 : h < 1 / 2) (hκ : κ ≤ 1 / 100000)
     (k m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
@@ -103,17 +102,15 @@ theorem potential_bound_boosted
       ‖iteratedFDeriv ℝ m (D.potential k) w‖ ≤ C * PhysicalWaveSum.physicalQ h w ^
         (boostedGain h κ (k + 1) - PhysicalStageBounds.potentialLoss h h 0 m) :=
   potentialIncrement_bound
-    (D.particularPotential k) (D.signedPotential k) (D.temporal k) (D.rank k)
+    (D.particular k) (D.signed k) (D.temporal k) (D.rank k)
     hh hh1 (Q.temporal k) (Q.rank k)
-    (potential_gain_boosted hh.le k (H.particularPotential k) (H.particularPotentialShift k))
-    (potential_gain_boosted hh.le k (H.signedPotential k) (H.signedPotentialShift k))
-    (mean_gain_boosted hh.le hκ k (H.temporal k))
-    (mean_gain_boosted hh.le hκ k (H.rank k)) m
+    (potential_gain_boosted hh.le (H.particularPotential k) (H.particularPotentialShift k))
+    (potential_gain_boosted hh.le (H.signedPotential k) (H.signedPotentialShift k))
+    (mean_gain_boosted hh.le hκ (H.temporal k))
+    (mean_gain_boosted hh.le hκ (H.rank k)) m
 
-/-- The literal direct-angular increment supports the same boosted gain. -/
-theorem direct_bound_boosted
-    (D : CycleInputs h DP IP KP DS IS KS)
-    (H : D.Metadata κ) (Q : D.ValidScale qbig)
+/-- Same literal direct angular increment at the boosted common gain. -/
+theorem direct_bound_boosted (H : D.Metadata κ) (Q : D.ValidScale qbig)
     (hh : 0 < h) (hh1 : h < 1 / 2) (hκ : κ ≤ 1 / 100000)
     (k m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
@@ -121,12 +118,10 @@ theorem direct_bound_boosted
       ‖iteratedFDeriv ℝ m (D.direct k) w‖ ≤ C * PhysicalWaveSum.physicalQ h w ^
         (boostedGain h κ (k + 1) - PhysicalStageBounds.directLoss h 0 m) :=
   (D.angular k).angular_bound_with_gain hh hh1 (Q.angular k)
-    (mean_gain_boosted hh.le hκ k (H.angular k)) m
+    (mean_gain_boosted hh.le hκ (H.angular k)) m
 
-/-- The literal pressure increment supports the same boosted gain. -/
-theorem pressure_bound_boosted
-    (D : CycleInputs h DP IP KP DS IS KS)
-    (H : D.Metadata κ) (Q : D.ValidScale qbig)
+/-- Same literal pressure increment at the boosted common gain. -/
+theorem pressure_bound_boosted (H : D.Metadata κ) (Q : D.ValidScale qbig)
     (hh : 0 < h) (hh1 : h < 1 / 2) (hκ : κ ≤ 1 / 100000)
     (k m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ w ∈ CutStageEstimates.physicalSublevel h qbig,
@@ -180,5 +175,7 @@ theorem represented_raw_bounds_boosted
       (pressure_bound_boosted D H Q hh hh1 hκ k m))
   exact ⟨CA, CB, CP, fun j m => ⟨hCA j m, hCB j m, hCP j m⟩,
     hrawA, hrawB, hrawP⟩
+
+end CycleInputs
 
 end NavierStokes.V580BoostedRawStages
