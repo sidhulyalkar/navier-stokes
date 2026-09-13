@@ -59,14 +59,16 @@ theorem exists_stageAdmissible
 `j`, with the source's initial lower bound `B`. -/
 noncomputable def leastStageScale
     (C p : ℕ → ℕ → ℝ) (g : ℕ → ℝ) (B : ℕ)
-    (hg : ∀ j, 1 ≤ j → 0 < g j) (j : ℕ) : ℕ :=
-  Nat.find (exists_stageAdmissible C p g B hg j)
+    (hg : ∀ j, 1 ≤ j → 0 < g j) (j : ℕ) : ℕ := by
+  classical
+  exact Nat.find (exists_stageAdmissible C p g B hg j)
 
 /-- The canonical least scale really is admissible. -/
 theorem leastStageScale_spec
     (C p : ℕ → ℕ → ℝ) (g : ℕ → ℝ) (B : ℕ)
     (hg : ∀ j, 1 ≤ j → 0 < g j) (j : ℕ) :
     StageAdmissible C p g B j (leastStageScale C p g B hg j) := by
+  classical
   unfold leastStageScale
   exact Nat.find_spec (exists_stageAdmissible C p g B hg j)
 
@@ -83,35 +85,33 @@ theorem StageAdmissible.mono_gain
     (hgain : ∀ k, 1 ≤ k → g k ≤ g' k)
     (h : StageAdmissible C p g B j a) :
     StageAdmissible C p g' B j a := by
-  refine ⟨h.1, h.2.1, ?_⟩
-  rcases h.2.2 with hj | hold
-  · exact Or.inl hj
-  · refine Or.inr ?_
-    intro m hm q hq hqa
-    have haR : (1 : ℝ) ≤ (a : ℝ) := by exact_mod_cast h.1
-    have haPos : (0 : ℝ) < (a : ℝ) := lt_of_lt_of_le zero_lt_one haR
-    have hrecip : (1 : ℝ) / (a : ℝ) ≤ 1 := by
-      rw [one_div, inv_le_one₀ haPos]
-      exact haR
-    have hq1 : q ≤ 1 := hqa.trans hrecip
-    have hjpos : 1 ≤ j := by
-      by_contra hj0
-      have hz : j = 0 := Nat.eq_zero_of_not_pos hj0
-      exact (by subst j; simp at hold)
-    have hhalf : g j / 2 ≤ g' j / 2 := by
-      exact div_le_div_of_nonneg_right (hgain j hjpos) (by norm_num)
-    have hmono :
-        |logPowerWeight (C j m) (p j m) (g' j / 2) q| ≤
-          |logPowerWeight (C j m) (p j m) (g j / 2) q| := by
-      unfold logPowerWeight
-      rw [abs_mul, abs_mul, abs_mul, abs_mul,
-        abs_of_nonneg (Real.rpow_nonneg hq.le (g' j / 2)),
-        abs_of_nonneg (Real.rpow_nonneg hq.le (g j / 2))]
-      exact mul_le_mul_of_nonneg_left
-        (Real.rpow_le_rpow_of_exponent_ge hq hq1 hhalf)
-        (mul_nonneg (abs_nonneg (C j m))
-          (abs_nonneg ((1 + |Real.log q|) ^ (p j m))))
-    exact hmono.trans (hold m hm q hq hqa)
+  by_cases hj : j = 0
+  · exact ⟨h.1, h.2.1, Or.inl hj⟩
+  · refine ⟨h.1, h.2.1, Or.inr ?_⟩
+    rcases h.2.2 with hzero | hold
+    · exact False.elim (hj hzero)
+    · intro m hm q hq hqa
+      have haR : (1 : ℝ) ≤ (a : ℝ) := by exact_mod_cast h.1
+      have haPos : (0 : ℝ) < (a : ℝ) := lt_of_lt_of_le zero_lt_one haR
+      have hrecip : (1 : ℝ) / (a : ℝ) ≤ 1 := by
+        rw [one_div, inv_le_one₀ haPos]
+        exact haR
+      have hq1 : q ≤ 1 := hqa.trans hrecip
+      have hjpos : 1 ≤ j := by omega
+      have hhalf : g j / 2 ≤ g' j / 2 := by
+        exact div_le_div_of_nonneg_right (hgain j hjpos) (by norm_num)
+      have hmono :
+          |logPowerWeight (C j m) (p j m) (g' j / 2) q| ≤
+            |logPowerWeight (C j m) (p j m) (g j / 2) q| := by
+        unfold logPowerWeight
+        rw [abs_mul, abs_mul, abs_mul, abs_mul,
+          abs_of_nonneg (Real.rpow_nonneg hq.le (g' j / 2)),
+          abs_of_nonneg (Real.rpow_nonneg hq.le (g j / 2))]
+        exact mul_le_mul_of_nonneg_left
+          (Real.rpow_le_rpow_of_exponent_ge hq hq1 hhalf)
+          (mul_nonneg (abs_nonneg (C j m))
+            (abs_nonneg ((1 + |Real.log q|) ^ (p j m))))
+      exact hmono.trans (hold m hm q hq hqa)
 
 /-- Canonical stage scales are antitone in the gain. A stronger gain can only
 lower, or leave unchanged, the least integer cutoff needed at that stage. -/
@@ -121,6 +121,7 @@ theorem leastStageScale_antitone_gain
     (hg' : ∀ j, 1 ≤ j → 0 < g' j)
     (hgain : ∀ j, 1 ≤ j → g j ≤ g' j) (j : ℕ) :
     leastStageScale C p g' B hg' j ≤ leastStageScale C p g B hg j := by
+  classical
   unfold leastStageScale
   apply Nat.find_min'
   exact StageAdmissible.mono_gain hgain
