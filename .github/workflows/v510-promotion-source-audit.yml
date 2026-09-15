@@ -1,0 +1,112 @@
+name: v5.10-promotion-source-audit
+
+on:
+  push:
+    branches: ["research/v5.10.0-clean-promotion"]
+    paths:
+      - "formal/V590CanonicalDiagonalScale.lean"
+      - "formal/V590StrictScaleCrossing.lean"
+      - "formal/V590GainBuysScale.lean"
+      - "formal/V510MinimalStrictSchedule.lean"
+      - "formal/V510FiniteStrictCutBounds.lean"
+      - "formal/V510PhysicalLocalStrictCutBounds.lean"
+      - ".github/workflows/v510-promotion-source-audit.yml"
+  pull_request:
+    paths:
+      - "formal/V590CanonicalDiagonalScale.lean"
+      - "formal/V590StrictScaleCrossing.lean"
+      - "formal/V590GainBuysScale.lean"
+      - "formal/V510MinimalStrictSchedule.lean"
+      - "formal/V510FiniteStrictCutBounds.lean"
+      - "formal/V510PhysicalLocalStrictCutBounds.lean"
+      - ".github/workflows/v510-promotion-source-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  source-locked-promotion:
+    name: v5.9-v5.10 qualified formal chain
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+
+      - name: Verify source lock
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+
+      - name: Build pinned dependency closure
+        run: |
+          cd upstream
+          ~/.elan/bin/lake build NavierStokes.DiagonalScale NavierStokes.SolenoidalDiagonal NavierStokes.CutStageEstimates
+
+      - name: Install research modules
+        run: |
+          set -euo pipefail
+          for f in \
+            V590CanonicalDiagonalScale \
+            V590StrictScaleCrossing \
+            V590GainBuysScale \
+            V510MinimalStrictSchedule \
+            V510FiniteStrictCutBounds \
+            V510PhysicalLocalStrictCutBounds
+          do
+            cp "formal/${f}.lean" "upstream/NavierStokes/${f}.lean"
+          done
+          mkdir -p upstream/.lake/build/lib/lean/NavierStokes
+
+      - name: Compile canonical schedule
+        run: |
+          cd upstream
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V590CanonicalDiagonalScale.olean NavierStokes/V590CanonicalDiagonalScale.lean
+
+      - name: Compile strict crossing
+        run: |
+          cd upstream
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V590StrictScaleCrossing.olean NavierStokes/V590StrictScaleCrossing.lean
+
+      - name: Compile constant-cancelling relaxation
+        run: |
+          cd upstream
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V590GainBuysScale.olean NavierStokes/V590GainBuysScale.lean
+
+      - name: Compile minimal strict schedule
+        run: |
+          cd upstream
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V510MinimalStrictSchedule.olean NavierStokes/V510MinimalStrictSchedule.lean
+
+      - name: Compile finite strict cut bounds
+        run: |
+          cd upstream
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V510FiniteStrictCutBounds.olean NavierStokes/V510FiniteStrictCutBounds.lean
+
+      - name: Compile physical local-q strict cut bounds
+        run: |
+          cd upstream
+          ~/.elan/bin/lake env lean NavierStokes/V510PhysicalLocalStrictCutBounds.lean
