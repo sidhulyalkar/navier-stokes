@@ -1,6 +1,8 @@
 # Research map
 
-This document is the live conceptual map of the project. It is organized by mechanisms and decision gates rather than by software versions.
+This is the live conceptual map of the project. It is organized by mechanisms and falsifiable decision gates rather than by release numbers.
+
+For current qualification status and exact CI evidence, see [`CURRENT_STATUS.md`](CURRENT_STATUS.md).
 
 ## Reference mechanism
 
@@ -19,147 +21,229 @@ iterative residual improvement
         ↓
 flat residual near singular time
         ↓
-localization / globalization
+diagonal cutoff schedule / localization
+        ↓
+periodic + temporal/spatial globalization
         ↓
 final smooth force
         ↓
 finite-time singular behavior
 ```
 
-The research program asks which arrows can be replaced, compressed, or generalized.
+The research program asks which arrows are structural, which are sufficient proof architecture, and which can be removed or replaced without losing the singular candidate.
 
-## Track A: initial-data pulse transfer
+## Track A: pulse continuation / initial-data replacement
 
 ### Hypothesis
-Late pulse seeding can be replaced by extremely small components already encoded in the true initial data.
 
-### Current evidence
-- The source formalization contains a Gaussian envelope theorem for pulse growth/decay in slot time.
-- A machine-readable source map exists at `artifacts/v530/pulse_tail_source_map.json`.
+Part of the explicitly localized pulse mechanism can be replaced by homogeneous continuation or by tiny components already encoded in initial data.
+
+### Established boundary
+
+- The canonical primary pulse solves a homogeneous source-zero two-mode ODE on its native slot.
+- The excluded-slot principal error decomposes into cutoff-derivative and uncovered-source channels.
+- For the source-zero primary class, the uncovered-source channel disappears.
+- Setting the temporal cutoff to one removes that local principal commutator only where the uncut solve identity remains valid.
+- The source does not prove that the existing differentiable coefficient extension solves the homogeneous ODE outside the native interval.
 
 ### Decision chain
 
 ```text
-A1 source Gaussian envelope        [SOURCE_EXTRACTED]
-          ↓
-A2 derive slot length ℓ(k_n)       [OPEN]
-          ↓
-A3 derive γ_tail interval          [OPEN]
-          ↓
-A4 bound inverse propagator        [OPEN]
-          ↓
-A5 derive δ_back interval          [OPEN]
-          ↓
-A6 compare exponents/coefficients  [OPEN]
-          ↓
-A7 all-Sobolev/Gevrey summability  [BLOCKED]
-          ↓
-A8 nonlinear pulse interactions    [BLOCKED]
-          ↓
-A9 exact unforced residual closure [BLOCKED]
+A1 native-slot homogeneous solve                   [SOURCE_LOCKED]
+A2 exact cutoff commutator identification          [SOURCE_LOCKED]
+A3 enlarged-interval homogeneous continuation      [OPEN]
+A4 uniqueness agreement on original slot           [OPEN]
+A5 recompute all residual channels with psi = 1    [BLOCKED ON A3]
+A6 finite pulse hierarchy / initial-data encoding  [BLOCKED]
+A7 all-Sobolev or Gevrey summability               [BLOCKED]
+A8 nonlinear cross-pulse closure                   [BLOCKED]
 ```
 
 ### Kill conditions
-- certified backward amplification asymptotically dominates tail suppression;
-- pulled-back hierarchy fails the required smoothness or energy class;
-- nonlinear cross-pulse interactions recreate a non-summable residual.
+
+- no homogeneous continuation compatible with the required geometry/support;
+- backward amplification overwhelms any initial-data tail suppression;
+- nonlinear interactions recreate a non-summable residual.
 
 ## Track B: similarity-parameter margin
 
 ### Hypothesis
-Part of the gap between the elementary `h < 1/6` window and the concrete formalized `h ≤ 1/1000` choice is proof bookkeeping rather than structural necessity.
+
+Part of the gap between broad power-counting windows and the source's small selected parameters is sufficient-constant bookkeeping rather than a structural barrier.
+
+### Current state
+
+Two exact local sufficient bounds were extracted earlier:
+
+```text
+h < 99/17002
+h < 949/268040
+```
+
+They are local sufficient certificates, not global or sharp thresholds.
 
 ### Decision chain
 
 ```text
-B1 cheap balance h < 1/6               [REPRODUCED]
-          ↓
-B2 manuscript small-h regime            [SOURCE]
-          ↓
-B3 NaturalAxisData h ≤ 1/1000           [SOURCE_EXTRACTED]
-          ↓
-B4 enumerate direct consumers           [ACTIVE]
-          ↓
-B5 build downstream dependency DAG      [OPEN]
-          ↓
-B6 classify each constraint             [OPEN]
-          ↓
-B7 relax one local constant at a time   [BLOCKED]
-          ↓
-B8 determine certified admissible range [BLOCKED]
+B1 cheap balance window                         [REPRODUCED]
+B2 source small-h constraints                    [SOURCE_EXTRACTED]
+B3 enumerate direct consumers                    [PARTIAL]
+B4 classify structural vs sufficient constants  [ACTIVE]
+B5 relax one binding inequality at a time        [OPEN]
+B6 propagate through downstream dependency DAG   [OPEN]
+B7 certify a larger admissible parameter region  [BLOCKED]
 ```
 
-Constraint classes:
+## Track C: force / residual attribution
 
-- `STRUCTURAL`: changing it breaks a mechanism or theorem in an essential way.
-- `SUFFICIENT_CONSTANT`: a convenient quantitative choice with visible slack.
-- `INHERITED`: copied from an upstream assumption without independently consuming the margin.
-- `UNKNOWN`: source dependence located but mathematical necessity unresolved.
+### Goal
 
-## Track C: forcing decomposition
+Trace the final physical forcing back to source-level residual mechanisms without double-counting bookkeeping decompositions.
 
-Before optimizing the actual force, the final residual must be decomposed into mechanism-level contributions.
+### Qualified source lineage
 
-Target decomposition:
+For pre-singular times, the final force is the Navier–Stokes residual of the activated/localized candidate. The time-activation identity separates:
 
 ```text
-f = f_base
-  + f_pulse_seed
-  + f_mean
-  + f_localization
-  + f_exterior
-  + f_terminal
+chi * incoming residual
++ chi' * velocity
++ (chi^2 - chi) * nonlinear transport
 ```
 
-For each component we want:
+Within the normalized finite-stage residual, the meaningful physical decomposition is the nonlinear differential residual plus virtual/base terms. Gaussian and alias pieces appear in an exact harmonic reconstruction as subtraction/restoration bookkeeping and must not be ranked as independent force atoms.
 
-- provenance;
-- support geometry;
-- asymptotic order;
-- `L¹_t L²_x`, `L²_t L^{3/2}_x`, and `L∞` observables where meaningful;
-- replacement mechanisms;
-- exact residual consequences of deletion.
+Native exponent ranking identifies the harmonic-source sum as the slowest finite-stage decay channel among the presently isolated terms. This is an exponent bottleneck, not a numerical norm fraction.
 
-This track remains blocked until the source construction is quantitatively compiled far enough to evaluate the actual fields.
+### Next quantitative target
 
-## Track D: stress-cone optimization
+Move from exponent attribution to an explicit force-size observable only after the geometry/schedule is fully specified.
 
-The oscillatory families realize a required mean stress through positive coefficients.
+Candidate observables:
+
+1. terminal-window weighted `C^m`/`L∞` residual seminorm;
+2. terminal-window `L^1_t L^2_x` on one periodic spatial cell;
+3. broader force norms only after activation and globalization contributions are controlled.
+
+## Track D: canonical schedule and quantitative gain
+
+### Qualified results
+
+A deterministic least-admissible local integer scale and canonical schedule have been formalized. If a gain certificate improves pointwise, the canonical selected cutoff schedule cannot worsen.
+
+Strict improvement is not automatic. The project now has:
+
+- an exact integer-threshold crossing criterion;
+- a sufficient condition for strict local improvement to survive the recursive envelope; and
+- a constant-cancelling theorem that compares stronger and weaker power budgets without assigning fake numerical values to existential constants.
+
+### Secondary gain-slack hypothesis
+
+The pinned source exposes a common candidate positive-stage margin
+
+```text
+Delta g = h * (3/5 - kappa)
+        = 59999/100000 * h
+```
+
+at `kappa = 1/100000`.
+
+Low-level slack statements remain interesting, but the attempted literal actual-candidate adapter is not qualified. Treat this as a blocked secondary lane until the exact `StageEstimates` reconstruction is repaired or replaced.
+
+## Track E: factor-two schedule necessity
+
+### Hypothesis
+
+The source condition
+
+```text
+2 * a(j) <= a(j+1)
+```
+
+is a convenient way to force a positive, strictly increasing, divergent cutoff schedule, but is not structurally required by the final singular candidate.
+
+### Qualified results
+
+The minimal strict envelope
+
+```text
+s(0)   = max(1, local(0))
+s(j+1) = max(local(j+1), s(j)+1)
+```
+
+has been source-locked in Lean and is pointwise no larger than the source doubling envelope. It preserves all numerical local admissibility requirements.
+
+The finite heterogeneous analytic cutoff-bound theorem has also been rebuilt successfully using this weaker schedule.
+
+### Active decision chain
+
+```text
+E1 minimal strict numerical selector              [FORMALIZED]
+E2 finite heterogeneous cutoff bounds             [FORMALIZED]
+E3 local-q support + smooth zero extension        [CI ACTIVE]
+E4 mixed three-component schedule                 [OPEN]
+E5 mixed residual vanishing                       [SOURCE AUDIT SUPPORTS]
+E6 parallel final singular candidate theorem      [OPEN]
+E7 old-vs-new collar residual comparison          [BLOCKED ON E6]
+E8 standard force-norm comparison                 [BLOCKED ON E7]
+```
+
+### Current source-audit evidence
+
+The downstream residual and final assembly proofs audited so far consume:
+
+- positivity / minimum scale;
+- strict monotonicity or `Tendsto` of real scales;
+- local support separation;
+- smooth diagonal sums;
+- away-extension data;
+- residual vanishing;
+- angular divergence; and
+- origin blowup.
+
+The factor-two witness is carried by the existing schedule API but is not visibly passed to those final calls. This is strong evidence for the hypothesis, but only E6 would make the deletion end-to-end.
+
+### Kill condition
+
+If any downstream theorem genuinely requires factor-two growth rather than only strict divergence/local finiteness, record the first such theorem and stop claiming the mechanism is removable.
+
+## Track F: stress-cone optimization
 
 For a target stress `T` and covariance columns `H_i`, solve
 
 ```text
-T = Σ_i a_i H_i,    a_i ≥ 0.
+T = sum_i a_i H_i,    a_i >= 0.
 ```
 
-The important quantity is not only feasibility but robustness margin. A future evaluator should optimize an interior-cone margin while preserving profile and residual constraints.
+The target is not just feasibility but robustness margin. A future evaluator should optimize interior-cone margin while preserving profile, support, and residual constraints.
 
 Potential payoff:
 
-- identify wave families with more tolerance;
-- simplify the correction architecture;
-- discover analogous realizable-stress constructions in MHD/Boussinesq/Hall-MHD.
+- identify redundant wave families;
+- simplify correction architecture;
+- expose more stable realizable-stress mechanisms;
+- transfer the grammar to neighboring PDEs.
 
-## Track E: cross-PDE mechanism compiler
+## Track G: cross-PDE mechanism compiler
 
-Once the Navier–Stokes reference is encoded quantitatively, reuse the grammar on neighboring systems.
+Once the Navier–Stokes mechanisms are encoded quantitatively, reuse the grammar on neighboring systems.
 
 Priority order:
 
-1. Euler, because the source project already provides an unforced blowup construction and therefore a nearby comparison class.
-2. Boussinesq, because coupling can introduce additional amplification/stress channels.
-3. MHD, where Maxwell stress supplies a natural second quadratic transport mechanism.
-4. Hall-MHD / generalized dissipative systems, where the balance grammar changes more substantially.
+1. Euler, because the pinned project already provides an unforced comparison construction.
+2. Boussinesq, because coupling introduces another amplification/stress channel.
+3. MHD, where Maxwell stress supplies a natural quadratic transport mechanism.
+4. Hall-MHD and generalized dissipative systems, where the balance grammar changes more substantially.
 
 ## Research resource allocation
 
-Agents should be allocated according to information gain, not only apparent probability of success.
+Prioritize information gain over cosmetic progress.
 
-High-value tasks include:
+High-value outcomes include:
 
-- proving a route impossible;
-- locating the first genuinely binding inequality;
-- converting a qualitative statement into a source-backed interval;
-- finding two apparently different proof steps that are manifestations of the same mechanism.
+- proving a proposed deletion impossible;
+- locating the first truly binding theorem or inequality;
+- turning an existential comparison into a deterministic/canonical one;
+- finding proof fields that are carried through APIs but never consumed downstream;
+- separating a real physical field change from a proof-certificate improvement.
 
-A useful failure shrinks the hypothesis space. That is progress.
+A failed branch with a precise mathematical blocker is evidence. A green branch without a clearly stated claim boundary is not.
