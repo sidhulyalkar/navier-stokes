@@ -1,0 +1,66 @@
+name: v5.10-mixed-strict-schedule-audit
+
+on:
+  push:
+    branches: ["research/v5.10.0-mixed-strict-schedule"]
+    paths:
+      - "formal/V590CanonicalDiagonalScale.lean"
+      - "formal/V510MinimalStrictSchedule.lean"
+      - "formal/V510FiniteStrictCutBounds.lean"
+      - "formal/V510PhysicalLocalStrictCutBounds.lean"
+      - "formal/V510MixedStrictSchedule.lean"
+      - ".github/workflows/v510-mixed-strict-schedule-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  mixed-strict-schedule:
+    name: v5.10 mixed three-component strict schedule
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+      - name: Verify source lock
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+      - name: Build mixed-schedule dependency closure
+        run: cd upstream && ~/.elan/bin/lake build NavierStokes.MixedDiagonalSchedule
+      - name: Install strict-schedule research modules
+        run: |
+          set -euo pipefail
+          for f in V590CanonicalDiagonalScale V510MinimalStrictSchedule V510FiniteStrictCutBounds V510PhysicalLocalStrictCutBounds
+          do
+            cp "formal/${f}.lean" "upstream/NavierStokes/${f}.lean"
+          done
+          cd upstream
+          mkdir -p .lake/build/lib/lean/NavierStokes
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V590CanonicalDiagonalScale.olean NavierStokes/V590CanonicalDiagonalScale.lean
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V510MinimalStrictSchedule.olean NavierStokes/V510MinimalStrictSchedule.lean
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V510FiniteStrictCutBounds.olean NavierStokes/V510FiniteStrictCutBounds.lean
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V510PhysicalLocalStrictCutBounds.olean NavierStokes/V510PhysicalLocalStrictCutBounds.lean
+      - name: Compile mixed strict schedule
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V510MixedStrictSchedule.lean
