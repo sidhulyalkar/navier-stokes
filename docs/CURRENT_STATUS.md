@@ -70,25 +70,31 @@ The source's finite-family cutoff estimates for heterogeneous potential/direct/p
 
 Qualified audit: `34785248912`.
 
-## Active qualification
+### v5.10: physical local-q support and smooth zero extension survive without factor-two growth
 
-`formal/V510PhysicalLocalStrictCutBounds.lean` extends the same deletion through the actual local-`q` validity region and smooth zero-extension argument. A dedicated pinned CI gate is running before this result is promoted.
+`formal/V510PhysicalLocalStrictCutBounds.lean` mirrors the pinned source's physical local-diagonal selector while removing only the factor-two growth field. It preserves the gain-independent support condition `1/a(j) < qbig`, positive-stage cut bounds, and smooth zero extension to all preterminal spacetime.
 
-If it qualifies, the next sequence is:
+Qualified audit: `34936977665`.
+
+The qualified deletion chain is now:
 
 ```text
-local-q strict cut bounds
+minimal strict numerical selector          [FORMALIZED]
         ↓
-three-component mixed schedule
+finite heterogeneous cutoff bounds         [FORMALIZED]
+        ↓
+local-q support + smooth zero extension     [FORMALIZED]
+        ↓
+three-component mixed schedule             [NEXT]
         ↓
 vanishing mixed residual jets
         ↓
-parallel final-candidate theorem without factor-two growth
+parallel final-candidate theorem
         ↓
 quantitative collar/force comparison
 ```
 
-Source audit already shows that the residual theorem and final force assembly consume `Tendsto`, positivity/monotonicity, support separation, smooth sums, extension data and residual vanishing; the factor-two witness is carried by the existing API but is not visibly used by those final calls. This is evidence for the v5.10 hypothesis, not yet an end-to-end theorem.
+Source audit already shows that the residual theorem and final force assembly consume `Tendsto`, positivity/monotonicity, support separation, smooth sums, extension data and residual vanishing; the factor-two witness is carried by the existing API but is not visibly used by those final calls. This is strong evidence for the v5.10 hypothesis, not yet an end-to-end theorem.
 
 ## Blocked / non-promoted experiment
 
@@ -114,11 +120,12 @@ Established here:
 - canonical schedule monotonicity and strict crossing criteria;
 - constant-cancelling cutoff-scale comparison;
 - a formally qualified minimal strict schedule that removes factor-two growth from the numerical selector;
-- formally qualified finite heterogeneous cutoff bounds using that weaker schedule.
+- formally qualified finite heterogeneous cutoff bounds using that weaker schedule;
+- formally qualified local-q support and smooth zero-extension using the weaker schedule.
 
 Not established:
 
-- end-to-end singular candidate with factor-two growth removed;
+- an end-to-end mixed/final singular candidate with factor-two growth removed;
 - any ordering of the old and new final forcing fields in a standard norm;
 - any strictly smaller final force norm;
 - any force norm tending to zero;
