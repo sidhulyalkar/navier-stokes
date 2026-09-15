@@ -1,100 +1,71 @@
 # Navier–Stokes Mechanism Lab
 
-A reproducible research program for studying **which pieces of the 2026 forced Navier–Stokes singularity construction are structurally necessary**, and for turning singularity proofs into a reusable search language for nonlinear PDEs.
+A reproducible research program for studying **which mechanisms in the 2026 forced Navier–Stokes singularity construction are structurally necessary**, and whether removable proof/localization machinery can lead to a genuinely smaller forcing construction.
 
-This repository is not a claim of an unforced Navier–Stokes blowup proof. It is a fail-closed laboratory for generating, testing, killing, and formally tracking mechanisms.
+This repository is **not** a claim of an unforced Navier–Stokes blowup proof. It is a fail-closed mechanism laboratory: promoted claims are tied to a pinned source revision, an explicit theorem boundary, and reproducible CI.
 
-## The two research questions
-
-### 1. What survives if the forcing is weakened or removed?
-
-The source audit now separates three mechanisms that were previously easy to blur together:
+## Reproducibility lock
 
 ```text
-tiny nonzero pulse entry seed
-        ↓
-homogeneous zero-forcing primary evolution on its native slot
-        ↓
-temporal / clock localization
-        ↓
-explicit cutoff residual channels
-        ↓
-correction + flatness machinery
+openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+leanprover/lean4:v4.34.0-rc2
 ```
 
-Pinned `LinearWaveBounds.excludedSlotError` gives the exact local identity
+The reference result under study is a smooth **forced** finite-time singularity construction.
+
+## Current frontier
+
+### v5.9: canonical cutoff-scale comparison
+
+Source-locked Lean formalizes a deterministic least-admissible local cutoff scale and canonical schedule comparison. Stronger certified gain cannot worsen the canonical schedule. The project also proves:
+
+- an exact criterion for strict integer-scale crossing;
+- a criterion for strict improvement to survive the source doubling envelope; and
+- a constant-cancelling scale-relaxation theorem that does not assign fake values to existential multiplicative constants.
+
+Qualified audit: `34784849248`.
+
+### v5.10: remove factor-two schedule growth
+
+The source constructs diagonal scales with
 
 ```text
-E_slot = Dfast(psi) * amplitude + (1-psi) * source.
+a(n+1) = max(local(n+1), 2*a(n)).
 ```
 
-For the primary residual class `source=0`, so only the cutoff-derivative commutator remains. Setting `psi=1` therefore removes this **specific principal localization error** exactly, provided the uncut coefficient still satisfies its solve identity.
-
-The first obstruction is now precise: `PrimaryODE.solution` is represented by a differentiable extension to all real slot times, but the source proves the ODE identity only on the native finite interval `Icc(a,b)`, instantiated as `Icc(0,L)` for the primary pulse. Reusing that extension after deleting the cutoff is therefore not a source-backed global homogeneous solution.
-
-Current promoted experiment:
+v5.10 replaces this by
 
 ```text
-extend one pulse's actual frame/coefficient dynamics to a larger interval
-        ↓
-solve the homogeneous ODE there directly
-        ↓
-prove agreement on the original slot by uniqueness
-        ↓
-set temporal cutoff to one
-        ↓
-recompute every remaining residual channel
-        ↓
-only then test two pulses and a finite hierarchy
+s(0)   = max(1, local(0))
+s(n+1) = max(local(n+1), s(n)+1).
 ```
 
-### 2. Can blowup mechanisms themselves become searchable objects?
+The following layers are now source-locked and formalized:
 
-The lab encodes candidates as interacting layers:
+1. **Numerical selector:** the weaker schedule stays positive, strictly monotone, divergent, preserves every local admissibility obligation, and is pointwise no larger than the source doubling schedule. Audit `34785230674`.
+2. **Finite heterogeneous cutoff bounds:** the source-style analytic cutoff estimate survives unchanged with the weaker schedule. Audit `34785248912`.
+3. **Physical local-q support and smooth zero extension:** the actual local validity floor, positive-stage cut bounds, and smooth extension to all preterminal spacetime survive without factor-two growth. Audit `34936977665`.
+
+The next theorem-sized target is the mixed three-component schedule, followed by residual vanishing and a parallel final-candidate theorem.
+
+## Why this matters
+
+The downstream source proofs audited so far consume positivity/monotonicity, divergence of the cutoff scales, support separation, smooth sums, extension data, residual vanishing, angular divergence, and origin blowup. The factor-two certificate is carried through intermediate APIs, but is not visibly consumed by those final calls.
+
+If the chain closes through the final singular candidate, factor-two growth will be identified as removable proof/localization architecture. That would **not** yet imply a smaller force norm.
+
+The cut field is `χ(a_j q) A_j`. Decreasing `a_j` moves and broadens the transition collar while changing cutoff-derivative factors and the uncut field sampled there. A force-size claim requires a direct residual/force comparison.
+
+## Secondary quantitative lane
+
+The pinned exponent ledger exposes a candidate positive-stage margin
 
 ```text
-scaling → geometry → PDE balance → stress realization
-        → pulse dynamics → localization → corrections
-        → residual closure → proof obligations
+h * (3/5 - kappa) = 59999/100000 * h,
+kappa = 1/100000.
 ```
 
-v5.6 adds a counterfactual cutoff-residual atlas so an agent cannot say “remove the cutoff” without inheriting the exact support, source, solve, and domain obligations that operation exposes.
-
-## Current research frontier
-
-### Cutoff residual lineage
-
-Source-backed facts:
-
-- canonical primary pulse is initialized by `primarySeed = (P(a), 0)`;
-- its native-slot ODE uses zero physical forcing;
-- slot-cutoff derivative support lies in `L/5 <= |v-L/2| <= L/3`;
-- Gaussian decay there beats every fixed power of the dyadic stage scale;
-- the general excluded-slot error has two channels: cutoff derivative and uncovered source;
-- the primary source-zero specialization removes the uncovered-source channel;
-- `psi=1` removes the principal localization error locally under the solve hypothesis;
-- the existing differentiable extension is **not** proven to satisfy that homogeneous ODE outside the native interval.
-
-The next theorem-sized target is therefore an **enlarged-interval one-pulse continuation**, not an infinite pulse hierarchy.
-
-### Similarity-parameter lineage
-
-Elementary power counting gives the broad window
-
-```text
-0 < h < 1/6.
-```
-
-Two conservative source-derived local certificates from the pinned construction are exact rationals:
-
-```text
-NaturalEntrance.base_source_lower:        h < 99/17002  ≈ 0.00582284
-MatchingConeBounds.shape_axis_lower:      h < 949/268040 ≈ 0.00354052
-```
-
-These are sufficient local bounds only, not sharp or global thresholds.
-
-An upstream check on 2026-09-10 found that OpenAI's current Lean tree separates a broader printed/manuscript axis range (`h <= 1/100`, `j <= 1/20`) from the tighter selected `SmallParameters` range (`h <= 1/1000`). The reproducibility lock remains pinned while the delta is tracked in `UPSTREAM_WATCH.json`.
+Several low-level statements qualified, but the attempted literal boosted `StageEstimates`/actual-candidate adapter did not compile source-locked. That experiment remains blocked and secondary to v5.10.
 
 ## Evidence ladder
 
@@ -108,27 +79,26 @@ VALIDATED_BOUND
 FORMALIZED
 ```
 
-`PROMOTE`, `HOLD`, and `KILL` are research-allocation labels, not theorem statuses.
-
-See [`docs/CLAIMS.md`](docs/CLAIMS.md) and [`docs/RESEARCH_GOVERNANCE.md`](docs/RESEARCH_GOVERNANCE.md).
-
 ## Project map
 
-- [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md): concise technical tour.
-- [`docs/RESEARCH_MAP.md`](docs/RESEARCH_MAP.md): mechanism graph and active decision gates.
-- [`docs/FINDINGS_V5_6.md`](docs/FINDINGS_V5_6.md): latest source audit and first no-cutoff obstruction.
-- [`docs/V5_6_PLAN.md`](docs/V5_6_PLAN.md): current release gates.
-- [`UPSTREAM_WATCH.json`](UPSTREAM_WATCH.json): upstream changes observed without mutating the reproducibility lock.
-- [`artifacts/`](artifacts/): machine-readable evidence and experiment outputs.
+- [`docs/CURRENT_STATUS.md`](docs/CURRENT_STATUS.md): canonical current state and exact audit IDs.
+- [`docs/CLAIMS.md`](docs/CLAIMS.md): scientific claim boundary.
+- [`docs/RESEARCH_MAP.md`](docs/RESEARCH_MAP.md): mechanism tracks and decision gates.
+- [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md): technical tour.
+- [`docs/RESEARCH_GOVERNANCE.md`](docs/RESEARCH_GOVERNANCE.md): promotion and falsification rules.
+- [`UPSTREAM_WATCH.json`](UPSTREAM_WATCH.json): observed upstream changes without mutating the reproducibility lock.
 
-## Repository workflow
+Historical `FINDINGS_V5_*` files are an audit trail, not the authoritative current status.
 
-- `main`: stable, reproducible research checkpoints.
-- `research/vX.Y.Z-*`: active hypothesis lineages.
-- pull requests: scientific release boundaries with explicit claims/non-claims.
-- issues: independent research questions and falsification tracks.
+## GitHub workflow
 
-Current active branch: `research/v5.6.0-cutoff-residual-atlas`.
+- `main`: stable reproducible checkpoints.
+- `research/vX.Y.Z-*`: hypothesis lineages.
+- issues: falsifiable research questions and kill rules.
+- pull requests: scientific promotion boundaries.
+- pinned CI: recompiles promoted formal claims against the exact upstream SHA and Lean version.
+
+Primary active lane: issue **#15**, factor-two diagonal schedule growth elimination.
 
 ## Run locally
 
@@ -138,4 +108,4 @@ pytest -q
 blowup-lab --out artifacts/local
 ```
 
-The code is designed to fail closed: unknown constants remain unknown, missing proof mechanisms cannot be silently ignored, attractive numerical behavior cannot override fatal mathematical invariants, and release metadata is checked for version drift.
+The repository is designed to fail closed: unknown constants stay unknown, failed proof obligations stay visible, and stronger estimates are never relabeled as force reduction without a direct physical comparison.
