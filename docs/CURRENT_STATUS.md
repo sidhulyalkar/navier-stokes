@@ -102,5 +102,5 @@ Not established:
 ## Active GitHub tracks
 
 - **#15** factor-two schedule growth elimination, primary lane.
-- **#14** quantitative force-size bridge after a genuinely changed physical witness is qualified.
+- **#14** quantitative force-size bridge after either a strict schedule-separation witness or another physically distinct singular witness is qualified.
 - **#13** common gain slack, blocked/secondary until its literal source adapter is redesigned.
