@@ -1,6 +1,6 @@
 # Current research status
 
-Last updated: 2026-09-17 (America/Los_Angeles)
+Last updated: 2026-09-18 (America/Los_Angeles)
 
 This is the canonical short status page. Historical `FINDINGS_V5_*` files remain useful audit trails, but active claims should be checked here first.
 
@@ -51,25 +51,26 @@ s(0)   = max(1, local(0))
 s(n+1) = max(local(n+1), s(n)+1).
 ```
 
-Five layers are now qualified:
+Six layers are now qualified:
 
 1. **Numerical selector**: positive, strictly monotone, divergent, reciprocal tends to zero, preserves all local admissibility, pointwise no larger than the source doubling envelope. Audit `34785230674`.
 2. **Finite heterogeneous cutoff bounds**: the source-style analytic cutoff-bound theorem survives using the weaker schedule. Audit `34785248912`.
 3. **Physical local-q support and smooth zero extension**: the gain-independent support floor, positive-stage cut bounds, and smooth preterminal extension survive without factor-two growth. Audit `34936977665`.
 4. **Mixed three-component schedule**: the same potential/direct/pressure families admit one common strict schedule with the same common loss and smooth full sums, without factor-two growth. Audit `34937994783`.
 5. **Mixed residual vanishing**: the physical mixed residual still has vanishing joint jets using the weaker schedule. Audit `34938088599`.
+6. **Final singular-candidate replay**: the pinned final candidate proof has been replayed with the same finite-stage fields and downstream force constructor while omitting the factor-two schedule-growth certificate. Audit `35299948373`.
 
 Next chain:
 
 ```text
-parallel final singular-candidate theorem
+strict schedule-separation witness at an actual stage
         ↓
 old-vs-new collar residual comparison
         ↓
 standard force-norm comparison
 ```
 
-Source audit strongly suggests the residual/final layers consume `Tendsto`, monotonicity, support separation, smooth sums, extension data, residual vanishing, angular divergence, and blowup, not the factor-two witness. This is evidence, not yet an end-to-end theorem.
+The factor-two growth rule is now formally unnecessary as a hypothesis/construction rule through the final forced singular candidate. The remaining construction-level question is whether the source's actual least local scales ever make the minimal `+1` envelope strictly smaller than the doubling envelope; without such a stage, the two selectors may still choose the same numerical schedule.
 
 ## Blocked secondary experiment
 
@@ -90,11 +91,11 @@ Established:
 
 - canonical schedule comparison and strict-crossing infrastructure;
 - constant-cancelling cutoff-scale comparison;
-- factor-two growth is unnecessary through the numerical selector, finite heterogeneous cutoff estimates, physical local-q zero extension, mixed three-component schedule, and mixed residual-vanishing layer.
+- factor-two growth is unnecessary through the numerical selector, finite heterogeneous cutoff estimates, physical local-q zero extension, mixed three-component schedule, mixed residual vanishing, and the final forced singular-candidate assembly.
 
 Not established:
 
-- end-to-end final singular candidate without factor-two growth;
+- that the actual minimal strict selector is numerically different from the source doubling selector at any concrete stage;
 - smaller final force in any standard norm;
 - force norm tending to zero;
 - unforced Navier–Stokes singularity.

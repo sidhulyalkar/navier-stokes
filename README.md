@@ -50,15 +50,15 @@ The finite heterogeneous cutoff-bound layer also survives without the factor-two
 
 Pinned audit: `34785248912`.
 
-The actual local-`q` validity region and smooth zero-extension layer also survives without factor-two growth (audit `34936977665`). The mixed three-component schedule and mixed residual-vanishing theorem also qualify without factor-two growth (audits `34937994783` and `34938088599`). The next theorem-sized target is a parallel final-candidate theorem using that weaker schedule.
+The actual local-`q` validity region and smooth zero-extension layer also survives without factor-two growth (audit `34936977665`). The mixed three-component schedule and mixed residual-vanishing theorem also qualify without factor-two growth (audits `34937994783` and `34938088599`). Finally, the pinned final singular-candidate proof itself has been replayed without the factor-two schedule-growth certificate (audit `35299948373`).
 
 ## Why this matters
 
 The final candidate assembly visibly uses positivity/monotonicity, divergence of the cutoff scales, support separation, smooth sums, extension data, residual vanishing, angular divergence, and origin blowup. The source carries a factor-two growth certificate through intermediate APIs, but the downstream calls audited so far do not visibly consume it.
 
-If the full v5.10 chain closes, this would establish that a concrete localization mechanism in the published proof architecture is unnecessary for producing the singular candidate. It would **not** yet establish a smaller force norm.
+The v5.10 theorem chain now establishes that factor-two schedule growth is unnecessary as a construction rule through the final forced singular candidate. This is an M2 mechanism-elimination result. It does **not** yet establish that the minimal `+1` selector chooses a numerically different schedule on the actual source data, nor does it establish a smaller force norm.
 
-Changing `a_j` changes both the cutoff derivative factors and the position/width of the transition collar. A force-size claim requires a direct comparison of the resulting residual/forcing fields.
+The next construction-level target is therefore a strict schedule-separation witness at an actual stage. Only after that is it meaningful to compare the changed transition collar. Changing `a_j` changes both cutoff derivative factors and the position/width of the transition collar, so a force-size claim still requires a direct comparison of the resulting residual/forcing fields.
 
 ## Secondary quantitative lane
 

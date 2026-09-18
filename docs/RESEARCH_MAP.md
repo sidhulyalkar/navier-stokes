@@ -97,9 +97,9 @@ E4 mixed three-component strict schedule        [FORMALIZED]
         ↓
 E5 mixed residual vanishing                     [FORMALIZED]
         ↓
-E6a parallel final singular candidate theorem   [NEXT]
+E6a parallel final singular candidate theorem   [FORMALIZED]
         ↓
-E6b strict schedule separation at actual stage  [OPEN]
+E6b strict schedule separation at actual stage  [ACTIVE]
         ↓
 E7 old-vs-new collar residual comparison        [BLOCKED]
         ↓
@@ -113,11 +113,11 @@ s(0)   = max(1, local(0))
 s(j+1) = max(local(j+1), s(j)+1).
 ```
 
-It is positive, strictly monotone, divergent, preserves local numerical admissibility, and is pointwise no larger than the source doubling envelope. The finite analytic cutoff layer, actual local support/zero-extension layer, mixed three-component schedule, and mixed residual-vanishing theorem have all been rebuilt with this weaker schedule.
+It is positive, strictly monotone, divergent, preserves local numerical admissibility, and is pointwise no larger than the source doubling envelope. The finite analytic cutoff layer, actual local support/zero-extension layer, mixed three-component schedule, mixed residual-vanishing theorem, and final forced singular-candidate assembly have all been rebuilt with this weaker schedule. Final-candidate audit: `35299948373`.
 
 ### Kill rule
 
-If any downstream theorem genuinely requires factor-two growth rather than strict divergence/local finiteness, record the first such theorem and stop the deletion claim there. Even if E6a closes, do not call the geometry changed until E6b proves a strict numerical schedule difference at an actual stage.
+The downstream final-candidate replay no longer exposes a factor-two requirement. Do not call the physical geometry changed until E6b proves a strict numerical schedule difference at an actual stage.
 
 ## Track F: stress-cone optimization
 

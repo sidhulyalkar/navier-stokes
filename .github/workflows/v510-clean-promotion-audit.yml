@@ -12,6 +12,7 @@ on:
       - "formal/V510PhysicalLocalStrictCutBounds.lean"
       - "formal/V510MixedStrictSchedule.lean"
       - "formal/V510MixedStrictResidual.lean"
+      - "formal/V510FinalStrictCandidate.lean"
       - ".github/workflows/v510-clean-promotion-audit.yml"
       - "docs/CURRENT_STATUS.md"
       - "docs/CLAIMS.md"
@@ -27,6 +28,7 @@ on:
       - "formal/V510PhysicalLocalStrictCutBounds.lean"
       - "formal/V510MixedStrictSchedule.lean"
       - "formal/V510MixedStrictResidual.lean"
+      - "formal/V510FinalStrictCandidate.lean"
       - ".github/workflows/v510-clean-promotion-audit.yml"
   workflow_dispatch:
 
@@ -76,7 +78,7 @@ jobs:
           key: v510-qualified-${{ runner.os }}-openai-8937a8f4-lean-v4.34.0-rc2
 
       - name: Build source dependency closure
-        run: cd upstream && ~/.elan/bin/lake build NavierStokes.MixedDiagonalResidual
+        run: cd upstream && ~/.elan/bin/lake build NavierStokes.MixedCandidateAssembly
 
       - name: Install and compile qualified research modules
         run: |
@@ -90,6 +92,7 @@ jobs:
             V510PhysicalLocalStrictCutBounds
             V510MixedStrictSchedule
             V510MixedStrictResidual
+            V510FinalStrictCandidate
           )
           for f in "${modules[@]}"; do
             cp "formal/$f.lean" "upstream/NavierStokes/$f.lean"

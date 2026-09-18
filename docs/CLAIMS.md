@@ -17,17 +17,18 @@ For the freshest project state, read [`CURRENT_STATUS.md`](CURRENT_STATUS.md).
 - The physical local-`q` support and smooth zero-extension layer formally survives with this weaker schedule.
 - The mixed potential/direct/pressure schedule formally survives with the weaker schedule.
 - Mixed residual vanishing formally survives without the factor-two growth field.
+- The final forced singular-candidate proof formally survives without carrying a factor-two schedule-growth certificate; the same downstream periodic-force constructor is used.
 
 ## Active but not yet established end-to-end
 
-- Removing factor-two schedule growth from the final singular-candidate assembly.
-- Translating a changed cutoff schedule into a quantitative ordering of collar residuals or final forcing fields.
+- Exhibiting an actual stage where the minimal strict schedule is strictly smaller than the source doubling schedule.
+- Translating any such changed cutoff schedule into a quantitative ordering of collar residuals or final forcing fields.
 - Promoting the source-visible `59999/100000 * h` common stage-gain slack into a fully qualified literal actual-candidate certificate.
 
 ## Not established
 
 - No independent re-proof of every theorem in the upstream OpenAI formalization.
-- No end-to-end singular witness has yet been qualified with factor-two schedule growth removed.
+- No theorem yet shows that the actual selected minimal strict schedule differs numerically from the doubling schedule at a concrete source stage.
 - No quantitative proof that any modified witness has smaller forcing in `L¹_t L²_x`, `L²_t L^{3/2}_x`, `L∞`, or another standard norm.
 - No family with force norm tending to zero.
 - No unforced Navier–Stokes singularity.
