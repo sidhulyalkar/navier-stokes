@@ -1,0 +1,86 @@
+name: v5.10-strict-germ-witness-audit
+
+on:
+  push:
+    branches: ["research/v5.10.0-strict-germ-witness"]
+    paths:
+      - "formal/V590CanonicalDiagonalScale.lean"
+      - "formal/V510MinimalStrictSchedule.lean"
+      - "formal/V510FiniteStrictCutBounds.lean"
+      - "formal/V510PhysicalLocalStrictCutBounds.lean"
+      - "formal/V510MixedStrictSchedule.lean"
+      - "formal/V510MixedStrictResidual.lean"
+      - "formal/V510FinalStrictCandidate.lean"
+      - "formal/V510StrictCandidateWitness.lean"
+      - "formal/V510StrictGermCandidateWitness.lean"
+      - ".github/workflows/v510-strict-germ-witness-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  strict-germ-witness:
+    name: v5.10 strict germ candidate witness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+      - name: Verify source lock
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+      - name: Restore candidate build cache
+        uses: actions/cache@v5
+        with:
+          path: upstream/.lake/build
+          key: v510-germ-${{ runner.os }}-openai-8937a8f4-lean-v4.34.0-rc2
+          restore-keys: |
+            v510-witness-${{ runner.os }}-openai-8937a8f4-lean-v4.34.0-rc2
+            v510-final-${{ runner.os }}-openai-8937a8f4-lean-v4.34.0-rc2
+            v510-qualified-${{ runner.os }}-openai-8937a8f4-lean-v4.34.0-rc2
+      - name: Build germ-candidate dependency closure
+        run: cd upstream && ~/.elan/bin/lake build NavierStokes.GermCandidateAssembly
+      - name: Install and compile strict germ witness chain
+        run: |
+          set -euo pipefail
+          modules=(
+            V590CanonicalDiagonalScale
+            V510MinimalStrictSchedule
+            V510FiniteStrictCutBounds
+            V510PhysicalLocalStrictCutBounds
+            V510MixedStrictSchedule
+            V510MixedStrictResidual
+            V510FinalStrictCandidate
+            V510StrictCandidateWitness
+            V510StrictGermCandidateWitness
+          )
+          for f in "${modules[@]}"; do
+            cp "formal/$f.lean" "upstream/NavierStokes/$f.lean"
+          done
+          cd upstream
+          mkdir -p .lake/build/lib/lean/NavierStokes
+          for f in "${modules[@]}"; do
+            ~/.elan/bin/lake env lean               -o ".lake/build/lib/lean/NavierStokes/$f.olean"               "NavierStokes/$f.lean"
+          done
