@@ -18,17 +18,18 @@ For the freshest project state, read [`CURRENT_STATUS.md`](CURRENT_STATUS.md).
 - The mixed potential/direct/pressure schedule formally survives with the weaker schedule.
 - Mixed residual vanishing formally survives without the factor-two growth field.
 - The final forced singular-candidate proof formally survives without carrying a factor-two schedule-growth certificate; the same downstream periodic-force constructor is used.
+- For any requested initial cutoff floor, there exists a common admissible floor at or above it for which the minimal strict selector and canonical doubling selector agree at stage 0 but are strictly separated at stage 1.
 
 ## Active but not yet established end-to-end
 
-- Exhibiting an actual stage where the minimal strict schedule is strictly smaller than the source doubling schedule.
-- Translating any such changed cutoff schedule into a quantitative ordering of collar residuals or final forcing fields.
+- Building **paired** strict/doubling candidates from identical aggregated cutoff constants and raw finite-stage fields.
+- Translating that controlled schedule change into a quantitative ordering of collar residuals or final forcing fields.
 - Promoting the source-visible `59999/100000 * h` common stage-gain slack into a fully qualified literal actual-candidate certificate.
 
 ## Not established
 
 - No independent re-proof of every theorem in the upstream OpenAI formalization.
-- No theorem yet shows that the actual selected minimal strict schedule differs numerically from the doubling schedule at a concrete source stage.
+- No theorem says the source/default `lower = 1` selectors differ; the strict-separation theorem chooses a common admissible floor.
 - No quantitative proof that any modified witness has smaller forcing in `L¹_t L²_x`, `L²_t L^{3/2}_x`, `L∞`, or another standard norm.
 - No family with force norm tending to zero.
 - No unforced Navier–Stokes singularity.

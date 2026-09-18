@@ -60,17 +60,30 @@ Six layers are now qualified:
 5. **Mixed residual vanishing**: the physical mixed residual still has vanishing joint jets using the weaker schedule. Audit `34938088599`.
 6. **Final singular-candidate replay**: the pinned final candidate proof has been replayed with the same finite-stage fields and downstream force constructor while omitting the factor-two schedule-growth certificate. Audit `35299948373`.
 
+### v5.10 strict selector separation
+
+Source-locked Lean proves that positive-stage least local scales are independent of the stage-zero floor. More strongly, for **any requested initial floor** `lower`, there exists a common admissible `B >= lower` such that
+
+```text
+minimalStrictSchedule(..., B, 0) = canonicalSchedule(..., B, 0)
+minimalStrictSchedule(..., B, 1) < canonicalSchedule(..., B, 1).
+```
+
+Qualified audit: `35372821347`.
+
+Thus the selector change can produce genuinely different localization geometry while accommodating an arbitrary gain-independent support floor. This is an existence result in the chosen floor; it does **not** prove strict separation for the source/default `lower = 1`.
+
 Next chain:
 
 ```text
-strict schedule-separation witness at an actual stage
+paired strict/doubling schedules from identical Kall/Pall and raw fields
         ↓
-old-vs-new collar residual comparison
+exact collar-residual difference
+        ↓
+source-compatible residual/force observable
         ↓
 standard force-norm comparison
 ```
-
-The factor-two growth rule is now formally unnecessary as a hypothesis/construction rule through the final forced singular candidate. The remaining construction-level question is whether the source's actual least local scales ever make the minimal `+1` envelope strictly smaller than the doubling envelope; without such a stage, the two selectors may still choose the same numerical schedule.
 
 ## Blocked secondary experiment
 
@@ -91,17 +104,20 @@ Established:
 
 - canonical schedule comparison and strict-crossing infrastructure;
 - constant-cancelling cutoff-scale comparison;
-- factor-two growth is unnecessary through the numerical selector, finite heterogeneous cutoff estimates, physical local-q zero extension, mixed three-component schedule, mixed residual vanishing, and the final forced singular-candidate assembly.
+- factor-two growth is unnecessary through the numerical selector, finite heterogeneous cutoff estimates, physical local-q zero extension, mixed three-component schedule, mixed residual vanishing, and the final forced singular-candidate assembly;
+- for any required initial floor, a common admissible floor can be chosen so the minimal strict and doubling selectors are genuinely separated at stage 1.
 
 Not established:
 
-- that the actual minimal strict selector is numerically different from the source doubling selector at any concrete stage;
+- strict separation for the source/default `lower = 1` schedule;
+- any ordering of the paired collar residuals yet;
 - smaller final force in any standard norm;
 - force norm tending to zero;
 - unforced Navier–Stokes singularity.
 
 ## Active GitHub tracks
 
-- **#15** factor-two schedule growth elimination, primary lane.
-- **#14** quantitative force-size bridge after either a strict schedule-separation witness or another physically distinct singular witness is qualified.
+- **#17** paired strict-vs-doubling candidates and collar residual comparison, primary lane.
+- **#14** broader quantitative force-size bridge and norm hierarchy.
 - **#13** common gain slack, blocked/secondary until its literal source adapter is redesigned.
+- **#15** factor-two schedule necessity, closed as completed after the final-candidate replay and strict-separation result.
