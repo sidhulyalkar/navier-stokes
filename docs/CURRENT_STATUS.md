@@ -1,6 +1,6 @@
 # Current research status
 
-Last updated: 2026-09-14 (America/Los_Angeles)
+Last updated: 2026-09-17 (America/Los_Angeles)
 
 This is the canonical short status page. Historical `FINDINGS_V5_*` files remain useful audit trails, but active claims should be checked here first.
 
