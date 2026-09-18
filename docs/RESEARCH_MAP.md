@@ -97,7 +97,9 @@ E4 mixed three-component strict schedule        [FORMALIZED]
         ↓
 E5 mixed residual vanishing                     [FORMALIZED]
         ↓
-E6 parallel final singular candidate theorem    [NEXT]
+E6a parallel final singular candidate theorem   [NEXT]
+        ↓
+E6b strict schedule separation at actual stage  [OPEN]
         ↓
 E7 old-vs-new collar residual comparison        [BLOCKED]
         ↓
@@ -115,7 +117,7 @@ It is positive, strictly monotone, divergent, preserves local numerical admissib
 
 ### Kill rule
 
-If any downstream theorem genuinely requires factor-two growth rather than strict divergence/local finiteness, record the first such theorem and stop the deletion claim there.
+If any downstream theorem genuinely requires factor-two growth rather than strict divergence/local finiteness, record the first such theorem and stop the deletion claim there. Even if E6a closes, do not call the geometry changed until E6b proves a strict numerical schedule difference at an actual stage.
 
 ## Track F: stress-cone optimization
 
