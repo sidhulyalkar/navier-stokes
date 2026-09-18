@@ -130,4 +130,66 @@ theorem exists_floor_strict_schedule_separation
     rw [max_eq_right hl_left, max_eq_right hl_right]
     omega
 
+
+/-- Any floor strictly above the positive-stage-one least local scale forces
+stage-one separation between the two canonical recursive selectors. -/
+theorem strict_schedule_separation_of_floor_gt_stage_one
+    (C p : ℕ → ℕ → ℝ) (g : ℕ → ℝ)
+    (hg : ∀ j, 1 ≤ j → 0 < g j) (B : ℕ)
+    (hB : leastLocalScale C p g hg 0 1 < B) :
+    minimalStrictSchedule C p g hg B 0 =
+        canonicalSchedule C p g hg B 0 ∧
+      minimalStrictSchedule C p g hg B 1 <
+        canonicalSchedule C p g hg B 1 := by
+  let l := leastLocalScale C p g hg 0 1
+  have hlpos : 0 < l := by
+    exact (leastLocalScale_spec C p g hg 0 1).1
+  have hB1 : 1 ≤ B := by
+    dsimp [l] at hB
+    omega
+  have hzero : leastLocalScale C p g hg B 0 = B := by
+    rw [leastLocalScale_zero_eq_max_one C p g hg B]
+    exact max_eq_right hB1
+  have hone : leastLocalScale C p g hg B 1 = l := by
+    exact leastLocalScale_floor_independent_of_pos
+      C p g hg (B := B) (B' := 0) (j := 1) (by omega)
+  constructor
+  · unfold minimalStrictSchedule canonicalSchedule
+    simp [strictEnvelope, DiagonalScale.doublingEnvelope, hzero, max_eq_right hB1]
+  · unfold minimalStrictSchedule canonicalSchedule
+    change
+      max (leastLocalScale C p g hg B 1)
+          (max 1 (leastLocalScale C p g hg B 0) + 1) <
+        max (leastLocalScale C p g hg B 1)
+          (2 * max 1 (leastLocalScale C p g hg B 0))
+    rw [hzero, hone, max_eq_right hB1]
+    have hlB : l < B := by
+      simpa only [l] using hB
+    have hl_left : l ≤ B + 1 := by omega
+    have hl_right : l ≤ 2 * B := by omega
+    rw [max_eq_right hl_left, max_eq_right hl_right]
+    omega
+
+/-- The support/localization layer may demand an arbitrary initial floor.
+Whatever that requested floor is, one can raise it further and still force a
+strict-vs-doubling separation at stage one without knowing any hidden cutoff
+constant numerically. -/
+theorem exists_floor_ge_strict_schedule_separation
+    (C p : ℕ → ℕ → ℝ) (g : ℕ → ℝ)
+    (hg : ∀ j, 1 ≤ j → 0 < g j) (lower : ℕ) :
+    ∃ B : ℕ,
+      lower ≤ B ∧
+      minimalStrictSchedule C p g hg B 0 =
+        canonicalSchedule C p g hg B 0 ∧
+      minimalStrictSchedule C p g hg B 1 <
+        canonicalSchedule C p g hg B 1 := by
+  let l := leastLocalScale C p g hg 0 1
+  let B := max lower (l + 1)
+  have hlB : l < B := by
+    have hle : l + 1 ≤ B := le_max_right lower (l + 1)
+    omega
+  refine ⟨B, le_max_left lower (l + 1), ?_⟩
+  exact strict_schedule_separation_of_floor_gt_stage_one
+    C p g hg B (by simpa only [l] using hlB)
+
 end NavierStokes.V510StrictScheduleSeparation
