@@ -7,7 +7,7 @@ on:
       - "formal/V590CanonicalDiagonalScale.lean"
       - "formal/V510MinimalStrictSchedule.lean"
       - "formal/V510StrictScheduleSeparation.lean"
-      - ".github/workflows/v510-strict-schedule-separation-audit.yml"
+      - ".github/workflows/v510-e6b-promotion-audit.yml"
   workflow_dispatch:
 
 concurrency:
