@@ -144,8 +144,9 @@ theorem strict_schedule_separation_of_floor_gt_stage_one
   let l := leastLocalScale C p g hg 0 1
   have hlpos : 0 < l := by
     exact (leastLocalScale_spec C p g hg 0 1).1
+  have hlB : l < B := by
+    simpa only [l] using hB
   have hB1 : 1 ≤ B := by
-    dsimp [l] at hB
     omega
   have hzero : leastLocalScale C p g hg B 0 = B := by
     rw [leastLocalScale_zero_eq_max_one C p g hg B]
@@ -163,8 +164,6 @@ theorem strict_schedule_separation_of_floor_gt_stage_one
         max (leastLocalScale C p g hg B 1)
           (2 * max 1 (leastLocalScale C p g hg B 0))
     rw [hzero, hone, max_eq_right hB1]
-    have hlB : l < B := by
-      simpa only [l] using hB
     have hl_left : l ≤ B + 1 := by omega
     have hl_right : l ≤ 2 * B := by omega
     rw [max_eq_right hl_left, max_eq_right hl_right]
