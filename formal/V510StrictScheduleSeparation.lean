@@ -81,7 +81,7 @@ theorem leastLocalScale_zero_eq_max_one
       omega
   · have hs := leastLocalScale_spec C p g hg B 0
     apply max_le
-    · omega
+    · exact hs.1
     · exact hs.2.1 rfl
 
 /-- For every source-compatible local admissibility problem, there is a common
