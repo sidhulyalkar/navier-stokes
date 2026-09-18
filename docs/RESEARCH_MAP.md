@@ -93,11 +93,11 @@ E2 finite heterogeneous cutoff bounds           [FORMALIZED]
         ↓
 E3 local-q support + smooth zero extension      [FORMALIZED]
         ↓
-E4 mixed three-component strict schedule        [NEXT]
+E4 mixed three-component strict schedule        [FORMALIZED]
         ↓
-E5 mixed residual vanishing                     [SOURCE AUDIT SUPPORTS]
+E5 mixed residual vanishing                     [FORMALIZED]
         ↓
-E6 parallel final singular candidate theorem    [OPEN]
+E6 parallel final singular candidate theorem    [NEXT]
         ↓
 E7 old-vs-new collar residual comparison        [BLOCKED]
         ↓
@@ -111,7 +111,7 @@ s(0)   = max(1, local(0))
 s(j+1) = max(local(j+1), s(j)+1).
 ```
 
-It is positive, strictly monotone, divergent, preserves local numerical admissibility, and is pointwise no larger than the source doubling envelope. The finite analytic cutoff layer and actual local support/zero-extension layer have both been rebuilt with this weaker schedule.
+It is positive, strictly monotone, divergent, preserves local numerical admissibility, and is pointwise no larger than the source doubling envelope. The finite analytic cutoff layer, actual local support/zero-extension layer, mixed three-component schedule, and mixed residual-vanishing theorem have all been rebuilt with this weaker schedule.
 
 ### Kill rule
 
