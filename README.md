@@ -58,7 +58,9 @@ The final candidate assembly visibly uses positivity/monotonicity, divergence of
 
 The v5.10 theorem chain now establishes that factor-two schedule growth is unnecessary as a construction rule through the final forced singular candidate. This is an M2 mechanism-elimination result. It does **not** yet establish that the minimal `+1` selector chooses a numerically different schedule on the actual source data, nor does it establish a smaller force norm.
 
-The next construction-level target is therefore a strict schedule-separation witness at an actual stage. Only after that is it meaningful to compare the changed transition collar. Changing `a_j` changes both cutoff derivative factors and the position/width of the transition collar, so a force-size claim still requires a direct comparison of the resulting residual/forcing fields.
+A source-locked strict-separation theorem now shows that for any requested initial floor, one can choose a common admissible floor at least that large for which the minimal strict and canonical doubling selectors already differ at stage 1 (audit `35372821347`). This is an existence theorem in the chosen floor, not a claim that the source/default `lower = 1` schedules differ.
+
+The next target is controlled pairing: generate both schedules from the same aggregated cutoff constants and the same finite-stage fields, then compare the changed transition collar. Changing `a_j` changes both cutoff derivative factors and the position/width of the collar, so a force-size claim still requires a direct comparison of the resulting residual/forcing fields.
 
 ## Secondary quantitative lane
 
@@ -105,7 +107,7 @@ Historical `FINDINGS_V5_*` files are retained as an audit trail, not as the auth
 - pull requests: scientific promotion boundaries.
 - pinned CI workflows: source-lock every formal claim against the exact upstream revision and Lean version.
 
-Primary active lane: issue **#15**, factor-two diagonal schedule growth elimination.
+Primary active lane: issue **#17**, paired strict-vs-doubling candidates and collar residual comparison. Issue #15 is closed as completed.
 
 ## Run locally
 

@@ -99,9 +99,11 @@ E5 mixed residual vanishing                     [FORMALIZED]
         ↓
 E6a parallel final singular candidate theorem   [FORMALIZED]
         ↓
-E6b strict schedule separation at actual stage  [ACTIVE]
+E6b strict schedule separation above any floor  [FORMALIZED]
         ↓
-E7 old-vs-new collar residual comparison        [BLOCKED]
+P1 paired strict/doubling schedule construction [ACTIVE]
+        ↓
+E7 exact collar residual comparison             [BLOCKED]
         ↓
 E8 standard force-norm comparison               [BLOCKED]
 ```
@@ -117,7 +119,9 @@ It is positive, strictly monotone, divergent, preserves local numerical admissib
 
 ### Kill rule
 
-The downstream final-candidate replay no longer exposes a factor-two requirement. Do not call the physical geometry changed until E6b proves a strict numerical schedule difference at an actual stage.
+The downstream final-candidate replay no longer exposes a factor-two requirement. E6b now proves that for any requested initial floor one can choose a common admissible floor at least that large for which the strict and doubling selectors are already separated at stage 1. This proves the selector change can alter localization geometry, but does not assert separation for the source/default `lower = 1`.
+
+The active control problem is #17: construct both schedules from the **same** aggregated cutoff constants `Kall/Pall` and the same raw fields before comparing collar residuals.
 
 ## Track F: stress-cone optimization
 
