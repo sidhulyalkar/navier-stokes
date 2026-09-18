@@ -1,3 +1,4 @@
+import NavierStokes.SolenoidalDiagonal
 import NavierStokes.SmoothCutoffs
 
 /-!
@@ -121,5 +122,27 @@ theorem cutoff_difference_localized
     obtain ⟨ha0, hb0⟩ :=
       cutoffs_both_zero_outside_relaxed_support hb hba hle
     exact hne (ha0.trans hb0.symm)
+
+/-- Stagewise physical consequence. If changing only the cutoff scale changes
+one actual diagonal stage value, the point must lie in the explicit comparison
+annulus. No nonvanishing assumption on the raw stage is needed: inequality of
+the stage values itself forces the scalar cutoff values to differ. -/
+theorem cutStage_difference_localized
+    {X V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {a b : ℕ → ℝ} {q : X → ℝ} {A : ℕ → X → V}
+    {j : ℕ} {x : X}
+    (hb : 0 < b j) (hba : b j ≤ a j) (hq : 0 ≤ q x)
+    (hne :
+      SolenoidalDiagonal.cutStage a q A j x ≠
+        SolenoidalDiagonal.cutStage b q A j x) :
+    1 / (2 * a j) < q x ∧ q x < 1 / (b j) := by
+  have hcut :
+      SmoothCutoffs.scaledCutoff (a j) (q x) ≠
+        SmoothCutoffs.scaledCutoff (b j) (q x) := by
+    intro heq
+    apply hne
+    simp only [SolenoidalDiagonal.cutStage]
+    rw [heq]
+  exact cutoff_difference_localized hb hba hq hcut
 
 end NavierStokes.V510CutoffCollarGeometry
