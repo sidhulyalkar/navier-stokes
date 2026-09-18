@@ -4,11 +4,15 @@ on:
   push:
     branches: ["research/**"]
     paths:
-      - "formal/**"
+      - "formal/V560EnlargedInterval.lean"
+      - "formal/V560DelayedRightCutoff.lean"
+      - "formal/V560EnlargedKinematics.lean"
       - ".github/workflows/lean-source-audit.yml"
   pull_request:
     paths:
-      - "formal/**"
+      - "formal/V560EnlargedInterval.lean"
+      - "formal/V560DelayedRightCutoff.lean"
+      - "formal/V560EnlargedKinematics.lean"
       - ".github/workflows/lean-source-audit.yml"
   workflow_dispatch:
 

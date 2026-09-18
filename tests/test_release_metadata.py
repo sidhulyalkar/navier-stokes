@@ -28,3 +28,12 @@ def test_source_lock_is_not_silently_migrated_by_upstream_watch():
     serialized = json.dumps(source_lock)
     assert pinned in serialized
     assert upstream["observed_main"] != pinned
+
+
+def test_python_version_markers_match_package_version():
+    import blowup_lab
+    from blowup_lab.cli import VERSION
+
+    expected = project_version()
+    assert blowup_lab.__version__ == expected
+    assert VERSION == expected
