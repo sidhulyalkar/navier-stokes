@@ -43,8 +43,8 @@ jobs:
           lint: false
           use-github-cache: true
           use-mathlib-cache: true
-      - name: Build cutoff dependency closure
-        run: cd upstream && ~/.elan/bin/lake build NavierStokes.SmoothCutoffs
+      - name: Build cut-stage dependency closure
+        run: cd upstream && ~/.elan/bin/lake build NavierStokes.SolenoidalDiagonal
       - name: Compile collar geometry
         run: |
           cp formal/V510CutoffCollarGeometry.lean upstream/NavierStokes/V510CutoffCollarGeometry.lean
