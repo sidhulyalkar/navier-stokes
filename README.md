@@ -50,7 +50,7 @@ The finite heterogeneous cutoff-bound layer also survives without the factor-two
 
 Pinned audit: `34785248912`.
 
-The actual local-`q` validity region and smooth zero-extension layer also survives without factor-two growth (pinned audit `34936977665`). The next theorem-sized target is the mixed three-component schedule, followed by residual vanishing and a parallel final-candidate theorem without factor-two growth.
+The actual local-`q` validity region and smooth zero-extension layer also survives without factor-two growth (audit `34936977665`). The mixed three-component schedule and mixed residual-vanishing theorem also qualify without factor-two growth (audits `34937994783` and `34938088599`). The next theorem-sized target is a parallel final-candidate theorem using that weaker schedule.
 
 ## Why this matters
 
