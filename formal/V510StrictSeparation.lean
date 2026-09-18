@@ -115,11 +115,20 @@ theorem exists_floor_strict_separation_at_one
   have hprev : 1 < canonicalSchedule C p g hg B 0 := by
     dsimp only [B] at hB0 ⊢
     omega
+  have hrBfloor : r < B := by
+    dsimp only [B]
+    omega
+  have hrD :
+      r < canonicalSchedule C p g hg B 0 :=
+    hrBfloor.trans_le hB0
+  have hDdouble :
+      canonicalSchedule C p g hg B 0 <
+        2 * canonicalSchedule C p g hg B 0 := by
+    omega
   have hlocal :
       leastLocalScale C p g hg B 1 <
-        2 * canonicalSchedule C p g hg B 0 := by
-    dsimp only [B] at hB0
-    omega
+        2 * canonicalSchedule C p g hg B 0 :=
+    lt_of_le_of_lt hlocal_le (hrD.trans hDdouble)
   exact ⟨B,
     minimalStrictSchedule_lt_canonicalSchedule_of_local_below_double
       C p g hg B 0 hprev hlocal⟩
