@@ -33,6 +33,7 @@ theorem scaledCutoff_derivative_collar_nonneg
     1 / (2 * a) ≤ q ∧ q ≤ 1 / a := by
   have hsupport :=
     SmoothCutoffs.scaledCutoff_iteratedDeriv_support a n hs
+  change (1 / 2 : ℝ) ≤ |a * q| ∧ |a * q| ≤ 1 at hsupport
   have habs : |a * q| = a * q :=
     abs_of_nonneg (mul_nonneg ha.le hq)
   rw [habs] at hsupport
