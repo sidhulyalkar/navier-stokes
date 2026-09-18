@@ -51,19 +51,17 @@ s(0)   = max(1, local(0))
 s(n+1) = max(local(n+1), s(n)+1).
 ```
 
-Three layers are now qualified:
+Five layers are now qualified:
 
 1. **Numerical selector**: positive, strictly monotone, divergent, reciprocal tends to zero, preserves all local admissibility, pointwise no larger than the source doubling envelope. Audit `34785230674`.
 2. **Finite heterogeneous cutoff bounds**: the source-style analytic cutoff-bound theorem survives using the weaker schedule. Audit `34785248912`.
 3. **Physical local-q support and smooth zero extension**: the gain-independent support floor, positive-stage cut bounds, and smooth preterminal extension survive without factor-two growth. Audit `34936977665`.
+4. **Mixed three-component schedule**: the same potential/direct/pressure families admit one common strict schedule with the same common loss and smooth full sums, without factor-two growth. Audit `34937994783`.
+5. **Mixed residual vanishing**: the physical mixed residual still has vanishing joint jets using the weaker schedule. Audit `34938088599`.
 
 Next chain:
 
 ```text
-mixed three-component strict schedule
-        ↓
-vanishing mixed residual jets
-        ↓
 parallel final singular-candidate theorem
         ↓
 old-vs-new collar residual comparison
@@ -92,7 +90,7 @@ Established:
 
 - canonical schedule comparison and strict-crossing infrastructure;
 - constant-cancelling cutoff-scale comparison;
-- factor-two growth is unnecessary through the numerical selector, finite heterogeneous cutoff estimates, and physical local-q zero-extension layer.
+- factor-two growth is unnecessary through the numerical selector, finite heterogeneous cutoff estimates, physical local-q zero extension, mixed three-component schedule, and mixed residual-vanishing layer.
 
 Not established:
 
