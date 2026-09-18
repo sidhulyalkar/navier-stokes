@@ -15,10 +15,12 @@ For the freshest project state, read [`CURRENT_STATUS.md`](CURRENT_STATUS.md).
 - Factor-two schedule growth is formally unnecessary for the numerical diagonal selector: the minimal `+1` strict envelope remains positive, strictly monotone, tends to infinity, preserves local admissibility, and is pointwise no larger than the source doubling envelope.
 - The finite heterogeneous cutoff-bound layer also formally survives with this weaker schedule.
 - The physical local-`q` support and smooth zero-extension layer formally survives with this weaker schedule.
+- The mixed potential/direct/pressure schedule formally survives with the weaker schedule.
+- Mixed residual vanishing formally survives without the factor-two growth field.
 
 ## Active but not yet established end-to-end
 
-- Removing factor-two schedule growth from the mixed three-component schedule, residual, and final singular-candidate pipeline.
+- Removing factor-two schedule growth from the final singular-candidate assembly.
 - Translating a changed cutoff schedule into a quantitative ordering of collar residuals or final forcing fields.
 - Promoting the source-visible `59999/100000 * h` common stage-gain slack into a fully qualified literal actual-candidate certificate.
 
