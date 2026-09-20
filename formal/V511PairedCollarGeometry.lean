@@ -150,6 +150,9 @@ theorem natPairedCutStage_difference_localized
     1 / (2 * (aDouble j : ℝ)) < q x ∧
       q x < 1 / (aStrict j : ℝ) := by
   apply cutStage_difference_localized
+    (a := fun k => (aDouble k : ℝ))
+    (b := fun k => (aStrict k : ℝ))
+    (q := q) (A := A) (j := j) (x := x)
   · exact_mod_cast hsPos
   · exact_mod_cast horder
   · exact hq
