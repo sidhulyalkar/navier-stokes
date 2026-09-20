@@ -104,7 +104,7 @@ theorem scaledCoordinate_jet_bound_on_collar
     linarith
   refine ⟨D, hD, ?_⟩
   intro a ha x hx hlow hhigh k hk hkm
-  obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (by omega)
+  obtain ⟨n, rfl⟩ := Nat.exists_eq_succ_of_ne_zero (Nat.ne_of_gt hk)
   have ha0 : 0 < a := lt_of_lt_of_le zero_lt_one ha
   have hqx : 0 < q x := hpos x hx
   have hrecip : 1 / q x ≤ 2 * a := by
