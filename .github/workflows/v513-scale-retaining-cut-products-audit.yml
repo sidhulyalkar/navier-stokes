@@ -1,0 +1,69 @@
+name: v5.13-scale-retaining-cut-products-audit
+
+on:
+  push:
+    branches: ["research/v5.13.0-scale-retaining-cut-products"]
+    paths:
+      - "formal/V512ScaleRetainingCutoffJets.lean"
+      - "formal/V513ScaleRetainingCutProducts.lean"
+      - ".github/workflows/v513-scale-retaining-cut-products-audit.yml"
+  pull_request:
+    paths:
+      - "formal/V512ScaleRetainingCutoffJets.lean"
+      - "formal/V513ScaleRetainingCutProducts.lean"
+      - ".github/workflows/v513-scale-retaining-cut-products-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  scale-retaining-cut-products:
+    name: v5.13 scale-retaining cut products
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+
+      - name: Verify source lock
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+
+      - name: Build cutoff-estimate dependency closure
+        run: cd upstream && ~/.elan/bin/lake build NavierStokes.CutStageEstimates
+
+      - name: Install v5.12 prerequisite
+        run: cp formal/V512ScaleRetainingCutoffJets.lean upstream/NavierStokes/V512ScaleRetainingCutoffJets.lean
+
+      - name: Compile v5.12 prerequisite
+        run: cd upstream && ~/.elan/bin/lake env lean NavierStokes/V512ScaleRetainingCutoffJets.lean
+
+      - name: Compile v5.13 cut-product bridge
+        run: |
+          cp formal/V513ScaleRetainingCutProducts.lean upstream/NavierStokes/V513ScaleRetainingCutProducts.lean
+          cd upstream
+          ~/.elan/bin/lake env lean NavierStokes/V513ScaleRetainingCutProducts.lean
