@@ -33,10 +33,10 @@ open scoped Topology ContDiff
 /-- Short names keep the final force input and its derivative-limit hypothesis
 syntactically identical, avoiding an expensive definitional-equality search
 through the full periodic/localized expressions. -/
-private abbrev periodicU (A v : VelocityField) : VelocityField :=
+private def periodicU (A v : VelocityField) : VelocityField :=
   MixedPeriodicAssembly.periodicVelocity A v
 
-private abbrev periodicP (p : PressureField) : PressureField :=
+private def periodicP (p : PressureField) : PressureField :=
   SpatialLocalization.periodicPressure p
 
 /-- On the late-time spatial plateau, the actual globally smooth force is
@@ -68,10 +68,18 @@ theorem force_eq_originalResidual_late_plateau
         (periodicP p) ht x)
   have hlate := htime.self_of_nhds
 
+  have hspaceU :
+      periodicU A v =ᶠ[𝓝 (t, x)] MixedPeriodicAssembly.velocity A v := by
+    simpa only [periodicU] using
+      (MixedPeriodicAssembly.periodicVelocity_eventuallyEq
+        (z := (t, x)) A v hx)
+  have hspaceP :
+      periodicP p =ᶠ[𝓝 (t, x)] p := by
+    simpa only [periodicP] using
+      (SpatialLocalization.periodicPressure_eventuallyEq
+        (z := (t, x)) p hx)
   have hspace :=
-    ResidualRegularity.residual_eventuallyEq
-      (MixedPeriodicAssembly.periodicVelocity_eventuallyEq A v hx)
-      (SpatialLocalization.periodicPressure_eventuallyEq p hx)
+    ResidualRegularity.residual_eventuallyEq hspaceU hspaceP
   have hplateau := hspace.self_of_nhds
 
   calc
