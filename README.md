@@ -1,8 +1,8 @@
 # Navier–Stokes Mechanism Lab
 
-A reproducible research program for studying **which mechanisms in the 2026 forced Navier–Stokes singularity construction are structurally necessary**, and whether any removable proof/localization machinery can be converted into a genuinely smaller forcing construction.
+A reproducible research program for studying **which mechanisms in the 2026 forced Navier–Stokes singularity construction are structurally necessary**, and whether removing proof/localization machinery can be turned into a genuinely smaller-forcing construction.
 
-This repository is **not** a claim of an unforced Navier–Stokes blowup proof. It is a fail-closed mechanism laboratory: every promoted claim is tied to a pinned source revision, explicit theorem boundary, and reproducible audit.
+This repository is **not** a claim of an unforced Navier–Stokes blowup proof. It is a fail-closed mechanism laboratory: promoted claims are tied to a pinned source revision, explicit theorem boundary, and reproducible audit.
 
 ## Reproducibility lock
 
@@ -11,91 +11,98 @@ openai/NavierStokesAndEuler@8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
 leanprover/lean4:v4.34.0-rc2
 ```
 
-The reference result under study is a smooth **forced** finite-time singularity construction. The long-term question is how much of that forcing/localization architecture is actually necessary.
+The reference result under study is a smooth **forced** finite-time singularity construction.
 
 ## Current frontier
 
-The project has moved from broad mechanism mapping into a concrete M2 elimination experiment.
+### v5.10: factor-two schedule growth is removable
 
-### v5.9: canonical cutoff-scale comparison
-
-We formalized a deterministic least-admissible local cutoff scale and canonical schedule comparison. Stronger certified gain cannot worsen the canonical schedule. We also proved:
-
-- an exact criterion for strict integer-scale crossing;
-- a criterion for that strict improvement to survive the recursive schedule envelope; and
-- a constant-cancelling scale-relaxation theorem that does not invent values for existential multiplicative constants.
-
-Pinned audit: `34784849248`.
-
-### v5.10: test whether factor-two schedule growth is unnecessary
-
-The source constructs diagonal scales with
+The source diagonal selector uses
 
 ```text
 a(n+1) = max(local(n+1), 2*a(n)).
 ```
 
-We replaced this by the minimal strict envelope
+The project replaces this with
 
 ```text
 s(0)   = max(1, local(0))
 s(n+1) = max(local(n+1), s(n)+1).
 ```
 
-Source-locked Lean proves that the weaker schedule remains positive, strictly monotone, tends to infinity, preserves all numerical local admissibility requirements, and is pointwise no larger than the source doubling schedule.
+Source-locked Lean now carries the weaker selector through numerical admissibility, finite heterogeneous cutoff bounds, physical local-q support and smooth zero extension, the common potential/direct/pressure schedule, vanishing mixed residual jets, and the final forced singular-candidate replay.
 
-Pinned audit: `34785230674`.
+The factor-two growth certificate is therefore unnecessary for this candidate construction. This is an **M2 mechanism-elimination result**, not a force-norm reduction.
 
-The finite heterogeneous cutoff-bound layer also survives without the factor-two condition.
+See [docs/CURRENT_STATUS.md](docs/CURRENT_STATUS.md) for exact audit IDs.
 
-Pinned audit: `34785248912`.
+### v5.11: pair the old and new constructions
 
-The actual local-`q` validity region and smooth zero-extension layer also survives without factor-two growth (audit `34936977665`). The mixed three-component schedule and mixed residual-vanishing theorem also qualify without factor-two growth (audits `34937994783` and `34938088599`). Finally, the pinned final singular-candidate proof itself has been replayed without the factor-two schedule-growth certificate (audit `35299948373`).
+The active lane removes a major comparison confound. Instead of independently choosing two existential schedules, v5.11 derives strict and doubling schedules from the **same** raw potential/direct/pressure stage families, gain/loss functions, aggregated cutoff constants/log powers, physical support floor, finite background, and finite residual data.
 
-## Why this matters
-
-The final candidate assembly visibly uses positivity/monotonicity, divergence of the cutoff scales, support separation, smooth sums, extension data, residual vanishing, angular divergence, and origin blowup. The source carries a factor-two growth certificate through intermediate APIs, but the downstream calls audited so far do not visibly consume it.
-
-The v5.10 theorem chain now establishes that factor-two schedule growth is unnecessary as a construction rule through the final forced singular candidate. This is an M2 mechanism-elimination result. It does **not** yet establish that the minimal `+1` selector chooses a numerically different schedule on the actual source data, nor does it establish a smaller force norm.
-
-A source-locked strict-separation theorem now shows that for any requested initial floor, one can choose a common admissible floor at least that large for which the minimal strict and canonical doubling selectors already differ at stage 1 (audit `35372821347`). This is an existence theorem in the chosen floor, not a claim that the source/default `lower = 1` schedules differ.
-
-The next target is controlled pairing: generate both schedules from the same aggregated cutoff constants and the same finite-stage fields, then compare the changed transition collar. Changing `a_j` changes both cutoff derivative factors and the position/width of the collar, so a force-size claim still requires a direct comparison of the resulting residual/forcing fields.
-
-## Secondary quantitative lane
-
-The pinned exponent ledger exposes a candidate common positive-stage gain margin
+Both schedules satisfy the source-compatible local cutoff estimates, smooth mixed sums, and endpoint-flat residual conclusions. They obey
 
 ```text
-h * (3/5 - kappa) = 59999/100000 * h,
-kappa = 1/100000.
+aStrict(0) = aDouble(0)
+aStrict(1) < aDouble(1)
+aStrict(j) <= aDouble(j)
 ```
 
-Several low-level slack/gain statements qualified, but the attempted literal boosted `StageEstimates`/actual-candidate adapter did not compile source-locked. That experiment remains a secondary blocked lane rather than a promoted result.
+for the paired selection.
 
-## Evidence ladder
+A stronger stage-two theorem chooses a common admissible `B >= 2` so
 
 ```text
-EXPLORATORY
-    ↓
-SOURCE_EXTRACTED / REPRODUCED
-    ↓
-VALIDATED_BOUND
-    ↓
-FORMALIZED
+strict:   B, B+1, B+2
+doubling: B, 2B,  4B.
 ```
 
-`PROMOTE`, `HOLD`, and `KILL` are research-allocation labels, not theorem statuses.
+At
+
+```text
+q* = 1 / (2*aStrict(2))
+```
+
+the pinned scalar cutoff is **exactly 1** for the strict schedule and **exactly 0** for the doubling schedule.
+
+That proves the localization functions can differ maximally at an explicit radius. It still does **not** prove the actual physical fields differ there: the raw positive-stage field could vanish at that point. Closing that nonvanishing/observable gap is the current P2b target.
+
+## Why the force comparison is still open
+
+The source's exact scalar chain rule retains the cutoff scale:
+
+```text
+D^n[cutoff(a*q)] = a^n * cutoff^(n)(a*q).
+```
+
+But the published cut-stage estimate deliberately converts the scale power to a scale-uniform `q^(-n)` loss. That is ideal for proving existence and convergence but erases the information needed to order strict and doubling schedules.
+
+The next quantitative layer therefore needs to preserve explicit `a^n` factors on the paired collar, then feed the resulting field difference through the source-native Navier–Stokes residual identity.
+
+## Claim boundary
+
+Established:
+
+- factor-two schedule growth is unnecessary through the final forced singular candidate;
+- strict and doubling schedules can be paired from identical finite-stage data;
+- the paired scalar cutoff profiles can be explicitly separated.
+
+Not established:
+
+- that the paired actual physical fields are nonidentical;
+- that one paired collar residual is smaller;
+- a smaller final force in any standard norm;
+- a force norm tending to zero;
+- an unforced Navier–Stokes singularity.
 
 ## Project map
 
-- [`docs/CURRENT_STATUS.md`](docs/CURRENT_STATUS.md): canonical current state, qualified audits, active blockers, and milestone ladder.
-- [`docs/CLAIMS.md`](docs/CLAIMS.md): strict scientific claim boundary.
-- [`docs/RESEARCH_MAP.md`](docs/RESEARCH_MAP.md): mechanism graph and active decision gates.
-- [`docs/PROJECT_OVERVIEW.md`](docs/PROJECT_OVERVIEW.md): technical tour.
-- [`docs/RESEARCH_GOVERNANCE.md`](docs/RESEARCH_GOVERNANCE.md): promotion and falsification rules.
-- [`UPSTREAM_WATCH.json`](UPSTREAM_WATCH.json): observed upstream changes without mutating the reproducibility lock.
-- [`artifacts/`](artifacts/): machine-readable evidence and experiment outputs.
+- [docs/CURRENT_STATUS.md](docs/CURRENT_STATUS.md): canonical current state and exact audit ledger.
+- [docs/CLAIMS.md](docs/CLAIMS.md): strict scientific claim boundary.
+- [docs/RESEARCH_MAP.md](docs/RESEARCH_MAP.md): mechanism graph and decision gates.
+- [docs/PROJECT_OVERVIEW.md](docs/PROJECT_OVERVIEW.md): technical tour.
+- [docs/RESEARCH_GOVERNANCE.md](docs/RESEARCH_GOVERNANCE.md): promotion and falsification rules.
+- [artifacts/](artifacts/): machine-readable evidence and experiment outputs.
 
 Historical `FINDINGS_V5_*` files are retained as an audit trail, not as the authoritative current status.
 
@@ -105,9 +112,9 @@ Historical `FINDINGS_V5_*` files are retained as an audit trail, not as the auth
 - `research/vX.Y.Z-*`: active hypothesis lineages.
 - issues: falsifiable research questions and explicit kill rules.
 - pull requests: scientific promotion boundaries.
-- pinned CI workflows: source-lock every formal claim against the exact upstream revision and Lean version.
+- pinned CI: recompiles formal claims against the exact upstream source and Lean revision.
 
-Primary active lane: issue **#17**, paired strict-vs-doubling candidates and collar residual comparison. Issue #15 is closed as completed.
+Primary active lane: issue **#17**, paired strict-vs-doubling candidates and collar residual comparison.
 
 ## Run locally
 
@@ -117,4 +124,4 @@ pytest -q
 blowup-lab --out artifacts/local
 ```
 
-The repository is designed to fail closed: unknown constants stay unknown, missing mechanisms cannot be silently ignored, attractive numerics cannot override failed proof obligations, and stronger estimates are never relabeled as force reduction without a direct physical comparison.
+Unknown constants stay unknown, failed proof obligations stay failed, and a changed estimate is never relabeled as force reduction without a direct physical comparison.
