@@ -101,11 +101,17 @@ E6a parallel final singular candidate theorem   [FORMALIZED]
         ↓
 E6b strict schedule separation above any floor  [FORMALIZED]
         ↓
-P1 paired strict/doubling schedule construction [ACTIVE]
+P1 paired strict/doubling schedule construction [FORMALIZED]
         ↓
-E7 exact collar residual comparison             [BLOCKED]
+P2 paired mixed residuals / same stage data      [FORMALIZED]
         ↓
-E8 standard force-norm comparison               [BLOCKED]
+P2b scalar cutoff separation                     [FORMALIZED]
+        ↓
+P2c actual field nonvanishing / distinction      [ACTIVE]
+        ↓
+P3 scale-retaining collar residual comparison    [BLOCKED]
+        ↓
+P4 standard force-norm comparison                [BLOCKED]
 ```
 
 The minimal strict envelope is
@@ -121,7 +127,12 @@ It is positive, strictly monotone, divergent, preserves local numerical admissib
 
 The downstream final-candidate replay no longer exposes a factor-two requirement. E6b now proves that for any requested initial floor one can choose a common admissible floor at least that large for which the strict and doubling selectors are already separated at stage 1. This proves the selector change can alter localization geometry, but does not assert separation for the source/default `lower = 1`.
 
-The active control problem is #17: construct both schedules from the **same** aggregated cutoff constants `Kall/Pall` and the same raw fields before comparing collar residuals.
+Issue #17 has now closed the schedule-control confound: both schedules are constructed from the **same** aggregated cutoff constants `Kall/Pall`, raw potential/direct/pressure fields, gain/loss functions, support floor, finite background, and finite residual data.
+
+A stronger stage-two theorem chooses a common floor `B >= 2` with explicit values
+`aStrict(2)=B+2` and `aDouble(2)=4B`. At `q*=1/(2*aStrict(2))`, the strict scalar cutoff is exactly one and the doubling cutoff exactly zero.
+
+The active gate is now P2c: prove an actual positive-stage field is nonzero at a comparison point, or identify another source-backed observable proving the paired physical constructions are nonidentical. After that, P3 must retain exact cutoff-scale powers `a^n` rather than using the source's schedule-erasing `q^{-n}` bound.
 
 ## Track F: stress-cone optimization
 
