@@ -26,7 +26,7 @@ noncomputable section
 
 namespace NavierStokes.V511PairedPhysicalLocalCutBounds
 
-open Set Function Filter
+open Set Function Filter ProblemStatement
 open V511PairedFiniteCutBounds
 open scoped Topology ContDiff BigOperators
 
