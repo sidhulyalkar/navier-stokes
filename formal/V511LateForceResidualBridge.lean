@@ -9,18 +9,17 @@ Taylor--Borel extension at the singular time. For physical comparison of two
 schedule choices, that future extension should not be mistaken for an
 additional source of presingular force.
 
-This module proves an exact source-locked bridge. At every point with
+The key bridge is stated for generic presingular inputs `u,p₀`, together with
+source-native local equalities identifying them with the mixed physical fields
+at the comparison point. This formulation avoids forcing Lean's elaborator to
+unfold the full periodic/localized construction merely to type-check the
+dependent derivative-limit witness.
 
-* `3/4 < t < 1`, so the time switch is locally one; and
-* spatial coordinate in `SpatialLocalization.plateau`, so the spatial
-  localization/periodization is locally the identity,
+On `3/4 < t < 1`, activation is locally the identity. If `u,p₀` are locally
+the mixed velocity/pressure at `(t,x)`, the actual globally smooth force is
+exactly `MixedPeriodicAssembly.originalResidual` there.
 
-the actual constructed force equals the incoming
-`MixedPeriodicAssembly.originalResidual` exactly.
-
-The result is independent of the future-side extension details. It is the
-intended P3 bridge for comparing paired strict-vs-doubling constructions on a
-late-time physical region.
+No force-size or norm ordering is claimed.
 -/
 
 noncomputable section
@@ -30,65 +29,57 @@ namespace NavierStokes.V511LateForceResidualBridge
 open ProblemStatement Set Filter
 open scoped Topology ContDiff
 
-/-- Short names keep the final force input and its derivative-limit hypothesis
-syntactically identical, avoiding an expensive definitional-equality search
-through the full periodic/localized expressions. -/
-private def periodicU (A v : VelocityField) : VelocityField :=
-  MixedPeriodicAssembly.periodicVelocity A v
-
-private def periodicP (p : PressureField) : PressureField :=
-  SpatialLocalization.periodicPressure p
-
-/-- On the late-time spatial plateau, the actual globally smooth force is
-exactly the original mixed Navier--Stokes residual. -/
-theorem force_eq_originalResidual_late_plateau
+/-- Generic late-time bridge. The only spatial input needed is local equality
+of the force inputs with the mixed physical velocity and pressure. -/
+theorem force_eq_originalResidual_of_eventuallyEq_late
+    {u : VelocityField} {p₀ : PressureField}
     {A v : VelocityField} {p : PressureField}
-    (hu : ContDiffOn ℝ ∞ (periodicU A v) preSingularDomain)
-    (hp : ContDiffOn ℝ ∞ (periodicP p) preSingularDomain)
+    (hu : ContDiffOn ℝ ∞ u preSingularDomain)
+    (hp : ContDiffOn ℝ ∞ p₀ preSingularDomain)
     (L : Space → FormalMultilinearSeries ℝ SpaceTime Space)
     (hlim : ∀ n : ℕ, TendstoLocallyUniformly
       (fun t x => iteratedFDeriv ℝ n
-        (fun z => navierStokesResidual (periodicU A v) (periodicP p) z.1 z.2)
-        (t, x))
+        (fun z => navierStokesResidual u p₀ z.1 z.2) (t, x))
       (fun x => L x n) (𝓝[<] (1 : ℝ)))
     {t : ℝ} (ht : 3 / 4 < t) (ht1 : t < 1)
-    {x : Space} (hx : x ∈ SpatialLocalization.plateau) :
-    CandidateFromLimits.force (periodicU A v) (periodicP p)
-        hu hp L hlim (t, x) =
+    {x : Space}
+    (hvel : u =ᶠ[𝓝 (t, x)] MixedPeriodicAssembly.velocity A v)
+    (hpress : p₀ =ᶠ[𝓝 (t, x)] p) :
+    CandidateFromLimits.force u p₀ hu hp L hlim (t, x) =
       MixedPeriodicAssembly.originalResidual A v p (t, x) := by
   rw [CandidateFromLimits.force_eq_activated_residual
-    (periodicU A v) (periodicP p)
-    hu hp L hlim (by linarith) ht1 x]
+    u p₀ hu hp L hlim (by linarith) ht1 x]
 
   have htime :=
     ResidualRegularity.residual_eventuallyEq
-      (TimeLocalization.activatedVelocity_eventuallyEq_late
-        (periodicU A v) ht x)
-      (TimeLocalization.activatedPressure_eventuallyEq_late
-        (periodicP p) ht x)
+      (TimeLocalization.activatedVelocity_eventuallyEq_late u ht x)
+      (TimeLocalization.activatedPressure_eventuallyEq_late p₀ ht x)
   have hlate := htime.self_of_nhds
 
-  have hspaceU :
-      periodicU A v =ᶠ[𝓝 (t, x)] MixedPeriodicAssembly.velocity A v := by
-    simpa only [periodicU] using
-      (MixedPeriodicAssembly.periodicVelocity_eventuallyEq
-        (z := (t, x)) A v hx)
-  have hspaceP :
-      periodicP p =ᶠ[𝓝 (t, x)] p := by
-    simpa only [periodicP] using
-      (SpatialLocalization.periodicPressure_eventuallyEq
-        (z := (t, x)) p hx)
   have hspace :=
-    ResidualRegularity.residual_eventuallyEq hspaceU hspaceP
-  have hplateau := hspace.self_of_nhds
+    ResidualRegularity.residual_eventuallyEq hvel hpress
+  have hphysical := hspace.self_of_nhds
 
   calc
     navierStokesResidual
-        (TimeLocalization.activatedVelocity (periodicU A v))
-        (TimeLocalization.activatedPressure (periodicP p)) t x =
-      navierStokesResidual (periodicU A v) (periodicP p) t x := hlate
+        (TimeLocalization.activatedVelocity u)
+        (TimeLocalization.activatedPressure p₀) t x =
+      navierStokesResidual u p₀ t x := hlate
     _ = MixedPeriodicAssembly.originalResidual A v p (t, x) := by
-      simpa only [periodicU, periodicP, MixedPeriodicAssembly.originalResidual]
-        using hplateau
+      simpa only [MixedPeriodicAssembly.originalResidual] using hphysical
+
+/-- The source periodic/localized inputs satisfy the local hypotheses of the
+generic bridge everywhere on the spatial plateau. -/
+theorem periodic_inputs_eventuallyEq_on_plateau
+    (A v : VelocityField) (p : PressureField)
+    {t : ℝ} {x : Space} (hx : x ∈ SpatialLocalization.plateau) :
+    MixedPeriodicAssembly.periodicVelocity A v
+        =ᶠ[𝓝 (t, x)] MixedPeriodicAssembly.velocity A v ∧
+      SpatialLocalization.periodicPressure p =ᶠ[𝓝 (t, x)] p := by
+  exact ⟨
+    MixedPeriodicAssembly.periodicVelocity_eventuallyEq
+      (z := (t, x)) A v hx,
+    SpatialLocalization.periodicPressure_eventuallyEq
+      (z := (t, x)) p hx⟩
 
 end NavierStokes.V511LateForceResidualBridge
