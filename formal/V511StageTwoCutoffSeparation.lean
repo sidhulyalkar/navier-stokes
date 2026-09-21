@@ -256,4 +256,152 @@ theorem cutStages_ne_of_raw_projection_ne_at_plateau_zero
   rw [hzero]
   exact map_zero π
 
+
+/-- Interior plateau-vs-zero comparison. The stronger scale ratio puts the
+strict cutoff strictly inside its constant-one region and the doubling cutoff
+strictly inside its constant-zero region. -/
+theorem scaledCutoffs_interior_plateau_vs_zero
+    {aStrict aDouble : ℕ}
+    (hsPos : 0 < aStrict)
+    (hRatio : 5 * aStrict < 2 * aDouble) :
+    let qStar : ℝ := (2 / 5 : ℝ) / (aStrict : ℝ)
+    SmoothCutoffs.scaledCutoff (aStrict : ℝ) qStar = 1 ∧
+      SmoothCutoffs.scaledCutoff (aDouble : ℝ) qStar = 0 ∧
+      SmoothCutoffs.scaledCutoff (aStrict : ℝ) =ᶠ[𝓝 qStar] (fun _ => 1) ∧
+      SmoothCutoffs.scaledCutoff (aDouble : ℝ) =ᶠ[𝓝 qStar] (fun _ => 0) := by
+  dsimp only
+  have hsR : (0 : ℝ) < aStrict := by exact_mod_cast hsPos
+  have hdPos : 0 < aDouble := by omega
+  have hdR : (0 : ℝ) < aDouble := by exact_mod_cast hdPos
+  have hsProd :
+      (aStrict : ℝ) * ((2 / 5 : ℝ) / (aStrict : ℝ)) = 2 / 5 := by
+    field_simp [ne_of_gt hsR]
+  have hRatioR :
+      (5 : ℝ) * (aStrict : ℝ) < 2 * (aDouble : ℝ) := by
+    exact_mod_cast hRatio
+  have hdProd :
+      1 < (aDouble : ℝ) * ((2 / 5 : ℝ) / (aStrict : ℝ)) := by
+    have heq :
+        (aDouble : ℝ) * ((2 / 5 : ℝ) / (aStrict : ℝ)) =
+          (2 * (aDouble : ℝ)) / (5 * (aStrict : ℝ)) := by
+      field_simp [ne_of_gt hsR]
+      <;> ring
+    rw [heq]
+    exact (lt_div_iff₀ (mul_pos (by norm_num) hsR)).2 hRatioR
+  have hsAbs :
+      |(aStrict : ℝ) * ((2 / 5 : ℝ) / (aStrict : ℝ))| < 1 / 2 := by
+    rw [hsProd, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 2 / 5)]
+    norm_num
+  have hdAbs :
+      1 < |(aDouble : ℝ) * ((2 / 5 : ℝ) / (aStrict : ℝ))| := by
+    rw [abs_of_pos]
+    · exact hdProd
+    · exact mul_pos hdR (div_pos (by norm_num) hsR)
+  exact ⟨
+    SmoothCutoffs.scaledCutoff_one_of_abs_le hsAbs.le,
+    SmoothCutoffs.scaledCutoff_zero_of_one_le_abs hdAbs.le,
+    SmoothCutoffs.scaledCutoff_eventually_one hsAbs,
+    SmoothCutoffs.scaledCutoff_eventually_zero hdAbs⟩
+
+/-- With floor at least four, the explicit stage-two schedules satisfy the
+strong interior separation ratio. -/
+theorem stage_two_cutoffs_interior_plateau_vs_zero
+    (C p : ℕ → ℕ → ℝ) (g : ℕ → ℝ)
+    (hg : ∀ j, 1 ≤ j → 0 < g j) (B : ℕ)
+    (hBfour : 4 ≤ B)
+    (hB1 : leastLocalScale C p g hg 0 1 < B)
+    (hB2 : leastLocalScale C p g hg 0 2 < B) :
+    let aStrict := minimalStrictSchedule C p g hg B
+    let aDouble := canonicalSchedule C p g hg B
+    let qStar : ℝ := (2 / 5 : ℝ) / (aStrict 2 : ℝ)
+    SmoothCutoffs.scaledCutoff (aStrict 2 : ℝ) qStar = 1 ∧
+      SmoothCutoffs.scaledCutoff (aDouble 2 : ℝ) qStar = 0 ∧
+      SmoothCutoffs.scaledCutoff (aStrict 2 : ℝ) =ᶠ[𝓝 qStar] (fun _ => 1) ∧
+      SmoothCutoffs.scaledCutoff (aDouble 2 : ℝ) =ᶠ[𝓝 qStar] (fun _ => 0) := by
+  dsimp only
+  have hBtwo : 2 ≤ B := by omega
+  obtain ⟨_, _, _, _, hs2, hd2⟩ :=
+    first_three_schedule_values C p g hg B hBtwo hB1 hB2
+  have hsPos : 0 < minimalStrictSchedule C p g hg B 2 := by
+    rw [hs2]
+    omega
+  have hRatio :
+      5 * minimalStrictSchedule C p g hg B 2 <
+        2 * canonicalSchedule C p g hg B 2 := by
+    rw [hs2, hd2]
+    omega
+  exact scaledCutoffs_interior_plateau_vs_zero hsPos hRatio
+
+/-- At the interior comparison point, every cut-stage jet is exactly the raw
+stage jet for the strict schedule and exactly zero for the doubling schedule. -/
+theorem cutStage_jets_interior_plateau_vs_zero
+    {X V : Type*}
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {aStrict aDouble : ℕ → ℕ} {q : X → ℝ} {A : ℕ → X → V}
+    {j : ℕ} {x : X}
+    (hqcont : ContinuousAt q x)
+    (hsPos : 0 < aStrict j)
+    (hRatio : 5 * aStrict j < 2 * aDouble j)
+    (hq : q x = (2 / 5 : ℝ) / (aStrict j : ℝ))
+    (m : ℕ) :
+    iteratedFDeriv ℝ m
+        (SolenoidalDiagonal.cutStage (fun k => (aDouble k : ℝ)) q A j) x = 0 ∧
+      iteratedFDeriv ℝ m
+        (SolenoidalDiagonal.cutStage (fun k => (aStrict k : ℝ)) q A j) x =
+          iteratedFDeriv ℝ m (A j) x := by
+  obtain ⟨_, _, hsEv, hdEv⟩ :=
+    scaledCutoffs_interior_plateau_vs_zero hsPos hRatio
+  have hqt :
+      Tendsto q (𝓝 x) (𝓝 ((2 / 5 : ℝ) / (aStrict j : ℝ))) := by
+    simpa only [hq] using hqcont
+  have hsComp :
+      (fun y => SmoothCutoffs.scaledCutoff (aStrict j : ℝ) (q y))
+        =ᶠ[𝓝 x] (fun _ => 1) :=
+    hsEv.comp_tendsto hqt
+  have hdComp :
+      (fun y => SmoothCutoffs.scaledCutoff (aDouble j : ℝ) (q y))
+        =ᶠ[𝓝 x] (fun _ => 0) :=
+    hdEv.comp_tendsto hqt
+  have hsStage :
+      SolenoidalDiagonal.cutStage (fun k => (aStrict k : ℝ)) q A j
+        =ᶠ[𝓝 x] A j := by
+    filter_upwards [hsComp] with y hy
+    simp only [SolenoidalDiagonal.cutStage, hy, one_smul]
+  have hdStage :
+      SolenoidalDiagonal.cutStage (fun k => (aDouble k : ℝ)) q A j
+        =ᶠ[𝓝 x] (fun _ => 0) := by
+    filter_upwards [hdComp] with y hy
+    simp only [SolenoidalDiagonal.cutStage, hy, zero_smul]
+  constructor
+  · have hd :=
+      (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq hdStage m).self_of_nhds
+    simpa using hd
+  · exact
+      (SolenoidalDiagonal.iteratedFDeriv_eventuallyEq hsStage m).self_of_nhds
+
+/-- Jet form of P2c. Any nonzero raw-stage jet at the interior comparison
+point forces the corresponding strict and doubling cut-stage jets to differ. -/
+theorem cutStage_jets_ne_of_raw_jet_ne_at_interior_plateau_zero
+    {X V : Type*}
+    [NormedAddCommGroup X] [NormedSpace ℝ X]
+    [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {aStrict aDouble : ℕ → ℕ} {q : X → ℝ} {A : ℕ → X → V}
+    {j : ℕ} {x : X}
+    (hqcont : ContinuousAt q x)
+    (hsPos : 0 < aStrict j)
+    (hRatio : 5 * aStrict j < 2 * aDouble j)
+    (hq : q x = (2 / 5 : ℝ) / (aStrict j : ℝ))
+    (m : ℕ)
+    (hjet : iteratedFDeriv ℝ m (A j) x ≠ 0) :
+    iteratedFDeriv ℝ m
+        (SolenoidalDiagonal.cutStage (fun k => (aDouble k : ℝ)) q A j) x ≠
+      iteratedFDeriv ℝ m
+        (SolenoidalDiagonal.cutStage (fun k => (aStrict k : ℝ)) q A j) x := by
+  obtain ⟨hd, hs⟩ :=
+    cutStage_jets_interior_plateau_vs_zero
+      hqcont hsPos hRatio hq m
+  rw [hd, hs]
+  exact fun he => hjet he.symm
+
 end NavierStokes.V511StageTwoCutoffSeparation
