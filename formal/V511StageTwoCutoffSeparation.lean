@@ -231,4 +231,29 @@ theorem cutStages_ne_of_raw_ne_at_plateau_zero
     zero_smul, one_smul] at heq
   exact hA heq.symm
 
+
+/-- Projection form of the P2c gate. It is enough to certify one nonzero
+continuous-linear observable of the raw stage at the explicit comparison
+point; full raw-stage nonvanishing then follows automatically. This lets the
+source audit target a distinguished component/Fourier/angular observable
+instead of proving a vector-valued noncancellation statement directly. -/
+theorem cutStages_ne_of_raw_projection_ne_at_plateau_zero
+    {X V W : Type*}
+    [NormedAddCommGroup V] [NormedSpace ℝ V]
+    [NormedAddCommGroup W] [NormedSpace ℝ W]
+    {aStrict aDouble : ℕ → ℕ} {q : X → ℝ} {A : ℕ → X → V}
+    {j : ℕ} {x : X}
+    (π : V →L[ℝ] W)
+    (hsPos : 0 < aStrict j)
+    (hRatio : 2 * aStrict j ≤ aDouble j)
+    (hq : q x = 1 / (2 * (aStrict j : ℝ)))
+    (hπ : π (A j x) ≠ 0) :
+    SolenoidalDiagonal.cutStage (fun k => (aDouble k : ℝ)) q A j x ≠
+      SolenoidalDiagonal.cutStage (fun k => (aStrict k : ℝ)) q A j x := by
+  apply cutStages_ne_of_raw_ne_at_plateau_zero hsPos hRatio hq
+  intro hzero
+  apply hπ
+  rw [hzero]
+  exact map_zero π
+
 end NavierStokes.V511StageTwoCutoffSeparation
