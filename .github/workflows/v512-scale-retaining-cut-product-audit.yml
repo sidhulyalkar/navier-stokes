@@ -52,10 +52,10 @@ jobs:
       - name: Build cutoff-estimate dependency closure
         run: cd upstream && ~/.elan/bin/lake build NavierStokes.CutStageEstimates
       - name: Install v5.12 cutoff-jet prerequisite
-        run: cp formal/V512ScaleRetainingCutoffJets.lean upstream/NavierStokes/V512ScaleRetainingCutoffJets.lean
-      - name: Compile scale-retaining cut product
         run: |
-          cp formal/V512ScaleRetainingCutProduct.lean upstream/NavierStokes/V512ScaleRetainingCutProduct.lean
+          cp formal/V512ScaleRetainingCutoffJets.lean upstream/NavierStokes/V512ScaleRetainingCutoffJets.lean
           cd upstream
-          ~/.elan/bin/lake env lean NavierStokes/V512ScaleRetainingCutoffJets.lean
-          ~/.elan/bin/lake env lean NavierStokes/V512ScaleRetainingCutProduct.lean
+          mkdir -p .lake/build/lib/lean/NavierStokes
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V512ScaleRetainingCutoffJets.olean NavierStokes/V512ScaleRetainingCutoffJets.lean
+      - name: Compile scale-retaining cut product
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V512ScaleRetainingCutProduct.lean
