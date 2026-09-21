@@ -37,6 +37,8 @@ noncomputable section
 
 namespace NavierStokes.V511StageTwoCutoffSeparation
 
+open Filter
+open scoped Topology
 open V590CanonicalDiagonalScale
 open V510MinimalStrictSchedule
 open V510StrictScheduleSeparation
@@ -287,7 +289,8 @@ theorem scaledCutoffs_interior_plateau_vs_zero
       field_simp [ne_of_gt hsR]
       <;> ring
     rw [heq]
-    exact (lt_div_iff₀ (mul_pos (by norm_num) hsR)).2 hRatioR
+    apply (lt_div_iff₀ (mul_pos (by norm_num) hsR)).2
+    simpa only [one_mul] using hRatioR
   have hsAbs :
       |(aStrict : ℝ) * ((2 / 5 : ℝ) / (aStrict : ℝ))| < 1 / 2 := by
     rw [hsProd, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 2 / 5)]
