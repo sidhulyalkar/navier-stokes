@@ -73,7 +73,7 @@ theorem cut_product_jet_scale_bound_on_collar
           CF * a ^ m := by
     intro i him
     have hi := hcut i a ha x hx hlow hhigh
-    simpa only [SmoothCutoffs.scaledCutoff] at hi
+    simp only [SmoothCutoffs.scaledCutoff] at hi
     calc
       ‖iteratedFDeriv ℝ i
           (fun y => SmoothCutoffs.scaledCutoff a (q y)) x‖
