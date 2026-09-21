@@ -357,7 +357,7 @@ theorem cutStage_jets_interior_plateau_vs_zero
     scaledCutoffs_interior_plateau_vs_zero hsPos hRatio
   have hqt :
       Tendsto q (𝓝 x) (𝓝 ((2 / 5 : ℝ) / (aStrict j : ℝ))) := by
-    simpa only [hq] using hqcont
+    simpa [ContinuousAt, hq] using hqcont
   have hsComp :
       (fun y => SmoothCutoffs.scaledCutoff (aStrict j : ℝ) (q y))
         =ᶠ[𝓝 x] (fun _ => 1) :=
@@ -403,7 +403,8 @@ theorem cutStage_jets_ne_of_raw_jet_ne_at_interior_plateau_zero
         (SolenoidalDiagonal.cutStage (fun k => (aStrict k : ℝ)) q A j) x := by
   obtain ⟨hd, hs⟩ :=
     cutStage_jets_interior_plateau_vs_zero
-      hqcont hsPos hRatio hq m
+      (aStrict := aStrict) (aDouble := aDouble) (q := q) (A := A)
+      (j := j) (x := x) hqcont hsPos hRatio hq m
   rw [hd, hs]
   exact fun he => hjet he.symm
 
