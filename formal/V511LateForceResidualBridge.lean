@@ -47,8 +47,14 @@ theorem force_eq_originalResidual_of_eventuallyEq_late
     (hpress : p₀ =ᶠ[𝓝 (t, x)] p) :
     CandidateFromLimits.force u p₀ hu hp L hlim (t, x) =
       MixedPeriodicAssembly.originalResidual A v p (t, x) := by
-  rw [CandidateFromLimits.force_eq_activated_residual
-    u p₀ hu hp L hlim (by linarith) ht1 x]
+  have ht0 : 0 ≤ t := by linarith
+  have hforce :
+      CandidateFromLimits.force u p₀ hu hp L hlim (t, x) =
+        navierStokesResidual
+          (TimeLocalization.activatedVelocity u)
+          (TimeLocalization.activatedPressure p₀) t x :=
+    CandidateFromLimits.force_eq_activated_residual
+      u p₀ hu hp L hlim ht0 ht1 x
 
   have htime :=
     ResidualRegularity.residual_eventuallyEq
@@ -61,9 +67,11 @@ theorem force_eq_originalResidual_of_eventuallyEq_late
   have hphysical := hspace.self_of_nhds
 
   calc
-    navierStokesResidual
+    CandidateFromLimits.force u p₀ hu hp L hlim (t, x) =
+      navierStokesResidual
         (TimeLocalization.activatedVelocity u)
-        (TimeLocalization.activatedPressure p₀) t x =
+        (TimeLocalization.activatedPressure p₀) t x := hforce
+    _ =
       navierStokesResidual u p₀ t x := hlate
     _ = MixedPeriodicAssembly.originalResidual A v p (t, x) := by
       simpa only [MixedPeriodicAssembly.originalResidual] using hphysical
