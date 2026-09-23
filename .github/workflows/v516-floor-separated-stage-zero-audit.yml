@@ -54,7 +54,7 @@ jobs:
           use-mathlib-cache: true
 
       - name: Build diagonal dependency closure
-        run: cd upstream && ~/.elan/bin/lake build NavierStokes.SolenoidalDiagonal NavierStokes.SmoothCutoffs
+        run: cd upstream && ~/.elan/bin/lake build NavierStokes.SolenoidalDiagonal NavierStokes.SmoothCutoffs NavierStokes.GermCandidateAssembly
 
       - name: Compile floor-separated witnesses
         run: |
