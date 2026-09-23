@@ -310,4 +310,92 @@ theorem physical_axis_velocity_ne_of_base_ne
   rw [hs, hl]
   exact hbase
 
+/-- The anchored slow base is nonzero at every physical axis time before the
+singular endpoint.  This follows from the pinned exact origin formula, not
+merely from asymptotic blow-up. -/
+theorem finalSlowBase_axis_ne_zero
+    {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
+    (H : NominalConeAssembly.Certificate W)
+    {ld : ModulatedProfileAssembly.LoopData W}
+    (v : ModulatedProfileAssembly.Witness ld)
+    (upper : ℝ) (B : ℕ) {t : ℝ} (ht : t < 1) :
+    FinalSlowBase.velocity H v upper B (t, 0) ≠ 0 := by
+  rw [FinalSlowBase.origin H v upper B ht]
+  have hpow :
+      0 < (1 - t) ^ (-CoordinateAlgebra.A F.data.h) :=
+    Real.rpow_pos_of_pos (sub_pos.mpr ht) _
+  have hcoef :
+      0 < (1 - t) ^ (-CoordinateAlgebra.A F.data.h) * W.axis.j :=
+    mul_pos hpow W.axis.small.j_pos
+  intro hz
+  have hz2 := congrArg (fun y : ProblemStatement.Space => y 2) hz
+  simp only [Pi.smul_apply, smul_eq_mul, ProblemStatement.coordinateVector,
+    EuclideanSpace.single_apply, if_pos rfl, mul_one, PiLp.zero_apply] at hz2
+  exact hcoef.ne' hz2
+
+/-- The gauge-modified base potential therefore has nonzero curl at every
+physical axis time before one. -/
+theorem anchoredBase_axis_curl_ne_zero
+    {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
+    (H : NominalConeAssembly.Certificate W)
+    {ld : ModulatedProfileAssembly.LoopData W}
+    (v : ModulatedProfileAssembly.Witness ld)
+    (upper : ℝ) (B : ℕ) {t : ℝ} (ht : t < 1) :
+    SpatialCurl.spatialCurl
+        (TailGaugePotential.finalPotential H v upper B) (t, 0) ≠ 0 := by
+  rw [TailGaugePotential.finalPotential_sameCurl H v upper B ht]
+  exact finalSlowBase_axis_ne_zero H v upper B ht
+
+/-- The conditional base-nonvanishing premise in
+`physical_axis_velocity_ne_of_base_ne` is automatic for the actual anchored
+slow base. -/
+theorem actualBase_physical_axis_velocity_ne
+    {F : OutgoingProfile.Profile} {W : NominalProfile.Witness F}
+    (H : NominalConeAssembly.Certificate W)
+    {ld : ModulatedProfileAssembly.LoopData W}
+    (v : ModulatedProfileAssembly.Witness ld)
+    (upper : ℝ) (bandFloor : ℕ)
+    {qbig : ℝ} (hh : 0 < F.data.h) (hh1 : F.data.h < 1 / 2)
+    {initial : VelocityField} {stages : ℕ → VelocityField}
+    (D : ℕ → DirectAngularDiagonal.AngularData
+      (LocalAngularDiagonal.localSlowDomain F.data.h qbig))
+    {small large : ℕ → ℝ}
+    (hsmallTop : Tendsto small atTop atTop)
+    (hlargeTop : Tendsto large atTop atTop)
+    (hsmall0 : 0 < small 0)
+    (hRatio : 5 * small 0 < 2 * large 0)
+    (hqbig : (2 / 5 : ℝ) / small 0 < qbig)
+    (hInitialAxis :
+      GermCandidateAssembly.AxisZeroOn
+        (MixedAxisPreservation.localDomain F.data.h qbig) initial)
+    (hStagesAxis : ∀ j,
+      GermCandidateAssembly.AxisZeroOn
+        (MixedAxisPreservation.localDomain F.data.h qbig) (stages j)) :
+    let tStar : ℝ := 1 - (2 / 5 : ℝ) / small 0
+    MixedPeriodicAssembly.velocity
+        (SolenoidalDiagonal.potentialSum small
+          (PhysicalWaveSum.physicalQ F.data.h)
+          (GermCandidateAssembly.initializedSeries
+            (TailGaugePotential.finalPotential H v upper bandFloor)
+            initial stages))
+        (SolenoidalDiagonal.potentialSum small
+          (PhysicalWaveSum.physicalQ F.data.h)
+          (LocalAngularDiagonal.rawSeries D)) (tStar, 0) ≠
+      MixedPeriodicAssembly.velocity
+        (SolenoidalDiagonal.potentialSum large
+          (PhysicalWaveSum.physicalQ F.data.h)
+          (GermCandidateAssembly.initializedSeries
+            (TailGaugePotential.finalPotential H v upper bandFloor)
+            initial stages))
+        (SolenoidalDiagonal.potentialSum large
+          (PhysicalWaveSum.physicalQ F.data.h)
+          (LocalAngularDiagonal.rawSeries D)) (tStar, 0) := by
+  dsimp only
+  apply physical_axis_velocity_ne_of_base_ne
+    hh hh1 D hsmallTop hlargeTop hsmall0 hRatio hqbig
+    hInitialAxis hStagesAxis
+  have hqStar : 0 < (2 / 5 : ℝ) / small 0 := by positivity
+  apply anchoredBase_axis_curl_ne_zero H v upper bandFloor
+  linarith
+
 end NavierStokes.V516AxisFloorSeparation
