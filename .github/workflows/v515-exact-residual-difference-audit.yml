@@ -1,0 +1,81 @@
+name: v5.15-exact-residual-difference-audit
+
+on:
+  push:
+    branches: ["research/v5.15.0-exact-residual-difference"]
+    paths:
+      - "formal/V512ScaleRetainingCutoffJets.lean"
+      - "formal/V513ScaleRetainingCutProducts.lean"
+      - "formal/V515ExactResidualDifference.lean"
+      - ".github/workflows/v515-exact-residual-difference-audit.yml"
+  pull_request:
+    paths:
+      - "formal/V512ScaleRetainingCutoffJets.lean"
+      - "formal/V513ScaleRetainingCutProducts.lean"
+      - "formal/V515ExactResidualDifference.lean"
+      - ".github/workflows/v515-exact-residual-difference-audit.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  exact-residual-difference:
+    name: v5.15 exact residual difference
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout pinned OpenAI formalization
+        uses: actions/checkout@v4
+        with:
+          repository: openai/NavierStokesAndEuler
+          ref: 8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538
+          path: upstream
+          fetch-depth: 1
+
+      - name: Verify source lock
+        run: |
+          set -euo pipefail
+          test "$(git -C upstream rev-parse HEAD)" = "8937a8f4cbc7abaab5e9e97d1cc7f5d2319d9538"
+          test "$(cat upstream/lean-toolchain)" = "leanprover/lean4:v4.34.0-rc2"
+
+      - name: Install pinned Lean environment
+        uses: leanprover/lean-action@38fbc41a8c28c4cbaec22d7f7de508ec2e7c0dd9
+        with:
+          lake-package-directory: upstream
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: true
+          use-mathlib-cache: true
+
+      - name: Build pinned residual dependencies
+        run: |
+          cd upstream
+          ~/.elan/bin/lake build NavierStokes.ResidualCalculus NavierStokes.MixedDiagonalResidual NavierStokes.CutStageEstimates
+
+      - name: Install v5.12 and v5.13 prerequisites
+        run: |
+          cp formal/V512ScaleRetainingCutoffJets.lean upstream/NavierStokes/V512ScaleRetainingCutoffJets.lean
+          cp formal/V513ScaleRetainingCutProducts.lean upstream/NavierStokes/V513ScaleRetainingCutProducts.lean
+          cd upstream
+          mkdir -p .lake/build/lib/lean/NavierStokes
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V512ScaleRetainingCutoffJets.olean NavierStokes/V512ScaleRetainingCutoffJets.lean
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V513ScaleRetainingCutProducts.olean NavierStokes/V513ScaleRetainingCutProducts.lean
+
+      - name: Compile v5.15 exact residual difference
+        run: |
+          cp formal/V515ExactResidualDifference.lean upstream/NavierStokes/V515ExactResidualDifference.lean
+          cd upstream
+          ~/.elan/bin/lake env lean NavierStokes/V515ExactResidualDifference.lean
+
+      - name: Reject placeholders
+        run: |
+          set -euo pipefail
+          ! grep -RInE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' formal/V515ExactResidualDifference.lean
