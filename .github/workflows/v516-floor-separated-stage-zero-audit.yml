@@ -5,10 +5,12 @@ on:
     branches: ["research/v5.16.0-floor-separated-stage-zero"]
     paths:
       - "formal/V516FloorSeparatedStageZero.lean"
+      - "formal/V516AxisFloorSeparation.lean"
       - ".github/workflows/v516-floor-separated-stage-zero-audit.yml"
   pull_request:
     paths:
       - "formal/V516FloorSeparatedStageZero.lean"
+      - "formal/V516AxisFloorSeparation.lean"
       - ".github/workflows/v516-floor-separated-stage-zero-audit.yml"
   workflow_dispatch:
 
@@ -54,13 +56,15 @@ jobs:
       - name: Build diagonal dependency closure
         run: cd upstream && ~/.elan/bin/lake build NavierStokes.SolenoidalDiagonal NavierStokes.SmoothCutoffs
 
-      - name: Compile floor-separated stage-zero witness
+      - name: Compile floor-separated witnesses
         run: |
           cp formal/V516FloorSeparatedStageZero.lean upstream/NavierStokes/V516FloorSeparatedStageZero.lean
+          cp formal/V516AxisFloorSeparation.lean upstream/NavierStokes/V516AxisFloorSeparation.lean
           cd upstream
           ~/.elan/bin/lake env lean NavierStokes/V516FloorSeparatedStageZero.lean
+          ~/.elan/bin/lake env lean NavierStokes/V516AxisFloorSeparation.lean
 
       - name: Reject placeholders
         run: |
           set -euo pipefail
-          ! grep -RInE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' formal/V516FloorSeparatedStageZero.lean
+          ! grep -RInE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' formal/V516FloorSeparatedStageZero.lean formal/V516AxisFloorSeparation.lean
