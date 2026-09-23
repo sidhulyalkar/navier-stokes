@@ -91,14 +91,17 @@ theorem potentialSum_eq_zero_at_half_scale_of_floor
     (hq : q x = 1 / (2 * a0)) :
     SolenoidalDiagonal.potentialSum b q A x = 0 := by
   unfold SolenoidalDiagonal.potentialSum
-  apply tsum_zero
-  intro j
-  have hratio : 2 * a0 ≤ b j :=
-    hfloor.trans (hbmono (Nat.zero_le j))
-  have hzero :
-      SmoothCutoffs.scaledCutoff (b j) (1 / (2 * a0)) = 0 :=
-    (scaledCutoffs_half_scale ha0 hratio).2
-  simp only [SolenoidalDiagonal.cutStage, hq, hzero, zero_smul]
+  have hz :
+      (fun j : ℕ => SolenoidalDiagonal.cutStage b q A j x) =
+        (fun _ : ℕ => (0 : V)) := by
+    funext j
+    have hratio : 2 * a0 ≤ b j :=
+      hfloor.trans (hbmono (Nat.zero_le j))
+    have hzero :
+        SmoothCutoffs.scaledCutoff (b j) (1 / (2 * a0)) = 0 :=
+      (scaledCutoffs_half_scale ha0 hratio).2
+    simp only [SolenoidalDiagonal.cutStage, hq, hzero, zero_smul]
+  rw [hz, tsum_zero]
 
 /-- Exact two-schedule witness: the small factor-two schedule retains precisely
 stage zero, while the larger-floor schedule retains nothing at the same point. -/
@@ -139,6 +142,8 @@ theorem floorSeparated_potentialSums_ne
       SolenoidalDiagonal.potentialSum aLarge q A x := by
   obtain ⟨hs, hl⟩ :=
     floorSeparated_potentialSums
+      (X := X) (V := V) (aSmall := aSmall) (aLarge := aLarge)
+      (q := q) (A := A) (x := x)
       hsmall0 hsmallGrowth0 hsmallMono hlargeFloor hlargeMono hq
   rw [hs, hl]
   exact hA0
