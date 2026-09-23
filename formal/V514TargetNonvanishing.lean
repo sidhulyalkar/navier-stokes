@@ -64,7 +64,7 @@ theorem actualTarget_ne_zero
     PrimaryTargetBounds.actualTarget v p ≠ 0 := by
   have hq :=
     BaseChartJets.normalizedCoordinates_q_pos F.data.h_pos F.data.h_lt_half hT
-  have hs := stressVector_ne_zero H v hcone hT hX
+  have hs := stressVector_ne_zero v hcone hT hX
   intro hz
   unfold PrimaryTargetBounds.actualTarget at hz
   have hscalar :
