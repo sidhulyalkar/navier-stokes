@@ -59,8 +59,11 @@ jobs:
       - name: Install v5.12 prerequisite
         run: cp formal/V512ScaleRetainingCutoffJets.lean upstream/NavierStokes/V512ScaleRetainingCutoffJets.lean
 
-      - name: Compile v5.12 prerequisite
-        run: cd upstream && ~/.elan/bin/lake env lean NavierStokes/V512ScaleRetainingCutoffJets.lean
+      - name: Compile and install v5.12 prerequisite
+        run: |
+          cd upstream
+          mkdir -p .lake/build/lib/lean/NavierStokes
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V512ScaleRetainingCutoffJets.olean NavierStokes/V512ScaleRetainingCutoffJets.lean
 
       - name: Compile v5.13 cut-product bridge
         run: |
