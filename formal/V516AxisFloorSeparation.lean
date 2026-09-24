@@ -53,7 +53,8 @@ theorem velocitySum_eq_zero
     (hlarge : 1 < |scales 0 * q w|) :
     SolenoidalDiagonal.velocitySum scales q A w = 0 := by
   have hz := potentialSum_eq_zero_germ hscales hq hpos hzero hlarge
-  exact SolenoidalDiagonal.spatialCurl_eq_of_eventuallyEq hz
+  simpa [SolenoidalDiagonal.velocitySum] using
+    SolenoidalDiagonal.spatialCurl_eq_of_eventuallyEq hz
 
 /-- Two floor-separated schedules give exact mixed-velocity values at an axis
 point. The first sees only the base curl; the second sees zero. -/
@@ -327,11 +328,11 @@ theorem finalSlowBase_axis_ne_zero
   have hcoef :
       0 < (1 - t) ^ (-CoordinateAlgebra.A F.data.h) * W.axis.j :=
     mul_pos hpow W.axis.small.j_pos
-  intro hz
-  have hz2 := congrArg (fun y : ProblemStatement.Space => y 2) hz
-  simp only [Pi.smul_apply, smul_eq_mul, ProblemStatement.coordinateVector,
-    EuclideanSpace.single_apply, if_pos rfl, mul_one, PiLp.zero_apply] at hz2
-  exact hcoef.ne' hz2
+  have hcoord : ProblemStatement.coordinateVector (2 : Fin 3) ≠ 0 := by
+    intro hz
+    have hz2 := congrArg (fun y : ProblemStatement.Space => y 2) hz
+    simpa [ProblemStatement.coordinateVector] using hz2
+  exact smul_ne_zero hcoef.ne' hcoord
 
 /-- The gauge-modified base potential therefore has nonzero curl at every
 physical axis time before one. -/
