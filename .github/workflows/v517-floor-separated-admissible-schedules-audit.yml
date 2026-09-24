@@ -10,12 +10,14 @@ on:
       - "formal/V517FloorSeparatedAdmissibleSchedules.lean"
       - "formal/V517ResidualFromSelectedBounds.lean"
       - "formal/V517PrescribedScheduleCandidate.lean"
+      - "formal/V517FloorSeparatedFiniteCutBounds.lean"
       - ".github/workflows/v517-floor-separated-admissible-schedules-audit.yml"
   pull_request:
     paths:
       - "formal/V517FloorSeparatedAdmissibleSchedules.lean"
       - "formal/V517ResidualFromSelectedBounds.lean"
       - "formal/V517PrescribedScheduleCandidate.lean"
+      - "formal/V517FloorSeparatedFiniteCutBounds.lean"
       - ".github/workflows/v517-floor-separated-admissible-schedules-audit.yml"
   workflow_dispatch:
 
@@ -66,12 +68,17 @@ jobs:
           ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V590CanonicalDiagonalScale.olean NavierStokes/V590CanonicalDiagonalScale.lean
           ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V510MinimalStrictSchedule.olean NavierStokes/V510MinimalStrictSchedule.lean
           ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V510StrictScheduleSeparation.olean NavierStokes/V510StrictScheduleSeparation.lean
-      - name: Compile floor-separated schedule theorem
-        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V517FloorSeparatedAdmissibleSchedules.lean
+      - name: Install and compile floor-separated schedule theorem
+        run: |
+          cp formal/V517FloorSeparatedAdmissibleSchedules.lean upstream/NavierStokes/V517FloorSeparatedAdmissibleSchedules.lean
+          cd upstream
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V517FloorSeparatedAdmissibleSchedules.olean NavierStokes/V517FloorSeparatedAdmissibleSchedules.lean
+      - name: Compile floor-separated finite cut bounds
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V517FloorSeparatedFiniteCutBounds.lean
       - name: Compile prescribed-schedule residual bridge
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V517ResidualFromSelectedBounds.lean
       - name: Compile prescribed-schedule force bridge
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V517PrescribedScheduleCandidate.lean
       - name: Reject placeholders
         run: |
-          ! grep -R -nE '\\b(sorry|admit)\\b' formal/V517FloorSeparatedAdmissibleSchedules.lean formal/V517ResidualFromSelectedBounds.lean formal/V517PrescribedScheduleCandidate.lean
+          ! grep -R -nE '\\b(sorry|admit)\\b' formal/V517FloorSeparatedAdmissibleSchedules.lean formal/V517FloorSeparatedFiniteCutBounds.lean formal/V517ResidualFromSelectedBounds.lean formal/V517PrescribedScheduleCandidate.lean
