@@ -52,9 +52,10 @@ theorem velocitySum_eq_zero
     (hzero : ∀ j : ℕ, j ≠ 0 → A j =ᶠ[𝓝 w] fun _ => 0)
     (hlarge : 1 < |scales 0 * q w|) :
     SolenoidalDiagonal.velocitySum scales q A w = 0 := by
-  have hz := potentialSum_eq_zero_germ hscales hq hpos hzero hlarge
-  simpa [SolenoidalDiagonal.velocitySum] using
-    SolenoidalDiagonal.spatialCurl_eq_of_eventuallyEq hz
+  change SpatialCurl.spatialCurl
+    (SolenoidalDiagonal.potentialSum scales q A) w = 0
+  exact PhysicalCurlCovariance.spatialCurl_zero_of_zero_near
+    (potentialSum_eq_zero_germ hscales hq hpos hzero hlarge)
 
 /-- Two floor-separated schedules give exact mixed-velocity values at an axis
 point. The first sees only the base curl; the second sees zero. -/
