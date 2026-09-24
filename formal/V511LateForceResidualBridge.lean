@@ -30,7 +30,13 @@ open ProblemStatement Set Filter
 open scoped Topology ContDiff
 
 /-- Generic late-time bridge. The only spatial input needed is local equality
-of the force inputs with the mixed physical velocity and pressure. -/
+of the force inputs with the mixed physical velocity and pressure.
+
+The dependent `CandidateFromLimits.force` expression is expensive for Lean to
+elaborate even though its source theorem is already compiled, so this bridge
+uses a larger local heartbeat budget without changing any assumptions or
+conclusions. -/
+set_option maxHeartbeats 800000 in
 theorem force_eq_originalResidual_of_eventuallyEq_late
     {u : VelocityField} {p₀ : PressureField}
     {A v : VelocityField} {p : PressureField}
