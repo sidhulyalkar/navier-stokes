@@ -97,10 +97,20 @@ theorem residual_difference_exact
           (deltaVelocity aStrict aDouble q A B (t, x)) := by
   have hDeltaU :
       ContDiffOn ℝ ∞ (deltaVelocity aStrict aDouble q A B) preSingularDomain := by
-    simpa only [deltaVelocity] using hUDouble.sub hUStrict
+    change ContDiffOn ℝ ∞
+      (fun z =>
+        MixedDiagonalResidual.velocity aDouble q A B z -
+          MixedDiagonalResidual.velocity aStrict q A B z)
+      preSingularDomain
+    exact hUDouble.sub hUStrict
   have hDeltaP :
       ContDiffOn ℝ ∞ (deltaPressure aStrict aDouble q P) preSingularDomain := by
-    simpa only [deltaPressure] using hPDouble.sub hPStrict
+    change ContDiffOn ℝ ∞
+      (fun z =>
+        MixedDiagonalResidual.pressure aDouble q P z -
+          MixedDiagonalResidual.pressure aStrict q P z)
+      preSingularDomain
+    exact hPDouble.sub hPStrict
   have h :=
     ResidualCalculus.navierStokesResidual_add_sub_of_smooth
       (MixedDiagonalResidual.velocity aStrict q A B)
