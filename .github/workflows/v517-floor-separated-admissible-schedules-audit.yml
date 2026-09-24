@@ -14,6 +14,7 @@ on:
       - "formal/V517FloorSeparatedPhysicalLocalCutBounds.lean"
       - "formal/V517FloorSeparatedMixedSchedule.lean"
       - "formal/V517FloorSeparatedMixedResidual.lean"
+      - "formal/V517FloorSeparatedStageEstimates.lean"
       - ".github/workflows/v517-floor-separated-admissible-schedules-audit.yml"
   pull_request:
     paths:
@@ -24,6 +25,7 @@ on:
       - "formal/V517FloorSeparatedPhysicalLocalCutBounds.lean"
       - "formal/V517FloorSeparatedMixedSchedule.lean"
       - "formal/V517FloorSeparatedMixedResidual.lean"
+      - "formal/V517FloorSeparatedStageEstimates.lean"
       - ".github/workflows/v517-floor-separated-admissible-schedules-audit.yml"
   workflow_dispatch:
 
@@ -99,10 +101,15 @@ jobs:
           cp formal/V517ResidualFromSelectedBounds.lean upstream/NavierStokes/V517ResidualFromSelectedBounds.lean
           cd upstream
           ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V517ResidualFromSelectedBounds.olean NavierStokes/V517ResidualFromSelectedBounds.lean
-      - name: Compile floor-separated selected schedules
-        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V517FloorSeparatedMixedResidual.lean
+      - name: Install and compile floor-separated selected schedules
+        run: |
+          cp formal/V517FloorSeparatedMixedResidual.lean upstream/NavierStokes/V517FloorSeparatedMixedResidual.lean
+          cd upstream
+          ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V517FloorSeparatedMixedResidual.olean NavierStokes/V517FloorSeparatedMixedResidual.lean
+      - name: Compile StageEstimates adapter
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V517FloorSeparatedStageEstimates.lean
       - name: Compile prescribed-schedule force bridge
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V517PrescribedScheduleCandidate.lean
       - name: Reject placeholders
         run: |
-          ! grep -R -nE '\\b(sorry|admit)\\b' formal/V517FloorSeparatedAdmissibleSchedules.lean formal/V517FloorSeparatedFiniteCutBounds.lean formal/V517FloorSeparatedPhysicalLocalCutBounds.lean formal/V517FloorSeparatedMixedSchedule.lean formal/V517FloorSeparatedMixedResidual.lean formal/V517ResidualFromSelectedBounds.lean formal/V517PrescribedScheduleCandidate.lean
+          ! grep -R -nE '\\b(sorry|admit)\\b' formal/V517FloorSeparatedAdmissibleSchedules.lean formal/V517FloorSeparatedFiniteCutBounds.lean formal/V517FloorSeparatedPhysicalLocalCutBounds.lean formal/V517FloorSeparatedMixedSchedule.lean formal/V517FloorSeparatedMixedResidual.lean formal/V517FloorSeparatedStageEstimates.lean formal/V517ResidualFromSelectedBounds.lean formal/V517PrescribedScheduleCandidate.lean
