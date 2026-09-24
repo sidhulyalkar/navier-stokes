@@ -8,10 +8,12 @@ on:
       - "formal/V510MinimalStrictSchedule.lean"
       - "formal/V510StrictScheduleSeparation.lean"
       - "formal/V517FloorSeparatedAdmissibleSchedules.lean"
+      - "formal/V517ResidualFromSelectedBounds.lean"
       - ".github/workflows/v517-floor-separated-admissible-schedules-audit.yml"
   pull_request:
     paths:
       - "formal/V517FloorSeparatedAdmissibleSchedules.lean"
+      - "formal/V517ResidualFromSelectedBounds.lean"
       - ".github/workflows/v517-floor-separated-admissible-schedules-audit.yml"
   workflow_dispatch:
 
@@ -50,8 +52,8 @@ jobs:
           lint: false
           use-github-cache: true
           use-mathlib-cache: true
-      - name: Build schedule dependency closure
-        run: cd upstream && ~/.elan/bin/lake build NavierStokes.SolenoidalDiagonal
+      - name: Build schedule and residual dependency closure
+        run: cd upstream && ~/.elan/bin/lake build NavierStokes.MixedDiagonalResidual
       - name: Install qualified schedule modules
         run: |
           cp formal/V590CanonicalDiagonalScale.lean upstream/NavierStokes/V590CanonicalDiagonalScale.lean
@@ -64,6 +66,8 @@ jobs:
           ~/.elan/bin/lake env lean -o .lake/build/lib/lean/NavierStokes/V510StrictScheduleSeparation.olean NavierStokes/V510StrictScheduleSeparation.lean
       - name: Compile floor-separated schedule theorem
         run: cd upstream && ~/.elan/bin/lake env lean ../formal/V517FloorSeparatedAdmissibleSchedules.lean
+      - name: Compile prescribed-schedule residual bridge
+        run: cd upstream && ~/.elan/bin/lake env lean ../formal/V517ResidualFromSelectedBounds.lean
       - name: Reject placeholders
         run: |
-          ! grep -R -nE '\\b(sorry|admit)\\b' formal/V517FloorSeparatedAdmissibleSchedules.lean
+          ! grep -R -nE '\\b(sorry|admit)\\b' formal/V517FloorSeparatedAdmissibleSchedules.lean formal/V517ResidualFromSelectedBounds.lean
