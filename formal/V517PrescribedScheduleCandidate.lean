@@ -32,7 +32,7 @@ theorem exists_force_of_selected_schedule
     {ld : ModulatedProfileAssembly.LoopData W}
     (v : ModulatedProfileAssembly.Witness ld)
     (upper : ℝ) (bandFloor : ℕ)
-    {qbig C : ℝ}
+    {qbig C : ℝ} (hqbig : 0 < qbig)
     (initial : MixedAxisPreservation.PotentialStage.{u} F.data.h
       (MixedAxisPreservation.localDomain F.data.h qbig))
     (stages : ℕ → MixedAxisPreservation.PotentialStage.{u} F.data.h
@@ -98,7 +98,7 @@ theorem exists_force_of_selected_schedule
       Nonempty (OneSidedExtension (A 0) x) := by
     intro x hx hxz
     exact MixedDiagonalExtensions.initial_add_extension
-      F.data.h_pos F.data.h_lt_half hgap
+      F.data.h_pos F.data.h_lt_half hqbig
       hInitial hx hxz
       (Classical.choice
         (TailGaugePotential.finalPotential_awayExtensions
@@ -108,7 +108,7 @@ theorem exists_force_of_selected_schedule
       Nonempty (OneSidedExtension (P 0) x) := by
     intro x hx hxz
     have h := MixedDiagonalExtensions.initial_add_extension
-      F.data.h_pos F.data.h_lt_half hgap
+      F.data.h_pos F.data.h_lt_half hqbig
       hpInitial hx hxz
       (Classical.choice
         ((SlowBaseEndpoint.final_fields_awayExtensions
@@ -121,7 +121,7 @@ theorem exists_force_of_selected_schedule
     intro x hx hxz
     exact MixedDiagonalExtensions.extension_of_eventually_zero
       ((hDirect 0).eventually_zero
-        F.data.h_pos F.data.h_lt_half hgap hx hxz)
+        F.data.h_pos F.data.h_lt_half hqbig hx hxz)
 
   have hAsupport (j : ℕ) (hj : j ≠ 0) :
       MixedDiagonalExtensions.SublevelShrinkingSupport
